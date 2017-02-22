@@ -63,3 +63,10 @@ fastlane/report.xml
 fastlane/Preview.html
 fastlane/screenshots
 fastlane/test_output
+
+# Wercker
+#
+# Wercker stores some build information in the following directory,
+# that should be ignored.
+
+.wercker

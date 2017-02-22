@@ -1,0 +1,11 @@
+box: swift
+build:
+  steps:
+    - script:
+        name: build
+        code: |
+          swift build
+    - script:
+        name: test
+        code: |
+          swift test
