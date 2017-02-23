@@ -111,7 +111,7 @@ struct Species : Hashable {
     let name        : String
     let evolutions  : Set<Species>
     let attacks     : Set<Move>
-    let type        : (Type,Type?)
+    let type        : (Type, Type?)
     let base_values : Stats
     var hashValue   : Int {
       return self.id
