@@ -82,7 +82,7 @@ struct Move : Hashable {
     let name        : String
     let description : String
     let category    : Category
-    let type        : (Type, Type?)
+    let type        : Type
     let power       : Int
     let accuracy    : Int
     let powerpoints : Int
@@ -111,7 +111,7 @@ struct Species : Hashable {
     let name        : String
     let evolutions  : Set<Species>
     let attacks     : Set<Move>
-    let type        : Type
+    let type        : (Type, Type?)
     let base_values : Stats
     var hashValue   : Int {
       return self.id
