@@ -171,3 +171,4 @@ struct State {
 func battle(trainers: inout [Trainer], behavior: (State, Trainer) -> Move) -> () {
     // TODO: simulate battle
 }
+//dsfgnsdjhgksmdufhddmusflkughdsmkufhgskdfuhfkughdsfsdkufhgsdf
