@@ -106,6 +106,35 @@ struct Stats {
     let speed           : Int
 }
 
+// Collection to get stat modifiers based on nature
+let nature_modifiers: [Nature: Stats] = [
+   hardy: Stats(hitpoints:1, attack:1, defense:1, special_attack:1, special_defense:1, speed:1),
+   lonely: Stats(hitpoints:1, attack:1.1, defense:0.9, special_attack:1, special_defense:1, speed:1),
+   brave: Stats(hitpoints:1, attack:1.1, defense:1, special_attack:1, special_defense:1, speed:0.9),
+   adamant: Stats(hitpoints:1, attack:1.1, defense:1, special_attack:0.9, special_defense:1, speed:1),
+   naughty: Stats(hitpoints:1, attack:1.1, defense:1, special_attack:1, special_defense:0.9, speed:1),
+   bold: Stats(hitpoints:1, attack:0.9, defense:1.1, special_attack:1, special_defense:1, speed:1),
+   docile: Stats(hitpoints:1, attack:1, defense:1, special_attack:1, special_defense:1, speed:1),
+   relaxed: Stats(hitpoints:1, attack:1, defense:1.1, special_attack:1, special_defense:1, speed:0.9),
+   impish: Stats(hitpoints:1, attack:1, defense:1.1, special_attack:0.9, special_defense:1, speed:1),
+   lax: Stats(hitpoints:1, attack:1, defense:1.1, special_attack:1, special_defense:0.9, speed:1),
+   timid: Stats(hitpoints:1, attack:0.9, defense:1, special_attack:1, special_defense:1, speed:1.1),
+   hasty: Stats(hitpoints:1, attack:1, defense:0.9, special_attack:1, special_defense:1, speed:1.1),
+   serious: Stats(hitpoints:1, attack:1, defense:1, special_attack:1, special_defense:1, speed:1),
+   jolly: Stats(hitpoints:1, attack:1, defense:1, special_attack:0.9, special_defense:1, speed:1.1),
+   naive: Stats(hitpoints:1, attack:1, defense:1, special_attack:1, special_defense:0.9, speed:1.1),
+   modest: Stats(hitpoints:1, attack:0.9, defense:1, special_attack:1.1, special_defense:1, speed:1),
+   mild: Stats(hitpoints:1, attack:1, defense:0.9, special_attack:1.1, special_defense:1, speed:1),
+   quiet: Stats(hitpoints:1, attack:1, defense:1, special_attack:1.1, special_defense:1, speed:0.9),
+   bashful: Stats(hitpoints:1, attack:1, defense:1, special_attack:1, special_defense:1, speed:1),
+   rash: Stats(hitpoints:1, attack:1, defense:1, special_attack:1.1, special_defense:0.9, speed:1),
+   calm: Stats(hitpoints:1, attack:0.9, defense:1, special_attack:1, special_defense:1.1, speed:1),
+   gentle: Stats(hitpoints:1, attack:1, defense:0.9, special_attack:1, special_defense:1.1, speed:1),
+   sassy: Stats(hitpoints:1, attack:1, defense:1, special_attack:1, special_defense:1.1, speed:0.9),
+   careful: Stats(hitpoints:1, attack:1, defense:1, special_attack:0.9, special_defense:1.1, speed:1),
+   quirky: Stats(hitpoints:1, attack:1, defense:1, special_attack:1, special_defense:1, speed:1)
+]
+
 struct Species : Hashable {
     let id          : Int
     let name        : String
@@ -194,21 +223,43 @@ let species_bulbasaur = Species(
    )
 )
 
+// Algorithm for effective stat computation (hitpoints excluded)
+func effective_stat_set(lvl L: Int, base B: Int, individual I: Int, effort E: Int, nat_mod N: Int){
+   Int(Int( Double((2 * B + I + E) * L) / Double(100) + 5) * N)
+}
+
 struct Pokemon {
     let nickname          : String?
-    let hitpoints         : Int // remaining hitpoints
+    var hitpoints         : Int // remaining hitpoints
     let size              : Int
     let weight            : Int
-    let experience        : Int
-    let level             : Int
+    var experience        : Int
+    var level             : Int
     let nature            : Nature
     let species           : Species
-    let moves             : [Move: Int] // Move -> remaining powerpoints
+    var moves             : [Move: Int] // Move -> remaining powerpoints
     let individual_values : Stats
-    let effort_values     : Stats
-    // TODO: implement the effective stats as a computed property:
-    // https://developer.apple.com/library/content/documentation/Swift/Conceptual/Swift_Programming_Language/Properties.html#//apple_ref/doc/uid/TP40014097-CH14-ID259
+    var effort_values     : Stats
+    var temp_modifiers    : Stats
     var effective_stats   : Stats {
+      get {
+         return Stats(
+            hitpoints: Int(Double((2 * species.base_values.hitpoints + individual_values.hitpoints + effort_values.hitpoints) * level) / Double(100) + level + 10) + temp_modifiers.hitpoints,
+            attack: effective_stat_set(lvl: level, base: species.base_values.attack, individual: individual_values.attack, effort: effort_values.attack, nat_mod: nature_modifiers[nature].attack) + temp_modifiers.attack,
+            defense: effective_stat_set(lvl: level, base: species.base_values.defense, individual: individual_values.defense, effort: effort_values.defense, nat_mod: nature_modifiers[nature].defense) + temp_modifiers.defense,
+            special_attack: effective_stat_set(lvl: level, base: species.base_values.special_attack, individual: individual_values.special_attack, effort: effort_values.special_attack, nat_mod: nature_modifiers[nature].special_attack) + temp_modifiers.special_attack,
+            special_defense: effective_stat_set(lvl: level, base: species.base_values.special_defense, individual: individual_values.special_defense, effort: effort_values.special_defense, nat_mod: nature_modifiers[nature].special_defense) + temp_modifiers.special_defense,
+            speed: effective_stat_set(lvl: level, base: species.base_values.speed, individual: individual_values.speed, effort: effort_values.speed, nat_mod: nature_modifiers[nature].speed) + temp_modifiers.speed
+         )
+      }
+      set(new_effective_stats){
+         temp_modifiers.hitpoints += new_effective_stats.hitpoints - effective_stats.hitpoints
+         temp_modifiers.attack += new_effective_stats.attack - effective_stats.attack
+         temp_modifiers.defense += new_effective_stats.defense - effective_stats.defense
+         temp_modifiers.special_attack += new_effective_stats.special_attack - effective_stats.special_attack
+         temp_modifiers.special_defense += new_effective_stats.special_defense - effective_stats.special_defense
+         temp_modifiers.speed += new_effective_stats.speed - effective_stats.speed
+      }
     }
 }
 
