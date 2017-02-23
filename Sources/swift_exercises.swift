@@ -125,6 +125,16 @@ func ==(lhs: Species, rhs: Species) -> Bool {
 // Do you use an enum, a map or constants/variables?
 // http://bulbapedia.bulbagarden.net/wiki/List_of_Pokémon_by_National_Pokédex_number
 
+let curse = Move(id: 1,name: "curse",description: "Curse (Japanese: のろい Curse/Slow) is a non-damaging Ghost-type move introduced in Generation II. Prior to Generation V, it was a ???-type move, and the only move of that type. It was TM03 in Generation II. ",category: Category.status,type: Type.ghost,power: 0,accuracy: 0,powerpoints: 10,priority: 0)
+let aeroblast = Move(id: 2,name: "aeroblast",description: "Aeroblast (Japanese: エアロブラスト Aeroblast) is a damage-dealing Flying-type move introduced in Generation II. It is the signature move of Lugia. ",category: Category.special,type: Type.flying,power: 100,accuracy: 95,powerpoints: 5,priority: 0)
+let earthquake = Move(id: 3,name: "earthquake",description: "Earthquake (Japanese: じしん Earthquake) is a damage-dealing Ground-type move introduced in Generation I. It is TM26 in all generations so far. ",category: Category.physical,type: Type.ground,power: 100,accuracy: 100,powerpoints: 10,priority: 0)
+let recover = Move(id: 4,name: "recover",description: "Recover (Japanese: じこさいせい Self-regeneration) is a non-damaging Normal-type move introduced in Generation I. ",category: Category.status,type: Type.normal,power: 0,accuracy: 0,powerpoints: 10,priority: 0)
+
+let speciesEmpty : Set<Species> = []
+let Attaque: Set = [curse,aeroblast,earthquake,recover]
+let Values = Stats(hitpoints: 106,attack: 90,defense: 130,special_attack: 90,special_defense: 154,speed: 110)
+let lugia = Species(id: 249,name: "maria",evolutions: speciesEmpty,attacks: Attaque,type: (Type.flying, Type.psychic),base_values: Values)
+
 struct Pokemon {
     let nickname          : String?
     let hitpoints         : Int // remaining hitpoints
@@ -137,10 +147,13 @@ struct Pokemon {
     let moves             : [Move: Int] // Move -> remaining powerpoints
     let individual_values : Stats
     let effort_values     : Stats
+
     // TODO: implement the effective stats as a computed property:
     // https://developer.apple.com/library/content/documentation/Swift/Conceptual/Swift_Programming_Language/Properties.html#//apple_ref/doc/uid/TP40014097-CH14-ID259
-    // var effective_stats   : Stats {
-    // }
+    var effective_stats   : Stats
+    {
+
+    }
 }
 
 struct Trainer {
