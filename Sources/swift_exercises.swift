@@ -124,6 +124,7 @@ func ==(lhs: Species, rhs: Species) -> Bool {
 // TODO: create some species
 // Do you use an enum, a map or constants/variables?
 // http://bulbapedia.bulbagarden.net/wiki/List_of_Pokémon_by_National_Pokédex_number
+let Snorlax = Species(id: 143, name= "Snorlax", evolutions: [], attacks)
 
 struct Pokemon {
     let nickname          : String?
