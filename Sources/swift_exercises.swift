@@ -83,7 +83,7 @@ struct Move : Hashable {
     let description : String
     let category    : Category
     let type        : Type
-    var power       : Int	// let -> var
+    var power       : Int
     let accuracy    : Int
     let powerpoints : Int
     let priority    : Int
@@ -127,7 +127,7 @@ let species_kangaskhan = Species(
 	id: 155,
 	name: "Kangaskhan",
 	evolutions: [],
-	attacks: ["reversal", "earthquake", "ice beam", "sucker punch"], //and a load of others
+	attacks: [179, 89, 58, 389],	// move id
 	type: .normal,
 	base_values: Stats(
 		hitpoints: 105,
@@ -142,7 +142,7 @@ let species_kangaskhan = Species(
 
 /* four moves: reversal, earthquake, ice beam, and sucker punch.
 
-This is actually a decent offensive moveset, geared towards consistent (100%
+This is actually a decent offensive moveset, geared towards consistent (100% starting
 accuracy) high damage while tanking (kangaskhan has high non-water HP, IVs
 willing), rather than endurance (only 40 cumulative PPs, 25 if not counting
 reversal) or status, and types are chosen so that there's always at least one
@@ -174,7 +174,7 @@ let move_reversal = Move(
 	description: "Stronger if the user's HP is low.",
 	category: .physical,
 	type: .fighting,
-	power: 0,	// variable base power, calculated when move is used
+	power: 0,	//can actually calculate power at this stage already
 	accuracy: 100,
 	powerpoints: 15,
 	priority: 0
@@ -219,17 +219,16 @@ let move_suckerPunch = Move(
 
 struct Pokemon {
     let nickname          : String?
-    var hitpoints         : Int // remaining hitpoints; let -> var
-    let size              : Float // int -> float
-    let weight            : Float // int -> float
-    var experience        : Int	// let -> var
-    var level             : Int	// let -> var
+    var hitpoints         : Int // remaining hitpoints
+    let size              : Float
+    let weight            : Float
+    var experience        : Int
+    var level             : Int
     let nature            : Nature
     let species           : Species
     var moves             : [Move: Int] // Move -> remaining powerpoints
-	// moves: let -> var
     let individual_values : Stats
-    var effort_values     : Stats	// let -> var
+    var effort_values     : Stats
 	var effective_stats	  : Stats
     // TODO: implement the effective stats as a computed property:
     // https://developer.apple.com/library/content/documentation/Swift/Conceptual/Swift_Programming_Language/Properties.html#//apple_ref/doc/uid/TP40014097-CH14-ID259
@@ -241,12 +240,12 @@ let kangaskhan = Pokemon(
 	weight: 80,
 	level: 100, // DA VERY BESS
 	experience: 1000000, // kangaskhan is a med-fast leveler, MFXP = lvl^3
-	nature: Nature.rash,
+	nature: .rash,
 	species: species_kangaskhan,
 	moves: [move_reversal: 15,
 			move_earthquake: 10,
 			move_iceBeam: 10,
-			move_suckerPunch: 5],
+			move_suckerPunch: 5]
 	/*
 	// TODO: set arbitrary (but reasonable) IV and EV, compute stats
 	// or maybe minmax like a huge tryhard idk
@@ -289,7 +288,7 @@ struct Trainer {
 }
 
 struct Environment {
-    var weather : Weather	// let -> var
+    var weather : Weather
     let terrain : Terrain
 }
 
@@ -312,4 +311,3 @@ struct State {
 func battle(trainers: inout [Trainer], behavior: (State, Trainer) -> Move) -> () {
     // TODO: simulate battle
 }
-//test
