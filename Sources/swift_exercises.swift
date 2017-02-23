@@ -1,3 +1,5 @@
+//210 Granbull
+
 // http://bulbapedia.bulbagarden.net/wiki/Type
 enum Type {
     case bug
@@ -76,6 +78,7 @@ enum Terrain {
     case misty
 }
 
+
 // http://bulbapedia.bulbagarden.net/wiki/Move
 struct Move : Hashable {
     let id          : Int
@@ -125,6 +128,23 @@ func ==(lhs: Species, rhs: Species) -> Bool {
 // Do you use an enum, a map or constants/variables?
 // http://bulbapedia.bulbagarden.net/wiki/List_of_Pokémon_by_National_Pokédex_number
 
+let granbull_species = Species(
+  id: 210,
+  name: "Granbull",
+  evolutions: [],
+  attacks: [],
+  type: (fairy, nil),
+  base_values:Stats(
+    hitpoints: 90,
+    attack: 120,
+    defense: 75,
+    special_attack: 60,
+    special_defense: 60,
+    speed: 45
+  )
+
+  )
+
 struct Pokemon {
     let nickname          : String?
     let hitpoints         : Int // remaining hitpoints
@@ -142,6 +162,7 @@ struct Pokemon {
     // var effective_stats   : Stats {
     // }
 }
+
 
 struct Trainer {
     let pokemons : [Pokemon]
