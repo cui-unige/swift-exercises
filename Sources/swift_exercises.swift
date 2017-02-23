@@ -122,6 +122,7 @@ func ==(lhs: Species, rhs: Species) -> Bool {
 }
 
 // wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww ho-oh a l'air chiant
+// tulio c'est un baka qui sèche les cours donc je lui montre comment ça marche git
 // TODO: create some species
 // Do you use an enum, a map or constants/variables?
 // http://bulbapedia.bulbagarden.net/wiki/List_of_Pokémon_by_National_Pokédex_number
