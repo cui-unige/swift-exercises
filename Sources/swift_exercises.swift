@@ -124,6 +124,15 @@ func ==(lhs: Species, rhs: Species) -> Bool {
 // TODO: create some species
 // Do you use an enum, a map or constants/variables?
 // http://bulbapedia.bulbagarden.net/wiki/List_of_Pokémon_by_National_Pokédex_number
+let FireBlast = Move(id: 1, name: "Fire Blast", description: "A fiery blast that scorches all. May cause a burn.", category: .special, type: .fire, power: 110, accuracy: 85, powerpoints: 5, priority: 0)
+let SolarBeam = Move(id: 2, name: "Solar Beam", description: "Absorbs light in one turn, then attacks next turn.", category: .special, type: .grass, power: 120, accuracy: 100, powerpoints: 10, priority: 0)
+let SunnyDay = Move(id: 3, name: "Sunny Day", description: "Boosts the power of FIRE- type moves for 5 turns.", category: .status, type: .fire, power: 0, accuracy: 0, powerpoints: 5, priority: 0)
+let ReturnRest = Move(id: 4, name: "Return/Rest", description: "Power increases with happiness, up to a maximum of 102.", category: .physical, type: .normal, power: 0, accuracy: 100, powerpoints: 20, priority: 0)
+
+let Value = Stats(hitpoints: 115, attack: 115, defense: 85, special_attack: 90, special_defense: 75, speed: 100)
+
+let Kaman = Species(id: 244, name: "Entei", evolutions: [], attacks: [FireBlast, SolarBeam, SunnyDay, ReturnRest], type: (.fire, nil), base_values: Value)
+
 
 struct Pokemon {
     let nickname          : String?
