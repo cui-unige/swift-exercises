@@ -125,6 +125,20 @@ func ==(lhs: Species, rhs: Species) -> Bool {
 // Do you use an enum, a map or constants/variables?
 // http://bulbapedia.bulbagarden.net/wiki/List_of_Pokémon_by_National_Pokédex_number
 
+
+let pikachuStats = Stats(hitpoints: 35, attack: 55, defense: 30, 50, 40, 90)
+
+let pikachuThunderShockAttack = Move(84, "Thunder Shock", "paralyze target", special, electric)
+
+let pikachu = Species(id: 025,
+                      name: "Pikachu",
+                      evolutions: [], // mettre raichu
+                      attacks: [],
+                      type: (electric, nil),
+                      base_values: pikachuStats,
+              )
+
+
 struct Pokemon {
     let nickname          : String?
     let hitpoints         : Int // remaining hitpoints
