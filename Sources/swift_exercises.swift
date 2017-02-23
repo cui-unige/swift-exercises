@@ -121,6 +121,7 @@ func ==(lhs: Species, rhs: Species) -> Bool {
     return lhs.id == rhs.id
 }
 
+// wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww ho-oh a l'air chiant
 // TODO: create some species
 // Do you use an enum, a map or constants/variables?
 // http://bulbapedia.bulbagarden.net/wiki/List_of_Pokémon_by_National_Pokédex_number
