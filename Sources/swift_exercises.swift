@@ -127,7 +127,7 @@ let species_kangaskhan = Species(
 	id: 155,
 	name: "Kangaskhan",
 	evolutions: [],
-	attacks: [179, 89, 58, 389],	// move id
+	attacks: [move_reversal, move_earthquake, move_iceBeam, move_suckerPunch],
 	type: .normal,
 	base_values: Stats(
 		hitpoints: 105,
