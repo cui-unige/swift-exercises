@@ -126,14 +126,24 @@ func ==(lhs: Species, rhs: Species) -> Bool {
 // http://bulbapedia.bulbagarden.net/wiki/List_of_Pokémon_by_National_Pokédex_number
 
 
-let pikachuStats = Stats(hitpoints: 35, attack: 55, defense: 30, 50, 40, 90)
+let pikachuStats = Stats(hitpoints: 35, attack: 55, defense: 30, special_attack: 50,special_defense: 40, speed: 90)
 
-let pikachuThunderShockAttack = Move(84, "Thunder Shock", "paralyze target", special, electric)
+let pikachuThunderShockAttack = Move(id: 84,
+                                     name: "Thunder Shock",
+                                     description: "paralyze target",
+                                     category: special,
+                                     type: electric,
+                                     power:40,
+                                     accuracy:100,
+                                     powerpoints:30,
+                                     priority:100, ///////////// ???????????????,
+                                   )
+
 
 let pikachu = Species(id: 025,
                       name: "Pikachu",
                       evolutions: [], // mettre raichu
-                      attacks: [],
+                      attacks: [pikachuThunderShockAttack],
                       type: (electric, nil),
                       base_values: pikachuStats,
               )
