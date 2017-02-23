@@ -45,7 +45,7 @@ If your question is about your implementation, please fill an issue in your repo
 
 All exercises are incremental: their code is built upon the previous ones.
 You **must** write tests for your code.
-It is for instance a good idea to implement the examples given in [bulbapedia](http://bulbapedia.bulbagarden.net/wiki/].
+It is for instance a good idea to implement the examples given in [bulbapedia](http://bulbapedia.bulbagarden.net/wiki/).
 
 Tests are put in functions located in the `Tests/swift-exercisesTests.swift` file.
 Do not forget to list them also explicitly in the `allTests` array.
