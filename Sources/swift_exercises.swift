@@ -973,13 +973,6 @@ func typeModifier(attacking: Type, defending : Type) -> Double {
       return nil;
 
     }
-
-
-
-
-
-    // TODO: encode type/type chart
-    return 1
 }
 
 // http://bulbapedia.bulbagarden.net/wiki/Damage
