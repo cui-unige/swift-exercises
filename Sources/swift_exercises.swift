@@ -125,12 +125,12 @@ func ==(lhs: Species, rhs: Species) -> Bool {
 
 
 // create kangaskhan species
-let Species_kangaskhan = Species(
+let species_kangaskhan: Species = Species(
 	id: 155,
 	name: "Kangaskhan",
 	evolutions: [],
 	attacks: [move_reversal, move_earthquake, move_iceBeam, move_suckerPunch],
-	type: .normal,
+	type: (Type.normal, nil),
 	base_values: Stats(
 		hitpoints: 105,
 		attack: 95,
@@ -174,7 +174,7 @@ func computeReversalPower(currentHitpoints: Int, maxHitpoints: Int) -> Int
 {
 	// returns damage dealt by the 'reversal' move
 	// see http://bulbapedia.bulbagarden.net/wiki/Reversal_(move)
-	HPratio = Double(currentHitpoints) / Double(maxHitpoints)
+	let HPRatio: Double = Double(currentHitpoints) / Double(maxHitpoints)
 
 	if (0.0417 > HPRatio) {return 200}
 	else if (0.1042 > HPRatio) {return 150}
@@ -184,7 +184,7 @@ func computeReversalPower(currentHitpoints: Int, maxHitpoints: Int) -> Int
 	else {return 20}
 }
 
-let move_reversal = Move(
+let move_reversal: Move = Move(
 	id: 179,
 	name: "Reversal",
 	description: "Stronger if the user's HP is low.",
@@ -196,7 +196,7 @@ let move_reversal = Move(
 	priority: 0
 )
 
-let move_earthquake = Move(
+let move_earthquake: Move = Move(
 	id: 89,
 	name: "Earthquake",
 	description: "Tough but useless vs. flying foes.",
@@ -208,7 +208,7 @@ let move_earthquake = Move(
 	priority: 0
 )
 
-let move_iceBeam = Move(
+let move_iceBeam: Move = Move(
 	id: 58,
 	name: "Ice Beam",
 	description: "An attack that may freeze the foe.",
@@ -220,7 +220,7 @@ let move_iceBeam = Move(
 	priority: 0
 )
 
-let move_suckerPunch = Move(
+let move_suckerPunch: Move = Move(
 	id: 389,
 	name: "Sucker Punch",
 	description: "This move enables the user to attack first. It fails if the foe is not readying an attack, however.",
@@ -240,6 +240,7 @@ struct Pokemon {
     let weight            : Float
     var experience        : Int
     var level             : Int
+	let type			  : (Type, Type?)
     let nature            : Nature
     let species           : Species
     var moves             : [Move: Int] // Move -> remaining powerpoints
@@ -251,10 +252,12 @@ struct Pokemon {
 
 let kangaskhan = Pokemon(
 	nickname: "KANGS",
+	hitpoints: 0,	// ?
 	size: 2.2,
 	weight: 80,
-	level: 100, // DA VERY BESS
 	experience: 1000000, // kangaskhan is a medium-fast leveler, MFXP = lvl^3
+	level: 100, // DA VERY BESS
+	type : (Type.normal, nil),
 	nature: .rash,
 	species: species_kangaskhan,
 	moves: [move_reversal: 15,
@@ -279,16 +282,23 @@ let kangaskhan = Pokemon(
 		special_defense: 30,
 		speed: 30
 	),
+	effective_stats: Stats(hitpoints: 0, // temporary, remove this and fix calculations
+	attack: 0,
+	defense: 0,
+	special_attack: 0,
+	special_defense: 0,
+	speed: 0)
+	/*		,
 	// http://bulbapedia.bulbagarden.net/wiki/Individual_values#Determination_of_stats_2
 	// https://developer.apple.com/library/content/documentation/Swift/Conceptual/Swift_Programming_Language/Properties.html#//apple_ref/doc/uid/TP40014097-CH14-ID259
 	effective_stats: Stats(	// 'pokemons'?
-		hitpoints		: 10 + level + floor( ( Double( 2 * species.base_values.hitpoints + individual_values.hitpoints + floor(Double(effort_values.hitpoints / 4 ) ) * level ) )  / 100 ),
-		attack			: floor( ( Double( (2 * base_values.attack + individual_values.attack  + floor(Double(effort_values.attack) / 4) ) * level) ) / 100 ) * natureMultiplier[nature],
-		defense			: floor( ( Double( (2 * base_values.defense + individual_values.defense  + floor(Double(effort_values.defense) / 4) ) * level) ) / 100 ) * natureMultiplier[nature],
-		special_attack	: floor( ( Double( (2 * base_values.special_attack + individual_values.special_attack  + floor(Double(effort_values.special_attack) / 4) ) * level) ) / 100 ) * natureMultiplier[nature],
-		special_defense	: floor( ( Double( (2 * base_values.special_defense + individual_values.special_defense  + floor(Double(effort_values.special_defense) / 4) ) * level) ) / 100 ) * natureMultiplier[nature],
-		speed			: floor( ( Double( (2 * base_values.speed + individual_values.speed  + floor(Double(effort_values.speed) / 4) ) * level) ) / 100 ) * natureMultiplier[nature]
-	)
+		hitpoints: Int 			= 10 + kangaskhan.level + floor( ( Double( 2 * kangaskhan_species.base_values.hitpoints + kangaskhan.individual_values.hitpoints + floor(Double(kangaskhan.effort_values.hitpoints / 4 ) ) * kangaskhan.level ) )  / 100 ),
+		attack: Int 			= floor( ( Double( (2 * base_values.attack + individual_values.attack  + floor(Double(effort_values.attack) / 4) ) * level) ) / 100 ) * natureMultiplier[kangaskhan.nature],
+		defense: Int 			= floor( ( Double( (2 * base_values.defense + individual_values.defense  + floor(Double(effort_values.defense) / 4) ) * level) ) / 100 ) * natureMultiplier[kangaskhan.nature],
+		special_attack: Int 	= floor( ( Double( (2 * base_values.special_attack + individual_values.special_attack  + floor(Double(effort_values.special_attack) / 4) ) * level) ) / 100 ) * natureMultiplier[nature],
+		special_defense: Int 	= floor( ( Double( (2 * base_values.special_defense + individual_values.special_defense  + floor(Double(effort_values.special_defense) / 4) ) * level) ) / 100 ) * natureMultiplier[nature],
+		speed: Int 				= floor( ( Double( (2 * base_values.speed + individual_values.speed  + floor(Double(effort_values.speed) / 4) ) * level) ) / 100 ) * natureMultiplier[nature]
+	)*/
 
 )
 
@@ -315,24 +325,24 @@ func typeModifier(attacking: Type, defending : Type) -> Double {
 func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pokemon) -> Int {
 
 	var STAB : Double = 1 // initialise with non-STAB multiplier value
-	if (pokemon.species.type == move.type) {var STAB = 1.5}
+	if (kangaskhan.type.0 == move.type) {var STAB = 1.5}
+	else if (kangaskhan.type.1 == move.type) {var STAB = 1.5}
 
-	// var typeBonus: Double =
+	let typeBonus: Double = 1 // actually calculate this
 
-	// see http://bulbapedia.bulbagarden.net/wiki/Critical_hit#Probability
-	var critical: Double = 1 //initialise with non-crit mult value
-	var randNum: Int = Int(drand48() * 257) // random int between 0 and 256 (included)
-	var threshold: Int = Int(round(kangaskhan.base_values.speed / 2))
+	var critical: Double = 1 // initialise with non-crit mult value
+	let randNum: Int = Int(drand48() * 257) // random int between 0 and 256 (included)
+	let threshold: Int = Int(round(Double(kangaskhan.base_values.speed / 2)))
 	if	( randNum < threshold) {var critical = ( (2 * kangaskhan.level + 5) / (kangaskhan.level + 5) ) }
 
-	//environmentBonus
+	let environmentBonus: Double = 1 // actually calculate this
 
 	// drand48() returns a random double between 0 and 1
 	// but randFactor should be uniformly distributed between 0.85 and 1
-	var randFactor: Double = ((drand48() * 0.15) + 0.85)
+	let randFactor: Double = ((drand48() * 0.15) + 0.85)
 
 	// assuming no items or abilities
-	var modifier : Double = STAB * typeBonus * critical * environmentBonus * randFactor
+	let modifier : Double = STAB * typeBonus * critical * environmentBonus * randFactor
 
 	// TODO calculate actual damage
 	// TODO status changes
