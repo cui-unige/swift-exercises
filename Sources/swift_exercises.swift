@@ -125,6 +125,8 @@ func ==(lhs: Species, rhs: Species) -> Bool {
 // Do you use an enum, a map or constants/variables?
 // http://bulbapedia.bulbagarden.net/wiki/List_of_Pokémon_by_National_Pokédex_number
 
+
+
 struct Pokemon {
     let nickname          : String?
     let hitpoints         : Int // remaining hitpoints
