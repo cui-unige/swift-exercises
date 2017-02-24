@@ -141,34 +141,7 @@ let species_kangaskhan: Species = Species(
 	)
 )
 
-
-/* four moves: reversal, earthquake, ice beam, and sucker punch.
-
-This is actually a decent offensive moveset, geared towards consistent (100% starting
-accuracy) high damage while tanking (kangaskhan has high non-water HP, IVs
-willing), rather than endurance (only 40 cumulative PPs, 25 if not counting
-reversal) or status, and types are chosen so that there's always at least one
-2x move (except against fight and ghost types, both of which are 1x). There
-aren't really any STAB moves worth using in this optic (except maybe
-frustration/return, but friendship isn't implemented)
-
-Possible but ultimately inconsistent candidates for powerful STAB would be:
-	dizzy punch: 1.5x70 with 20% chance of confusion; decent candidate, but ultimately worse than appropriately choosing type-specific moves. yeah, signature move and all
-	hyper beam: 1.5x150 is very good alpha, but the recovery round and the 90% accuracy screws it up; also, kangaskhan's spatk is relatively low
-	frustration/return: actually viable with extremely low/high friendship, but that mechanic isn't implemented and probably won't be, given the nature of this assignment
-	facade: boosted damage (1.5x2x70) seems good, but burn status halves physical damage, paralysis reduces effective damage per round by 25% and completely wrecks speed. If you're dangerously low on health reversal should be more than enough to finish them off (unless you're up against a ghost, in which case yeah tough shit).
-	giga impact: 1.5x150 is very good alpha, but the recovery round and the 90% accuracy screws it up
-	double edge: 1.5x120 is good alpha, but 1/3 recoil is just silly
-	uproar: 1.5x90 is alright, but it uses spatk and multi-turn moves are silly
-
-Also, keep in mind kangaskhan is normal-type and normal-type attacks are 1x
-against everything (except rock and steel (0.5x), and ghost (0x)), normal-type
-STAB isn't worth it over a potential 2x type bonus gained through the use of a
-move chosen appropriately with regard to type.
-
-Comparatively high HP will allow for an efficient use of reversal should the
-situation get dire, but it shouldn't be relied on earlier on.
-*/
+// fancy movesets are irrelevant, pick some other moves that aren't just plain damage
 
 func computeReversalPower(currentHitpoints: Int, maxHitpoints: Int) -> Int
 {
@@ -236,6 +209,7 @@ let move_suckerPunch: Move = Move(
 struct Pokemon {
 	let nickname          : String?
 	var hitpoints         : Int // remaining hitpoints
+	// eventually remove this, and get HP from current_stats
 	let size              : Float
 	let weight            : Float
 	var experience        : Int
@@ -248,11 +222,12 @@ struct Pokemon {
 	let individual_values : Stats
 	var effort_values     : Stats
 	var effective_stats	  : Stats
+	var current_stats	  : Stats
 }
 
 let kangaskhan = Pokemon(
 	nickname: "KANGS",
-	hitpoints: 0,	// ?
+	hitpoints: 0,	// eventually remove this, and get HP from current_stats
 	size: 2.2,
 	weight: 80,
 	experience: 1000000, // kangaskhan is a medium-fast leveler, MFXP = lvl^3
@@ -282,12 +257,20 @@ let kangaskhan = Pokemon(
 		special_defense: 30,
 		speed: 30
 	),
-	effective_stats: Stats(hitpoints: 0, // temporary, remove this and fix calculations
-	attack: 0,
-	defense: 0,
-	special_attack: 0,
-	special_defense: 0,
-	speed: 0)
+	effective_stats: Stats(	// temporary, remove these and fix calculations
+		hitpoints: 0,
+		attack: 0,
+		defense: 0,
+		special_attack: 0,
+		special_defense: 0,
+		speed: 0),
+	current_stats: Stats(	// temporary, remove these and fix calculations
+		hitpoints: 0,
+		attack: 0,
+		defense: 0,
+		special_attack: 0,
+		special_defense: 0,
+		speed: 0)
 	/*		,
 	// http://bulbapedia.bulbagarden.net/wiki/Individual_values#Determination_of_stats_2
 	// https://developer.apple.com/library/content/documentation/Swift/Conceptual/Swift_Programming_Language/Properties.html#//apple_ref/doc/uid/TP40014097-CH14-ID259
@@ -298,7 +281,9 @@ let kangaskhan = Pokemon(
 		special_attack: Int 	= floor( ( Double( (2 * base_values.special_attack + individual_values.special_attack  + floor(Double(effort_values.special_attack) / 4) ) * level) ) / 100 ) * natureMultiplier[nature],
 		special_defense: Int 	= floor( ( Double( (2 * base_values.special_defense + individual_values.special_defense  + floor(Double(effort_values.special_defense) / 4) ) * level) ) / 100 ) * natureMultiplier[nature],
 		speed: Int 				= floor( ( Double( (2 * base_values.speed + individual_values.speed  + floor(Double(effort_values.speed) / 4) ) * level) ) / 100 ) * natureMultiplier[nature]
-	)*/
+	),
+	// current_stats
+	*/
 
 )
 
