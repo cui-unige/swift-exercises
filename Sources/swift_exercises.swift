@@ -1,3 +1,5 @@
+import Foundation	// floor, random, etc
+
 // http://bulbapedia.bulbagarden.net/wiki/Type
 enum Type {
     case bug
@@ -123,7 +125,7 @@ func ==(lhs: Species, rhs: Species) -> Bool {
 
 
 // create kangaskhan species
-let species_kangaskhan = Species(
+let Species_kangaskhan = Species(
 	id: 155,
 	name: "Kangaskhan",
 	evolutions: [],
@@ -148,7 +150,7 @@ willing), rather than endurance (only 40 cumulative PPs, 25 if not counting
 reversal) or status, and types are chosen so that there's always at least one
 2x move (except against fight and ghost types, both of which are 1x). There
 aren't really any STAB moves worth using in this optic (except maybe
-frustration/return, but friendship isn't implemented.
+frustration/return, but friendship isn't implemented)
 
 Possible but ultimately inconsistent candidates for powerful STAB would be:
 	dizzy punch: 1.5x70 with 20% chance of confusion; decent candidate, but ultimately worse than appropriately choosing type-specific moves. yeah, signature move and all
@@ -168,13 +170,27 @@ Comparatively high HP will allow for an efficient use of reversal should the
 situation get dire, but it shouldn't be relied on earlier on.
 */
 
+func computeReversalPower(currentHitpoints: Int, maxHitpoints: Int) -> Int
+{
+	// returns damage dealt by the 'reversal' move
+	// see http://bulbapedia.bulbagarden.net/wiki/Reversal_(move)
+	HPratio = Double(currentHitpoints) / Double(maxHitpoints)
+
+	if (0.0417 > HPRatio) {return 200}
+	else if (0.1042 > HPRatio) {return 150}
+	else if (0.2083 > HPRatio) {return 100}
+	else if (0.3542 > HPRatio) {return 80}
+	else if (0.6875 > HPRatio) {return 40}
+	else {return 20}
+}
+
 let move_reversal = Move(
 	id: 179,
 	name: "Reversal",
 	description: "Stronger if the user's HP is low.",
 	category: .physical,
 	type: .fighting,
-	power: 0,	//can actually calculate power at this stage already
+	power: computeReversalPower(currentHitpoints: kangaskhan.hitpoints, maxHitpoints: kangaskhan.effective_stats.hitpoints),	// ?
 	accuracy: 100,
 	powerpoints: 15,
 	priority: 0
@@ -227,11 +243,10 @@ struct Pokemon {
     let nature            : Nature
     let species           : Species
     var moves             : [Move: Int] // Move -> remaining powerpoints
+	let base_values		  : Stats
     let individual_values : Stats
     var effort_values     : Stats
 	var effective_stats	  : Stats
-    // TODO: implement the effective stats as a computed property:
-    // https://developer.apple.com/library/content/documentation/Swift/Conceptual/Swift_Programming_Language/Properties.html#//apple_ref/doc/uid/TP40014097-CH14-ID259
 }
 
 let kangaskhan = Pokemon(
@@ -239,49 +254,47 @@ let kangaskhan = Pokemon(
 	size: 2.2,
 	weight: 80,
 	level: 100, // DA VERY BESS
-	experience: 1000000, // kangaskhan is a med-fast leveler, MFXP = lvl^3
+	experience: 1000000, // kangaskhan is a medium-fast leveler, MFXP = lvl^3
 	nature: .rash,
 	species: species_kangaskhan,
 	moves: [move_reversal: 15,
 			move_earthquake: 10,
 			move_iceBeam: 10,
-			move_suckerPunch: 5]
-	/*
-	// TODO: set arbitrary (but reasonable) IV and EV, compute stats
-	// or maybe minmax like a huge tryhard idk
-	// http://bulbapedia.bulbagarden.net/wiki/Individual_values
+			move_suckerPunch: 5],
+	base_values: species_kangaskhan.base_values,
+	//IVs and EVs tryharded to hell and back because why not
 	individual_values: Stats(
-		hitpoints: 105,
-		attack: 95,
-		defense: 80,
-		special_attack: 40,
-		special_defense: 80,
-		speed: 90
-	)
-	// http://bulbapedia.bulbagarden.net/wiki/Effort_values
+		hitpoints: 31,
+		attack: 31,
+		defense: 31,
+		special_attack: 31,
+		special_defense: 31,
+		speed: 31
+	),
 	effort_values: Stats(
-		hitpoints: 105,
-		attack: 95,
-		defense: 80,
-		special_attack: 40,
-		special_defense: 80,
-		speed: 90
-	)
+		hitpoints: 200,
+		attack: 200,
+		defense: 30,
+		special_attack: 20,
+		special_defense: 30,
+		speed: 30
+	),
 	// http://bulbapedia.bulbagarden.net/wiki/Individual_values#Determination_of_stats_2
-	effective_stats: Stats(
-		hitpoints: 105,
-		attack: 95,
-		defense: 80,
-		special_attack: 40,
-		special_defense: 80,
-		speed: 90
+	// https://developer.apple.com/library/content/documentation/Swift/Conceptual/Swift_Programming_Language/Properties.html#//apple_ref/doc/uid/TP40014097-CH14-ID259
+	effective_stats: Stats(	// 'pokemons'?
+		hitpoints		: 10 + level + floor( ( Double( 2 * species.base_values.hitpoints + individual_values.hitpoints + floor(Double(effort_values.hitpoints / 4 ) ) * level ) )  / 100 ),
+		attack			: floor( ( Double( (2 * base_values.attack + individual_values.attack  + floor(Double(effort_values.attack) / 4) ) * level) ) / 100 ) * natureMultiplier[nature],
+		defense			: floor( ( Double( (2 * base_values.defense + individual_values.defense  + floor(Double(effort_values.defense) / 4) ) * level) ) / 100 ) * natureMultiplier[nature],
+		special_attack	: floor( ( Double( (2 * base_values.special_attack + individual_values.special_attack  + floor(Double(effort_values.special_attack) / 4) ) * level) ) / 100 ) * natureMultiplier[nature],
+		special_defense	: floor( ( Double( (2 * base_values.special_defense + individual_values.special_defense  + floor(Double(effort_values.special_defense) / 4) ) * level) ) / 100 ) * natureMultiplier[nature],
+		speed			: floor( ( Double( (2 * base_values.speed + individual_values.speed  + floor(Double(effort_values.speed) / 4) ) * level) ) / 100 ) * natureMultiplier[nature]
 	)
-	*/
 
 )
 
 // TODO: nature stat modifiers
 // http://bulbapedia.bulbagarden.net/wiki/Nature
+
 
 struct Trainer {
     let pokemons : [Pokemon]
@@ -300,7 +313,31 @@ func typeModifier(attacking: Type, defending : Type) -> Double {
 
 // http://bulbapedia.bulbagarden.net/wiki/Damage
 func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pokemon) -> Int {
-    // TODO
+
+	var STAB : Double = 1 // initialise with non-STAB multiplier value
+	if (pokemon.species.type == move.type) {var STAB = 1.5}
+
+	// var typeBonus: Double =
+
+	// see http://bulbapedia.bulbagarden.net/wiki/Critical_hit#Probability
+	var critical: Double = 1 //initialise with non-crit mult value
+	var randNum: Int = Int(drand48() * 257) // random int between 0 and 256 (included)
+	var threshold: Int = Int(round(kangaskhan.base_values.speed / 2))
+	if	( randNum < threshold) {var critical = ( (2 * kangaskhan.level + 5) / (kangaskhan.level + 5) ) }
+
+	//environmentBonus
+
+	// drand48() returns a random double between 0 and 1
+	// but randFactor should be uniformly distributed between 0.85 and 1
+	var randFactor: Double = ((drand48() * 0.15) + 0.85)
+
+	// assuming no items or abilities
+	var modifier : Double = STAB * typeBonus * critical * environmentBonus * randFactor
+
+	// TODO calculate actual damage
+	// TODO status changes
+	// TODO recoil damage
+
     return 0
 }
 
