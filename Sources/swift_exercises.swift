@@ -207,41 +207,41 @@ func typeModifier(attacking: Type, defending : Type) -> Double {
         switch defending {
 
         case normal :
-
+            return 1
         case fire :
-
+            return 0.5
         case water :
-
+            return 0.5
         case electric :
-
+            return 1
         case grass :
-
+            return 2
         case ice :
-
+            return 2
         case fighting :
-
+            return 1
         case poison :
-
+            return 1
         case ground :
-
+            return 1
         case flying :
-
+            return 1
         case psychic :
-
+            return 1
         case bug :
-
+            return 2
         case rock :
-
+            return 0.5
         case ghost :
-
+            return 1
         case dragon :
-
+            return 0.5
         case dark :
-
+            return 1
         case steel :
-
+            return 2
         case fairy :
-
+            return 1
         default :
           print("Error in the defending type : type is not known");
           return nil;
@@ -252,41 +252,41 @@ func typeModifier(attacking: Type, defending : Type) -> Double {
         switch defending {
 
         case normal :
-
+            return 1
         case fire :
-
+            return 2
         case water :
-
+            return 0.5
         case electric :
-
+            return 1
         case grass :
-
+            return 0.5
         case ice :
-
+            return 1
         case fighting :
-
+            return 1
         case poison :
-
+            return 1
         case ground :
-
+            return 2
         case flying :
-
+            return 1
         case psychic :
-
+            return 1
         case bug :
-
+            return 1
         case rock :
-
+            return 2
         case ghost :
-
+            return 1
         case dragon :
-
+            return 0.5
         case dark :
-
+            return 1
         case steel :
-
+            return 1
         case fairy :
-
+            return 1
         default :
           print("Error in the defending type : type is not known");
           return nil;
@@ -297,41 +297,41 @@ func typeModifier(attacking: Type, defending : Type) -> Double {
         switch defending {
 
         case normal :
-
+            return 1
         case fire :
-
+            return 1
         case water :
-
+            return 2
         case electric :
-
+            return 0.5
         case grass :
-
+            return 0.5
         case ice :
-
+            return 1
         case fighting :
-
+            return 1
         case poison :
-
+            return 1
         case ground :
-
+            return 0
         case flying :
-
+            return 2
         case psychic :
-
+            return 1
         case bug :
-
+            return 1
         case rock :
-
+            return 1
         case ghost :
-
+            return 1
         case dragon :
-
+            return 0.5
         case dark :
-
+            return 1
         case steel :
-
+            return 1
         case fairy :
-
+            return 1
         default :
           print("Error in the defending type : type is not known");
           return nil;
@@ -342,41 +342,41 @@ func typeModifier(attacking: Type, defending : Type) -> Double {
         switch defending {
 
         case normal :
-
+            return 1
         case fire :
-
+            return 0.5
         case water :
-
+            return 2
         case electric :
-
+            return 1
         case grass :
-
+            return 0.5
         case ice :
-
+            return 1
         case fighting :
-
+            return 1
         case poison :
-
+            return 0.5
         case ground :
-
+            return 2
         case flying :
-
+            return 0.5
         case psychic :
-
+            return 1
         case bug :
-
+            return 0.5
         case rock :
-
+            return 2
         case ghost :
-
+            return 1
         case dragon :
-
+            return 0.5
         case dark :
-
+            return 1
         case steel :
-
+            return 0.5
         case fairy :
-
+            return 1
         default :
           print("Error in the defending type : type is not known");
           return nil;
@@ -387,41 +387,41 @@ func typeModifier(attacking: Type, defending : Type) -> Double {
         switch defending {
 
         case normal :
-
+            return 1
         case fire :
-
+            return 0.5
         case water :
-
+            return 0.5
         case electric :
-
+            return 1
         case grass :
-
+            return 2
         case ice :
-
+            return 0.5
         case fighting :
-
+            return 1
         case poison :
-
+            return 1
         case ground :
-
+            return 2
         case flying :
-
+            return 2
         case psychic :
-
+            return 1
         case bug :
-
+            return 1
         case rock :
-
+            return 1
         case ghost :
-
+            return 1
         case dragon :
-
+            return 2
         case dark :
-
+            return 1
         case steel :
-
+            return 0.5
         case fairy :
-
+            return 1
         default :
           print("Error in the defending type : type is not known");
           return nil;
@@ -432,41 +432,41 @@ func typeModifier(attacking: Type, defending : Type) -> Double {
         switch defending {
 
         case normal :
-
+            return 2
         case fire :
-
+            return 1
         case water :
-
+            return 1
         case electric :
-
+            return 1
         case grass :
-
+            return 1
         case ice :
-
+            return 2
         case fighting :
-
+            return 1
         case poison :
-
+            return 0.5
         case ground :
-
+            return 1
         case flying :
-
+            return 0.5
         case psychic :
-
+            return 0.5
         case bug :
-
+            return 0.5
         case rock :
-
+            return 2
         case ghost :
-
+            return 0
         case dragon :
-
+            return 1
         case dark :
-
+            return 2
         case steel :
-
+            return 2
         case fairy :
-
+            return 0.5
         default :
           print("Error in the defending type : type is not known");
           return nil;
@@ -477,41 +477,41 @@ func typeModifier(attacking: Type, defending : Type) -> Double {
         switch defending {
 
         case normal :
-
+            return 1
         case fire :
-
+            return 1
         case water :
-
+            return 1
         case electric :
-
+            return 1
         case grass :
-
+            return 2
         case ice :
-
+            return 1
         case fighting :
-
+            return 1
         case poison :
-
+            return 0.5
         case ground :
-
+            return 0.5
         case flying :
-
+            return 1
         case psychic :
-
+            return 1
         case bug :
-
+            return 1
         case rock :
-
+            return 0.5
         case ghost :
-
+            return 0.5
         case dragon :
-
+            return 1
         case dark :
-
+            return 1
         case steel :
-
+            return 0
         case fairy :
-
+            return 2
         default :
           print("Error in the defending type : type is not known");
           return nil;
@@ -522,41 +522,41 @@ func typeModifier(attacking: Type, defending : Type) -> Double {
         switch defending {
 
         case normal :
-
+            return 1
         case fire :
-
+            return 2
         case water :
-
+            return 1
         case electric :
-
+            return 2
         case grass :
-
+            return 0.5
         case ice :
-
+            return 1
         case fighting :
-
+            return 1
         case poison :
-
+            return 2
         case ground :
-
+            return 1
         case flying :
-
+            return 0
         case psychic :
-
+            return 1
         case bug :
-
+            return 0.5
         case rock :
-
+            return 2
         case ghost :
-
+            return 1
         case dragon :
-
+            return 1
         case dark :
-
+            return 1
         case steel :
-
+            return 2
         case fairy :
-
+            return 1
         default :
           print("Error in the defending type : type is not known");
           return nil;
@@ -567,41 +567,41 @@ func typeModifier(attacking: Type, defending : Type) -> Double {
         switch defending {
 
         case normal :
-
+            return 1
         case fire :
-
+            return 1
         case water :
-
+            return 1
         case electric :
-
+            return 0.5
         case grass :
-
+            return 2
         case ice :
-
+            return 1
         case fighting :
-
+            return 2
         case poison :
-
+            return 1
         case ground :
-
+            return 1
         case flying :
-
+            return 1
         case psychic :
-
+            return 1
         case bug :
-
+            return 2
         case rock :
-
+            return 0.5
         case ghost :
-
+            return 1
         case dragon :
-
+            return 1
         case dark :
-
+            return 1
         case steel :
-
+            return 0.5
         case fairy :
-
+            return 1
         default :
           print("Error in the defending type : type is not known");
           return nil;
@@ -612,41 +612,41 @@ func typeModifier(attacking: Type, defending : Type) -> Double {
         switch defending {
 
         case normal :
-
+            return 1
         case fire :
-
+            return 1
         case water :
-
+            return 1
         case electric :
-
+            return 1
         case grass :
-
+            return 1
         case ice :
-
+            return 1
         case fighting :
-
+            return 2
         case poison :
-
+            return 2
         case ground :
-
+            return 1
         case flying :
-
+            return 1
         case psychic :
-
+            return 0.5
         case bug :
-
+            return 1
         case rock :
-
+            return 1
         case ghost :
-
+            return 1
         case dragon :
-
+            return 1
         case dark :
-
+            return 0
         case steel :
-
+            return 0.5
         case fairy :
-
+            return 1
         default :
           print("Error in the defending type : type is not known");
           return nil;
@@ -657,41 +657,41 @@ func typeModifier(attacking: Type, defending : Type) -> Double {
         switch defending {
 
         case normal :
-
+            return 1
         case fire :
-
+            return 0.5
         case water :
-
+            return 1
         case electric :
-
+            return 1
         case grass :
-
+            return 2
         case ice :
-
+            return 1
         case fighting :
-
+            return 0.5
         case poison :
-
+            return 0.5
         case ground :
-
+            return 1
         case flying :
-
+            return 0.5
         case psychic :
-
+            return 2
         case bug :
-
+            return 1
         case rock :
-
+            return 1
         case ghost :
-
+            return 0.5
         case dragon :
-
+            return 1
         case dark :
-
+            return 2
         case steel :
-
+            return 0.5
         case fairy :
-
+            return 0.5
         default :
           print("Error in the defending type : type is not known");
           return nil;
@@ -702,41 +702,41 @@ func typeModifier(attacking: Type, defending : Type) -> Double {
         switch defending {
 
         case normal :
-
+            return 1
         case fire :
-
+            return 2
         case water :
-
+            return 1
         case electric :
-
+            return 1
         case grass :
-
+            return 1
         case ice :
-
+            return 2
         case fighting :
-
+            return 0.5
         case poison :
-
+            return 1
         case ground :
-
+            return 0.5
         case flying :
-
+            return 2
         case psychic :
-
+            return 1
         case bug :
-
+            return 2
         case rock :
-
+            return 1
         case ghost :
-
+            return 1
         case dragon :
-
+            return 1
         case dark :
-
+            return 1
         case steel :
-
+            return 0.5
         case fairy :
-
+            return 1
         default :
           print("Error in the defending type : type is not known");
           return nil;
@@ -747,41 +747,41 @@ func typeModifier(attacking: Type, defending : Type) -> Double {
         switch defending {
 
         case normal :
-
+            return 0
         case fire :
-
+            return 1
         case water :
-
+            return 1
         case electric :
-
+            return 1
         case grass :
-
+            return 1
         case ice :
-
+            return 1
         case fighting :
-
+            return 1
         case poison :
-
+            return 1
         case ground :
-
+            return 1
         case flying :
-
+            return 1
         case psychic :
-
+            return 2
         case bug :
-
+            return 1
         case rock :
-
+            return 1
         case ghost :
-
+            return 2
         case dragon :
-
+            return 1
         case dark :
-
+            return 0.5
         case steel :
-
+            return 1
         case fairy :
-
+            return 1
         default :
           print("Error in the defending type : type is not known");
           return nil;
@@ -792,41 +792,41 @@ func typeModifier(attacking: Type, defending : Type) -> Double {
         switch defending {
 
         case normal :
-
+            return 1
         case fire :
-
+            return 1
         case water :
-
+            return 1
         case electric :
-
+            return 1
         case grass :
-
+            return 1
         case ice :
-
+            return 1
         case fighting :
-
+            return 1
         case poison :
-
+            return 1
         case ground :
-
+            return 1
         case flying :
-
+            return 1
         case psychic :
-
+            return 1
         case bug :
-
+            return 1
         case rock :
-
+            return 1
         case ghost :
-
+            return 1
         case dragon :
-
+            return 2
         case dark :
-
+            return 1
         case steel :
-
+            return 0.5
         case fairy :
-
+            return 0
         default :
           print("Error in the defending type : type is not known");
           return nil;
@@ -837,41 +837,41 @@ func typeModifier(attacking: Type, defending : Type) -> Double {
         switch defending {
 
         case normal :
-
+            return 1
         case fire :
-
+            return 1
         case water :
-
+            return 1
         case electric :
-
+            return 1
         case grass :
-
+            return 1
         case ice :
-
+            return 1
         case fighting :
-
+            return 0.5
         case poison :
-
+            return 1
         case ground :
-
+            return 1
         case flying :
-
+            return 1
         case psychic :
-
+            return 2
         case bug :
-
+            return 1
         case rock :
-
+            return 1
         case ghost :
-
+            return 2
         case dragon :
-
+            return 1
         case dark :
-
+            return 0.5
         case steel :
-
+            return 1
         case fairy :
-
+            return 0.5
         default :
           print("Error in the defending type : type is not known");
           return nil;
@@ -882,41 +882,41 @@ func typeModifier(attacking: Type, defending : Type) -> Double {
         switch defending {
 
         case normal :
-
+            return 1
         case fire :
-
+            return 0.5
         case water :
-
+            return 0.5
         case electric :
-
+            return 0.5
         case grass :
-
+            return 1
         case ice :
-
+            return 2
         case fighting :
-
+            return 1
         case poison :
-
+            return 1
         case ground :
-
+            return 1
         case flying :
-
+            return 1
         case psychic :
-
+            return 1
         case bug :
-
+            return 1
         case rock :
-
+            return 2
         case ghost :
-
+            return 1
         case dragon :
-
+            return 1
         case dark :
-
+            return 1
         case steel :
-
+            return 0.5
         case fairy :
-
+            return 2
         default :
           print("Error in the defending type : type is not known");
           return nil;
@@ -927,41 +927,41 @@ func typeModifier(attacking: Type, defending : Type) -> Double {
         switch defending {
 
         case normal :
-
+            return 1
         case fire :
-
+            return 0.5
         case water :
-
+            return 1
         case electric :
-
+            return 1
         case grass :
-
+            return 1
         case ice :
-
+            return 1
         case fighting :
-
+            return 2
         case poison :
-
+            return 0.5
         case ground :
-
+            return 1
         case flying :
-
+            return 1
         case psychic :
-
+            return 1
         case bug :
-
+            return 1
         case rock :
-
+            return 1
         case ghost :
-
+            return 1
         case dragon :
-
+            return 2
         case dark :
-
+            return 2
         case steel :
-
+            return 0.5
         case fairy :
-
+            return 1
         default :
           print("Error in the defending type : type is not known");
           return nil;
@@ -969,7 +969,7 @@ func typeModifier(attacking: Type, defending : Type) -> Double {
 
     } else {
 
-      print("Error in the defending type : type is not known");
+      print("Error in the attack type : type is not known");
       return nil;
 
     }
