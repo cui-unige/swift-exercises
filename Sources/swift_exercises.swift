@@ -130,7 +130,7 @@ let species_kangaskhan: Species = Species(
 	name: "Kangaskhan",
 	evolutions: [],
 	attacks: [move_reversal, move_earthquake, move_iceBeam, move_suckerPunch],
-	type: (Type.normal, nil),
+	type: (.normal, nil),
 	base_values: Stats(
 		hitpoints: 105,
 		attack: 95,
@@ -234,19 +234,19 @@ let move_suckerPunch: Move = Move(
 
 
 struct Pokemon {
-    let nickname          : String?
-    var hitpoints         : Int // remaining hitpoints
-    let size              : Float
-    let weight            : Float
-    var experience        : Int
-    var level             : Int
+	let nickname          : String?
+	var hitpoints         : Int // remaining hitpoints
+	let size              : Float
+	let weight            : Float
+	var experience        : Int
+	var level             : Int
 	let type			  : (Type, Type?)
-    let nature            : Nature
-    let species           : Species
-    var moves             : [Move: Int] // Move -> remaining powerpoints
+	let nature            : Nature
+	let species           : Species
+	var moves             : [Move: Int] // Move -> remaining powerpoints
 	let base_values		  : Stats
-    let individual_values : Stats
-    var effort_values     : Stats
+	let individual_values : Stats
+	var effort_values     : Stats
 	var effective_stats	  : Stats
 }
 
@@ -257,7 +257,7 @@ let kangaskhan = Pokemon(
 	weight: 80,
 	experience: 1000000, // kangaskhan is a medium-fast leveler, MFXP = lvl^3
 	level: 100, // DA VERY BESS
-	type : (Type.normal, nil),
+	type : species_kangaskhan.type,
 	nature: .rash,
 	species: species_kangaskhan,
 	moves: [move_reversal: 15,
@@ -325,15 +325,16 @@ func typeModifier(attacking: Type, defending : Type) -> Double {
 func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pokemon) -> Int {
 
 	var STAB : Double = 1 // initialise with non-STAB multiplier value
-	if (kangaskhan.type.0 == move.type) {var STAB = 1.5}
-	else if (kangaskhan.type.1 == move.type) {var STAB = 1.5}
+	if (kangaskhan.type.0 == move.type) {STAB = 1.5}
+	else if (kangaskhan.type.1 == move.type) {STAB = 1.5}
 
 	let typeBonus: Double = 1 // actually calculate this
 
 	var critical: Double = 1 // initialise with non-crit mult value
 	let randNum: Int = Int(drand48() * 257) // random int between 0 and 256 (included)
 	let threshold: Int = Int(round(Double(kangaskhan.base_values.speed / 2)))
-	if	( randNum < threshold) {var critical = ( (2 * kangaskhan.level + 5) / (kangaskhan.level + 5) ) }
+	if ( randNum < threshold)
+		{critical = ( Double(2 * kangaskhan.level + 5) / Double(kangaskhan.level + 5) ) }
 
 	let environmentBonus: Double = 1 // actually calculate this
 
@@ -345,8 +346,6 @@ func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pok
 	let modifier : Double = STAB * typeBonus * critical * environmentBonus * randFactor
 
 	// TODO calculate actual damage
-	// TODO status changes
-	// TODO recoil damage
 
     return 0
 }
@@ -357,4 +356,14 @@ struct State {
 
 func battle(trainers: inout [Trainer], behavior: (State, Trainer) -> Move) -> () {
     // TODO: simulate battle
+
+
+	///////////////////////
+
+	// TODO check if enough PP left, error if not
+	// TODO calculate actual damage ('damage' function)
+	// TODO status changes?
+	// TODO recoil damage?
+	// TODO inflict damage to foe/self if appropriate
+	// TODO change pokemon status and environment if appropriate
 }
