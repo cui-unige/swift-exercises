@@ -287,8 +287,10 @@ let kangaskhan = Pokemon(
 
 )
 
-// TODO: nature stat modifiers
 // http://bulbapedia.bulbagarden.net/wiki/Nature
+// let natureMultiplier: [Nature: Stats](
+//
+//)
 
 
 struct Trainer {
@@ -300,18 +302,79 @@ struct Environment {
     let terrain : Terrain
 }
 
+func typeToInt(type: Type) -> Int {
+	//uses standard ordering
+	switch type {
+		case .normal: return 0
+		case .fighting: return 1
+		case .flying: return 2
+		case .poison: return 3
+		case .ground: return 4
+		case .rock: return 5
+		case .bug: return 6
+		case .ghost: return 7
+		case .steel: return 8
+		case .fire: return 9
+		case .water: return 10
+		case .grass: return 11
+		case .electric: return 12
+		case .psychic: return 13
+		case .ice: return 14
+		case .dragon: return 15
+		case .dark: return 16
+		case .fairy: return 17
+		case nil: return -1	// ?????
+		default: return -2 //
+	}
+}
+
 // http://bulbapedia.bulbagarden.net/wiki/Type/Type_chart
-func typeModifier(attacking: Type, defending : Type) -> Double {
+func typeModifier(attacking: Type, defending : (Type, Type?))-> Double {
     // TODO: encode type/type chart
-    return 1
+
+	let attackingID: Int = typeToInt(type: attacking)
+	let defendingID0: Int = typeToInt(type: defending.0)
+	let defendingID1: Int = typeToInt(type: defending.1!)
+
+	let multiplierMatrix: [[Double]] = [
+		[  1,  1,  1,  1,  1,0.5,  1,  0,0.5,  1,  1,  1,  1,  1,  1,  1,  1,  1], // normal
+		[  2,  1,0.5,0.5,  1,  2,0.5,  0,  2,  1,  1,  1,  1,0.5,  2,  1,  2,0.5], // fighting
+		[  1,  2,  1,  1,  1,0.5,  2,  1,0.5,  1,  1,  2,0.5,  1,  1,  1,  1,  1], // flying
+		[  1,  1,  1,0.5,0.5,0.5,  1,0.5,  0,  1,  1,  2,  1,  1,  1,  1,  1,  2], // poison
+		[  1,  1,  0,  2,  1,  2,0.5,  1,  2,  2,  1,0.5,  2,  1,  1,  1,  1,  1], // ground
+		[  1,0.5,  2,  1,0.5,  1,  2,  1,0.5,  2,  1,  1,  1,  1,  2,  1,  1,  1], // rock
+		[  1,0.5,0.5,0.5,  1,  1,  1,0.5,0.5,0.5,  1,  2,  1,  2,  1,  1,  2,0.5], // bug
+		[  0,  1,  1,  1,  1,  1,  1,  2,  1,  1,  1,  1,  1,  2,  1,  1,0.5,  1], // ghost
+		[  1,  1,  1,  1,  1,  2,  1,  1,0.5,0.5,0.5,  1,0.5,  1,  2,  1,  1,  2], // steel
+		[  1,  1,  1,  1,  1,0.5,  2,  1,  2,0.5,0.5,  2,  1,  1,  2,0.5,  1,  1], // fire
+		[  1,  1,  1,  1,  2,  2,  1,  1,  1,  2,0.5,0.5,  1,  1,  1,0.5,  1,  1], // water
+		[  1,  1,0.5,0.5,  2,  2,0.5,  1,0.5,0.5,  2,0.5,  1,  1,  1,0.5,  1,  1], // grass
+		[  1,  1,  2,  1,  0,  1,  1,  1,  1,  1,  2,0.5,0.5,  1,  1,0.5,  1,  1], // electric
+		[  1,  2,  1,  2,  1,  1,  1,  1,0.5,  1,  1,  1,  1,0.5,  1,  1,  0,  1], // psychic
+		[  1,  1,  2,  1,  2,  1,  1,  1,0.5,0.5,0.5,  2,  1,  1,0.5,  2,  1,  1], // ice
+		[  1,  1,  1,  1,  1,  1,  1,  1,0.5,  1,  1,  1,  1,  1,  1,  2,  1,  0], // dragon
+		[  1,0.5,  1,  1,  1,  1,  1,  2,  1,  1,  1,  1,  1,  2,  1,  1,0.5,0.5], // dark
+		[  1,  2,  1,0.5,  1,  1,  1,  1,0.5,0.5,  1,  1,  1,  1,  1,  2,  2,  1], // fairy
+	]
+
+	if (defendingID1 != -1)
+		{return ( Double(multiplierMatrix[attackingID][defendingID0])
+		* Double(multiplierMatrix[attackingID][defendingID1]) )}
+	else
+		{return (multiplierMatrix[attackingID][defendingID0])}
+
+		/*
+		/src/swift-exercises/Sources/swift_exercises.swift:326:3: warning: case will never be executed
+	                case nil: return -1     // ?????
+	                ^
+		*/
 }
 
 // http://bulbapedia.bulbagarden.net/wiki/Damage
 func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pokemon) -> Int {
 
 	var STAB : Double = 1 // initialise with non-STAB multiplier value
-	if (kangaskhan.type.0 == move.type) {STAB = 1.5}
-	else if (kangaskhan.type.1 == move.type) {STAB = 1.5}
+	if ( (kangaskhan.type.0 == move.type) || (kangaskhan.type.1 == move.type) ) {STAB = 1.5}
 
 	let typeBonus: Double = 1 // actually calculate this
 
@@ -394,7 +457,7 @@ func battle(trainers: inout [Trainer], behavior: (State, Trainer) -> Move) -> ()
 }
 
 
-func init() -> Int {
+func initialise() -> Int {
 	// call other stuff here
 	return 0
 }
