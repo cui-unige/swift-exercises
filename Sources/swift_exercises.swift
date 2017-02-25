@@ -326,6 +326,13 @@ func typeToInt(type: Type) -> Int {
 		case nil: return -1	// ?????
 		default: return -2 //
 	}
+
+	/*
+	/src/swift-exercises/Sources/swift_exercises.swift:326:3: warning: case will never be executed
+				case nil: return -1     // ?????
+				^
+	*/
+
 }
 
 // http://bulbapedia.bulbagarden.net/wiki/Type/Type_chart
@@ -334,7 +341,10 @@ func typeModifier(attacking: Type, defending : (Type, Type?))-> Double {
 
 	let attackingID: Int = typeToInt(type: attacking)
 	let defendingID0: Int = typeToInt(type: defending.0)
-	let defendingID1: Int = typeToInt(type: defending.1!)
+	if (defending.1 != nil){
+		let defendingID1: Int = typeToInt(type: defending.1!) }
+	else {let defendingID1: Int = -1}
+	//let defendingID1: Int = -1	// temporary
 
 	let multiplierMatrix: [[Double]] = [
 		[  1,  1,  1,  1,  1,0.5,  1,  0,0.5,  1,  1,  1,  1,  1,  1,  1,  1,  1], // normal
@@ -363,11 +373,7 @@ func typeModifier(attacking: Type, defending : (Type, Type?))-> Double {
 	else
 		{return (multiplierMatrix[attackingID][defendingID0])}
 
-		/*
-		/src/swift-exercises/Sources/swift_exercises.swift:326:3: warning: case will never be executed
-	                case nil: return -1     // ?????
-	                ^
-		*/
+
 }
 
 // http://bulbapedia.bulbagarden.net/wiki/Damage
@@ -394,6 +400,8 @@ func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pok
 	let modifier : Double = STAB * typeBonus * critical * environmentBonus * randFactor
 
 	// TODO calculate actual damage
+
+
 
     return 0
 }
