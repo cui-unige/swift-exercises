@@ -274,7 +274,7 @@ let kangaskhan = Pokemon(
 	/*		,
 	// http://bulbapedia.bulbagarden.net/wiki/Individual_values#Determination_of_stats_2
 	// https://developer.apple.com/library/content/documentation/Swift/Conceptual/Swift_Programming_Language/Properties.html#//apple_ref/doc/uid/TP40014097-CH14-ID259
-	effective_stats: Stats(	// 'pokemons'?
+	effective_stats: Stats(
 		hitpoints: Int 			= 10 + kangaskhan.level + floor( ( Double( 2 * kangaskhan_species.base_values.hitpoints + kangaskhan.individual_values.hitpoints + floor(Double(kangaskhan.effort_values.hitpoints / 4 ) ) * kangaskhan.level ) )  / 100 ),
 		attack: Int 			= floor( ( Double( (2 * base_values.attack + individual_values.attack  + floor(Double(effort_values.attack) / 4) ) * level) ) / 100 ) * natureMultiplier[kangaskhan.nature],
 		defense: Int 			= floor( ( Double( (2 * base_values.defense + individual_values.defense  + floor(Double(effort_values.defense) / 4) ) * level) ) / 100 ) * natureMultiplier[kangaskhan.nature],
@@ -292,7 +292,7 @@ let kangaskhan = Pokemon(
 
 
 struct Trainer {
-    let pokemons : [Pokemon]
+    let party : [Pokemon]
 }
 
 struct Environment {
@@ -339,16 +339,62 @@ struct State {
     // TODO: describe a battle state
 }
 
+
 func battle(trainers: inout [Trainer], behavior: (State, Trainer) -> Move) -> () {
-    // TODO: simulate battle
+
+	// assume you can either fight or switch pokemon, but nothing more
+	// struggle?????
+	// no fancy effects and such, at least for now
+
+    // TODO:
+	// introductory blah blah
+	// trainers send out the first respective pokemon
+	// while both trainers have at least 1 non-KO pokemon:
+		// display environment if relevant
+		// trainers pick a move, or switch pokemon
+			// pokemon: check it's valid and non-KO, priority 6
+			// move: check that it's a valid move, and that it has PP left
+		// check priority and speed to see who goes first
+		// first to move
+			// check status conditions, see if move can be executed (can always switch pokemon)
+				// move changes weather?
+					// y: set new weather
+				// move changes pokemon stats?
+					// y, first: set new first stats (self)
+					// y, second: set new second stats
+				// move deals damage?
+					// calculate damage
+					// deal damage to second
+					// second (foe) KO?
+						// y: opponent tries sending out another pokemon
+						// n: move has status effects on second?
+							//y: apply status effects
+					// deal recoil damage to first (self) if appropriate
+						// self KO?
+							// y: first tries sending out another pokemon
+		// second KO? n:
+			// check status conditions, see if move can be executed (can always switch pokemon)
+				// move changes weather?
+					// y: set new weather
+				// move changes pokemon stats?
+					// y, second: set new first stats (self)
+					// y, first: set new second stats
+				// move deals damage?
+					// calculate damage
+					// deal damage to first
+					// first (foe) KO?
+						// y: opponent tries sending out another pokemon
+						// n: move has status effects on first?
+							//y: apply status effects
+					// deal recoil damage to second (self) if appropriate
+						// self KO?
+							// y: second tries sending out another pokemon
+		// nonzero status conditions on either pokemon: apply effects
+
+}
 
 
-	///////////////////////
-
-	// TODO check if enough PP left, error if not
-	// TODO calculate actual damage ('damage' function)
-	// TODO status changes?
-	// TODO recoil damage?
-	// TODO inflict damage to foe/self if appropriate
-	// TODO change pokemon status and environment if appropriate
+func init() -> Int {
+	// call other stuff here
+	return 0
 }
