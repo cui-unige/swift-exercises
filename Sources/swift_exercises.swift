@@ -325,8 +325,66 @@ func typeModifier(attacking: Type, defending : Type) -> Double {
 
 // http://bulbapedia.bulbagarden.net/wiki/Damage
 func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pokemon) -> Int {
-    // TODO
-    return 0
+   let att = Double(move.category == .physical ? pokemon.effective_stats.attack : pokemon.effective_stats.special_attack)
+   let def = Double(move.category == .physical ? target.effective_stats.defense : target.effective_stats.special_defense)
+   var base = Double(move.power)
+   let STAB: Double
+   if move.type == pokemon.species.type.0 || move.type == pokemon.species.type.1 {
+      STAB = 1.5
+   } else {
+      STAB = 1
+   }
+   let type_effectiveness: Double
+   if let secondary = target.species.type.1 {
+      type_effectiveness = typeModifier(attacking: move.type, defending: target.species.type.0) * typeModifier(attacking: move.type, defending: secondary)
+   } else {
+      type_effectiveness = typeModifier(attacking: move.type, defending: target.species.type.0)
+   }
+   let crit_threshold = pokemon.species.base_values.speed / 2
+   #if os(Linux)
+      let diceRoll = Int(random() % 256)
+      let diceRoll2 = Double(rand()) / Double(UINT32_MAX) * 0.15 + 0.85
+   #else
+      let diceRoll = Int(arc4random_uniform(256))
+      let diceRoll2 = Double(arc4random()) / Double(UINT32_MAX) * 0.15 + 0.85
+   #endif
+   let critical: Double = diceRoll < crit_threshold ? 2 : 1
+   var other: Double = 1
+   switch environment.weather {
+      case .harsh_sunlight(let extremely):
+         if move.type == .fire {
+            base *= 1.5
+         }
+         if move.type == .water {
+            if extremely {
+               other = 0
+            } else {
+               base *= 0.5
+            }
+         }
+      case .rain(let heavy):
+         if move.type == .water {
+            base *= 1.5
+         }
+         if move.type == .fire {
+            if heavy {
+               other = 0
+            } else {
+               base *= 0.5
+            }
+         }
+      case .mysterious_air_current:
+         if ((target.species.type.0 == .flying || target.species.type.1 == .flying) && type_effectiveness == 2) {
+            other *= 0.5
+         }
+      default:
+         break
+   }
+   /* Terrain not implemented yet du to lack of an "ability" notion */
+   let modifier = STAB * type_effectiveness * critical * other * diceRoll2
+   let temp = Double(2*pokemon.level+10) * att / def / 250 * base
+   let damageOutput = Int((temp + 2) * modifier)
+   return damageOutput
 }
 
 struct State {
