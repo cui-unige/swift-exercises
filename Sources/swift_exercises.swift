@@ -341,10 +341,14 @@ func typeModifier(attacking: Type, defending : (Type, Type?))-> Double {
 
 	let attackingID: Int = typeToInt(type: attacking)
 	let defendingID0: Int = typeToInt(type: defending.0)
+	let defendingID1: Int = typeToInt(type: defending.1!)
+	// let defendingID1: Int = -1	// temporary
 	if (defending.1 != nil){
 		let defendingID1: Int = typeToInt(type: defending.1!) }
 	else {let defendingID1: Int = -1}
-	//let defendingID1: Int = -1	// temporary
+	// initialisation of defendingID1 never used?????????
+
+
 
 	let multiplierMatrix: [[Double]] = [
 		[  1,  1,  1,  1,  1,0.5,  1,  0,0.5,  1,  1,  1,  1,  1,  1,  1,  1,  1], // normal
