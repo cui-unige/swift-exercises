@@ -125,21 +125,23 @@ func ==(lhs: Species, rhs: Species) -> Bool {
 
 /* We only implement a few moves for Charizard - at the moment - */
 
-let moveAirSlash = Move(id: 1, name: "Air Slash", description: "Air Slash deals damage and has a 30% chance of causing the target to flinch", category: Category.special, type: Type.flying, power: 75, accuracy: 95, powerpoints: 20, priority: 0)
+let moveAirSlash = Move(id: 403, name: "Air Slash", description: "Air Slash deals damage and has a 30% chance of causing the target to flinch", category: Category.special, type: Type.flying, power: 75, accuracy: 95, powerpoints: 20, priority: 0)
 
-let moveDragonClaw = Move(id: 2, name: "Dragon Claw", description: "Dragon Claw deals damage with no additional effect.", category: Category.physical, type: Type.dragon, power: 80, accuracy: 100, powerpoints: 15, priority: 0)
+let moveDragonClaw = Move(id: 337, name: "Dragon Claw", description: "Dragon Claw deals damage with no additional effect.", category: Category.physical, type: Type.dragon, power: 80, accuracy: 100, powerpoints: 15, priority: 0)
 
-let moveEmber = Move(id: 3, name: "Ember", description: "Ember deals damage and has a 10% chance of burning the target.", category: Category.special, type: Type.fire, power: 40, accuracy: 100, powerpoints: 25, priority: 0)
+let moveEmber = Move(id: 52, name: "Ember", description: "Ember deals damage and has a 10% chance of burning the target.", category: Category.special, type: Type.fire, power: 40, accuracy: 100, powerpoints: 25, priority: 0)
 
-let moveFlareBlitz = Move(id: 4, name: "Flare Blitz", description: "Flare Blitz deals damage and has a 10% chance of burning the target, but the user receives 1⁄3 of the damage it inflicted in recoil. In other words, if the attack does 90 HP damage to the opponent, the user will lose 30 HP.", category: Category.physical, type: Type.fire, power: 120, accuracy: 100, powerpoints: 15, priority: 0)
+let moveFlareBlitz = Move(id: 394, name: "Flare Blitz", description: "Flare Blitz deals damage and has a 10% chance of burning the target, but the user receives 1⁄3 of the damage it inflicted in recoil. In other words, if the attack does 90 HP damage to the opponent, the user will lose 30 HP.", category: Category.physical, type: Type.fire, power: 120, accuracy: 100, powerpoints: 15, priority: 0)
 
-let moveGrowl = Move(id: 5, name: "Growl", description: "Growl lowers the target's Attack by one stage.", category: Category.status, type: Type.normal, power: 0, accuracy: 100, powerpoints: 40, priority: 0)
+let moveGrowl = Move(id: 45, name: "Growl", description: "Growl lowers the target's Attack by one stage.", category: Category.status, type: Type.normal, power: 0, accuracy: 100, powerpoints: 40, priority: 0)
 
-let moveHeatWave = Move(id: 6, name: "Heat Wave", description: "Heat Wave deals damage and has a 10% chance of burning the target.", category: Category.special, type: Type.fire, power: 95, accuracy: 90, priority: 0)
+let moveHeatWave = Move(id: 257, name: "Heat Wave", description: "Heat Wave deals damage and has a 10% chance of burning the target.", category: Category.special, type: Type.fire, power: 95, accuracy: 90, priority: 0)
 
-let charizardStat = Stats(hitpoints: 0, attack: 0, defense: 0, special_attack: 3, special_defense: 0, speed: 0)
+let charizardBaseValues = Stats(hitpoints: 78, attack: 84, defense: 78, special_attack: 109, special_defense: 85, speed: 100)
 
-let charizard = Species(id: 006, name: "Charizard", evolutions: [], attacks: [moveAirSlash, moveDragonClaw, moveEmber, moveFlareBlitz, moveGrowl, moveHeatWave], type: (Type.fire, nil), base_values: charizardStat)
+let charizardEffortValues = Stats(hitpoints: 0, attack: 0, defense: 0, special_attack: 3, special_defense: 0, speed: 0)
+
+let charizard = Species(id: 006, name: "Charizard", evolutions: [], attacks: [moveAirSlash, moveDragonClaw, moveEmber, moveFlareBlitz, moveGrowl, moveHeatWave], type: (Type.fire, Type.flying), base_values: charizardBaseValues)
 
 // ###################################### //
 
@@ -155,10 +157,16 @@ struct Pokemon {
     let moves             : [Move: Int] // Move -> remaining powerpoints
     let individual_values : Stats
     let effort_values     : Stats
-    // TODO: implement the effective stats as a computed property:
-    // https://developer.apple.com/library/content/documentation/Swift/Conceptual/Swift_Programming_Language/Properties.html#//apple_ref/doc/uid/TP40014097-CH14-ID259
-    // var effective_stats   : Stats {
-    // }
+    var effective_stats   : Stats { //Computed property
+        get {
+            let hitpoints = ((2*species.base_values.hitpoints + individual_values.hitpoints + (effort_values.hitpoints/4).rouded())*level/100).rounded() + level + 10
+            let attack = ((((2*species.base_values.attack + individual_values.attack + (effort_values.attack/4).rouded())*level/100).rounded() + 5)*nature).rounded()
+            let defense = ((((2*species.base_values.defense + individual_values.defense + (effort_values.defense/4).rouded())*level/100).rounded() + 5)*nature).rounded()
+            let special_attack = ((((2*species.base_values.special_attack + individual_values.special_attack + (effort_values.special_attack/4).rouded())*level/100).rounded() + 5)*nature).rounded()
+            let special_defense = ((((2*species.base_values.special_defense + individual_values.special_defense + (effort_values.special_defense/4).rouded())*level/100).rounded() + 5)*nature).rounded()
+            let speed = ((((2*species.base_values.speed + individual_values.speed + (effort_values.speed/4).rouded())*level/100).rounded() + 5)*nature).rounded()
+        }
+      }
 }
 
 struct Trainer {
