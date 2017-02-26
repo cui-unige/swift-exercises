@@ -264,8 +264,105 @@ func typeModifier(attacking: Type, defending : Type) -> Double {
 
 // http://bulbapedia.bulbagarden.net/wiki/Damage
 func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pokemon) -> Int {
-    // TODO
-    return 0
+    
+    
+    // All the following variables are used to calculate the "modifier" variable in order to get the damage resulting from the attack performed by the pokemons
+    
+    let STAB: Double //STAB is the same-type attack bonus. This is equal to 1.5 if the attack is of the same type as the user, and 1 if otherwise.
+    var other: Double = 1 //Counts for things like held items, Abilities, field advantages, and whether the battle is a Double Battle or Triple Battle or not.
+    var rand1 = arc4random_uniform(85..100)
+    let random: Double = rand1/100 //is a random number from 0.85 to 1.00.
+    let rand2 = arc4random_uniform(2..4)
+    let critical: Double = rand2/2 //Critical is 2 for a critical hit in Generations I-V, 1.5 for a critical hit from Generation VI onwards, and 1 otherwise.
+    var base = Double(move.power)
+    let type_effectiveness: Double
+    
+    let secondType = target.species.type.1 //If the target pokemon has 2 types, then we need to consider it
+    if secondType {
+        type_effectiveness = typeModifier(attacking: move.type, defending: target.species.type.0) * typeModifier(attacking: move.type, defending: secondType)
+    } else { //If the pokemon has only one type
+        type_effectiveness = typeModifier(attacking: move.type, defending: target.species.type.0)
+    }
+    
+    
+    if move.type == pokemon.species.type.0 || move.type == pokemon.species.type.1 { //Same type attack bonus?
+        STAB = 1.5
+    } else {
+        STAB = 1
+    }
+    
+    //Now, we determine the value of the variable "other" with a switch concerning the environment
+    
+    switch environment.weather{
+        case .rain(let heavy):
+            if move.type == .fire {
+                if heavy {
+                    other = 0 //Fire-type moves cannot be executed
+                } else {
+                    base = base * 0.5 //Fire-type moves do 50% less damage.
+                }
+            }
+            if move.type == .water {
+                base = base * 1.5 //Water-type moves do 50% more damage
+            }
+        
+        case .harsh_sunlight(let extremely):
+            if move.type == .water {
+                if extremely {
+                    other = 0 //Water-type moves cannot be executed
+                }
+                else {
+                    base = base * 0.5 //Water-type moves do 50% less damage
+                }
+                if move.type == .fire {
+                    base = base * 1.5 //Fire-type moves do 50% more damage
+                }
+
+            }
+        case .mysterious_air_current: //A mysterious air current halves all super-effective damage done to Flying-type Pokémon
+            if ((target.species.type.0 == .flying || target.species.type.1 == .flying) && type_effectiveness == 2) {
+                other = other * 0.5
+            }
+        default:
+            break
+    }
+    
+    switch environment.terrain{
+        case .normal:
+            other = other //No changes
+        case .electric:
+            if (pokemon.moves.type == .electric && (pokemon.species.type.0 != .flying || pokemon.species.type.1 != .flying)) {
+                other = other * 1.5 // Electric Terrain increases the power of Electric-type moves used by grounded Pokémon by 50%
+            }
+            if (target.species.type.0 == .electric || target.species.type.1 == .electric){
+                other = other * 0.5 // Decreases the damages on targeted pokemon if he's of type electric
+            }
+        case .grassy:
+            if (pokemon.moves.type == .grass && (pokemon.species.type.0 != .flying || pokemon.species.type.1 != .flying)) {
+                other = other * 1.5 // Grassy Terrain increases the power of grass-type moves used by grounded Pokémon by 50%
+            }
+            if (target.species.type.0 == .grass || target.species.type.1 == .grass){
+                other = other * 0.5 // Decreases the damages on targeted pokemon if he's of type grass
+            }
+        case .psychic:
+            if (pokemon.moves.type == .psychic && (pokemon.species.type.0 != .flying || pokemon.species.type.1 != .flying)) {
+                other = other * 1.5 // Psychic Terrain increases the power of psychic-type moves used by grounded Pokémon by 50%
+            }
+            if (target.species.type.0 == .psychic || target.species.type.1 == .psychic){
+                other = other * 0.5 // Decreases the damages on targeted pokemon if he's of type psychic
+            }
+        case .misty:
+            if (pokemon.moves.type == .dragon && (target.species.type.0 != .flying || target.species.type.1 != .flying)) {
+                other = other * 0.5 // Mistic Terrain decreases the power of dragon-type moves against grounded pokemons by 50%
+            }
+    }
+    
+    //Now we can compute the final value of the damages done:
+    
+    let modifier = STAB * type_effectiveness * critical * other * random
+    let finalDamage = Int(((Double(2*pokemon.level+10) * attack / defense / 250 * base) + 2) * modifier)
+    
+    return finalDamage
 }
 
 struct State {
