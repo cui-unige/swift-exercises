@@ -258,27 +258,41 @@ let type_mode: [Type: [Type: Double]] = [
 
 // ###################################### //
 
+//Function used to generate random numbers. Credits to http://stackoverflow.com/questions/24256564/generating-random-values-in-swift-between-two-integer-values
+
+func randomNumber(min: Int, max: Int) -> Int {
+    let randomNum = Int(arc4random_uniform(UInt32(max) - UInt32(min)) + UInt32(min))
+    return randomNum
+}
+
+
 func typeModifier(attacking: Type, defending : Type) -> Double {
      return (type_mode[attacking]?[defending])!
 }
 
 // http://bulbapedia.bulbagarden.net/wiki/Damage
+
+// ############### DAMAGE FUNCTION CALCULATION ############### //
+
 func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pokemon) -> Int {
     
+    let attack = Double(move.category == .physical ? pokemon.effective_stats.attack : pokemon.effective_stats.special_attack)
+    let defense = Double(move.category == .physical ? target.effective_stats.defense : target.effective_stats.special_defense)
     
     // All the following variables are used to calculate the "modifier" variable in order to get the damage resulting from the attack performed by the pokemons
     
     let STAB: Double //STAB is the same-type attack bonus. This is equal to 1.5 if the attack is of the same type as the user, and 1 if otherwise.
     var other: Double = 1 //Counts for things like held items, Abilities, field advantages, and whether the battle is a Double Battle or Triple Battle or not.
-    var rand1 = arc4random_uniform(85..100)
-    let random: Double = rand1/100 //is a random number from 0.85 to 1.00.
-    let rand2 = arc4random_uniform(2..4)
-    let critical: Double = rand2/2 //Critical is 2 for a critical hit in Generations I-V, 1.5 for a critical hit from Generation VI onwards, and 1 otherwise.
     var base = Double(move.power)
     let type_effectiveness: Double
     
-    let secondType = target.species.type.1 //If the target pokemon has 2 types, then we need to consider it
-    if secondType {
+    let rand1 = Double(randomNumber(min: 85, max: 100))
+    let random: Double = rand1/100 //is a random number from 0.85 to 1.00.
+    let rand2 = Double(randomNumber(min: 2, max:4))
+    let critical: Double = rand2/2 //Critical is 2 for a critical hit in Generations I-V, 1.5 for a critical hit from Generation VI onwards, and 1 otherwise.
+
+    
+    if let secondType = target.species.type.1 { //If the target pokemon has 2 types, then we need to consider it
         type_effectiveness = typeModifier(attacking: move.type, defending: target.species.type.0) * typeModifier(attacking: move.type, defending: secondType)
     } else { //If the pokemon has only one type
         type_effectiveness = typeModifier(attacking: move.type, defending: target.species.type.0)
@@ -328,33 +342,33 @@ func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pok
     }
     
     switch environment.terrain{
-        case .normal:
-            other = other //No changes
         case .electric:
-            if (pokemon.moves.type == .electric && (pokemon.species.type.0 != .flying || pokemon.species.type.1 != .flying)) {
+            if (move.type == .electric && (pokemon.species.type.0 != .flying || pokemon.species.type.1 != .flying)) {
                 other = other * 1.5 // Electric Terrain increases the power of Electric-type moves used by grounded Pokémon by 50%
             }
             if (target.species.type.0 == .electric || target.species.type.1 == .electric){
                 other = other * 0.5 // Decreases the damages on targeted pokemon if he's of type electric
             }
         case .grassy:
-            if (pokemon.moves.type == .grass && (pokemon.species.type.0 != .flying || pokemon.species.type.1 != .flying)) {
+            if (move.type == .grass && (pokemon.species.type.0 != .flying || pokemon.species.type.1 != .flying)) {
                 other = other * 1.5 // Grassy Terrain increases the power of grass-type moves used by grounded Pokémon by 50%
             }
             if (target.species.type.0 == .grass || target.species.type.1 == .grass){
                 other = other * 0.5 // Decreases the damages on targeted pokemon if he's of type grass
             }
         case .psychic:
-            if (pokemon.moves.type == .psychic && (pokemon.species.type.0 != .flying || pokemon.species.type.1 != .flying)) {
+            if (move.type == .psychic && (pokemon.species.type.0 != .flying || pokemon.species.type.1 != .flying)) {
                 other = other * 1.5 // Psychic Terrain increases the power of psychic-type moves used by grounded Pokémon by 50%
             }
             if (target.species.type.0 == .psychic || target.species.type.1 == .psychic){
                 other = other * 0.5 // Decreases the damages on targeted pokemon if he's of type psychic
             }
         case .misty:
-            if (pokemon.moves.type == .dragon && (target.species.type.0 != .flying || target.species.type.1 != .flying)) {
+            if (move.type == .dragon && (target.species.type.0 != .flying || target.species.type.1 != .flying)) {
                 other = other * 0.5 // Mistic Terrain decreases the power of dragon-type moves against grounded pokemons by 50%
             }
+        default:
+            break
     }
     
     //Now we can compute the final value of the damages done:
@@ -364,6 +378,8 @@ func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pok
     
     return finalDamage
 }
+
+// ###################################### //
 
 struct State {
     // TODO: describe a battle state
