@@ -163,6 +163,18 @@ func ==(lhs: Species, rhs: Species) -> Bool {
 }
 
 // http://bulbapedia.bulbagarden.net/wiki/List_of_Pokémon_by_National_Pokédex_number
+let move_struggle = Move(
+   id: 000,
+   name: "Struggle",
+   description: "Used only if the user runs totally out of PP. The user is hit with 1/4 of the damage it inflicts.",
+   category: .physical,
+   type: .normal,
+   power: 50,
+   accuracy: 100,
+   powerpoints: 1,
+   priority: 0
+)
+
 let move_tackle = Move(
    id: 738,
    name: "Tackle",
@@ -289,7 +301,7 @@ struct Pokemon {
 }
 
 struct Trainer {
-    let pokemons : [Pokemon]
+    var pokemons : [Pokemon]
 }
 
 struct Environment {
@@ -329,16 +341,24 @@ func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pok
    let def = Double(move.category == .physical ? target.effective_stats.defense : target.effective_stats.special_defense)
    var base = Double(move.power)
    let STAB: Double
-   if move.type == pokemon.species.type.0 || move.type == pokemon.species.type.1 {
-      STAB = 1.5
-   } else {
+   if move.name == "Struggle" {
       STAB = 1
+   } else {
+      if move.type == pokemon.species.type.0 || move.type == pokemon.species.type.1 {
+         STAB = 1.5
+      } else {
+         STAB = 1
+      }
    }
    let type_effectiveness: Double
-   if let secondary = target.species.type.1 {
-      type_effectiveness = typeModifier(attacking: move.type, defending: target.species.type.0) * typeModifier(attacking: move.type, defending: secondary)
+   if move.name == "Struggle" {
+       type_effectiveness = 1
    } else {
-      type_effectiveness = typeModifier(attacking: move.type, defending: target.species.type.0)
+      if let secondary = target.species.type.1 {
+         type_effectiveness = typeModifier(attacking: move.type, defending: target.species.type.0) * typeModifier(attacking: move.type, defending: secondary)
+      } else {
+         type_effectiveness = typeModifier(attacking: move.type, defending: target.species.type.0)
+      }
    }
    let crit_threshold = pokemon.species.base_values.speed / 2
    #if os(Linux)
@@ -388,9 +408,48 @@ func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pok
 }
 
 struct State {
-    // TODO: describe a battle state
+   var environment: Environment
+   var activePokemons: (attacking: Pokemon, defending: Pokemon)
+   var activeIDs: (attacking: Int, defending: Int)
+   var availableMoves: Array<Move> {
+      get{
+         return Array(activePokemons.attacking.moves.keys).filter{activePokemons.attacking.moves[$0]! > 0}
+      }
+   }
+   var remaining_pokemons: [[Int]]
+}
+
+// Function to randomly chose a next attack (normal attacks only)
+func dumbOffense(state: State, trainer: Trainer) -> Move {
+   if state.availableMoves.isEmpty {
+      return move_struggle
+   }
+   #if os(Linux)
+      let diceRoll = Int(random() % state.availableMoves.count)
+   #else
+      let diceRoll = Int(arc4random_uniform(state.availableMoves.count))
+   #endif
+   let move_pick = state.availableMoves[diceRoll]
+   return move_pick
 }
 
 func battle(trainers: inout [Trainer], behavior: (State, Trainer) -> Move) -> () {
-    // TODO: simulate battle
+   // Initial state
+   var battle_state = State(
+      environment: Environment(
+         weather: .clear_skies,
+         terrain: .normal
+      ),
+      activePokemons: (attacking: trainers[0].pokemons[0], defending: trainers[1].pokemons[0]), // First pokemons by default
+      activeIDs: (attacking: 0, defending: 0),
+      remaining_pokemons: [[Int](0 ..< trainers[0].pokemons.count), [Int](0 ..< trainers[1].pokemons.count)] // All pokemons available (no animal abuse yet...)
+   )
+   var turn = 0
+   while true {
+       let attMove = behavior(battle_state, trainers[turn])
+       let attDamage = damage(environment: battle_state.environment, pokemon: battle_state.activePokemons.attacking, move: attMove, target: battle_state.activePokemons.defending)
+       trainers[1-turn].pokemons[battle_state.activeIDs.defending].hitpoints = trainers[1-turn].pokemons[battle_state.activeIDs.defending].hitpoints > attDamage ? trainers[1-turn].pokemons[battle_state.activeIDs.defending].hitpoints - attDamage : 0
+       // Reste encore self damage si struggle et fainting + fin de combat
+       break
+   }
 }
