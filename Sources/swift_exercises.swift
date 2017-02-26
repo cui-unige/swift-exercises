@@ -1,3 +1,5 @@
+import Foundation
+
 // http://bulbapedia.bulbagarden.net/wiki/Type
 enum Type {
     case bug
@@ -106,6 +108,15 @@ struct Stats {
     let speed           : Int
 }
 
+struct StatsDouble {
+    let hitpoints       : Double
+    let attack          : Double
+    let defense         : Double
+    let special_attack  : Double
+    let special_defense : Double
+    let speed           : Double
+}
+
 struct Species : Hashable {
     let id          : Int
     let name        : String
@@ -121,6 +132,38 @@ func ==(lhs: Species, rhs: Species) -> Bool {
     return lhs.id == rhs.id
 }
 
+// ############### NATURE COEFFICIENT MODIFIER ############### //
+
+let nature_coeff: [Nature: StatsDouble] = [
+    Nature.hardy: StatsDouble(hitpoints: 1, attack: 1, defense: 1, special_attack: 1, special_defense: 1, speed: 1),
+    Nature.lonely: StatsDouble(hitpoints: 1, attack: 1.1, defense: 0.9, special_attack: 1, special_defense: 1, speed: 1),
+    Nature.brave: StatsDouble(hitpoints: 1, attack: 1.1, defense: 1, special_attack: 1, special_defense: 1, speed: 0.9),
+    Nature.adamant: StatsDouble(hitpoints: 1, attack: 1.1, defense: 1, special_attack: 0.9, special_defense: 1, speed: 1),
+    Nature.naughty: StatsDouble(hitpoints: 1, attack: 1.1, defense: 1, special_attack: 1, special_defense: 0.9, speed: 1),
+    Nature.bold: StatsDouble(hitpoints: 1, attack: 0.9, defense: 1.1, special_attack: 1, special_defense: 1, speed: 1),
+    Nature.docile: StatsDouble(hitpoints: 1, attack: 1, defense: 1, special_attack: 1, special_defense: 1, speed: 1),
+    Nature.relaxed: StatsDouble(hitpoints: 1, attack: 1, defense: 1.1, special_attack: 1, special_defense: 1, speed: 0.9),
+    Nature.impish: StatsDouble(hitpoints: 1, attack: 1, defense: 1.1, special_attack: 0.9, special_defense: 1, speed: 1),
+    Nature.lax: StatsDouble(hitpoints: 1, attack: 1, defense: 1.1, special_attack: 1, special_defense: 0.9, speed: 1),
+    Nature.timid: StatsDouble(hitpoints: 1, attack: 0.9, defense: 1, special_attack: 1, special_defense: 1, speed: 1.1),
+    Nature.hasty: StatsDouble(hitpoints: 1, attack: 1, defense: 0.9, special_attack: 1, special_defense: 1, speed: 1.1),
+    Nature.serious: StatsDouble(hitpoints: 1, attack: 1, defense: 1, special_attack: 1, special_defense: 1, speed: 1),
+    Nature.jolly: StatsDouble(hitpoints: 1, attack: 1, defense: 1, special_attack: 0.9, special_defense: 1, speed: 1.1),
+    Nature.naive: StatsDouble(hitpoints: 1, attack: 1, defense: 1, special_attack: 1, special_defense: 0.9, speed: 1.1),
+    Nature.modest: StatsDouble(hitpoints: 1, attack: 0.9, defense: 1, special_attack: 1.1, special_defense: 1, speed: 1),
+    Nature.mild: StatsDouble(hitpoints: 1, attack: 1, defense: 0.9, special_attack: 1.1, special_defense: 1, speed: 1),
+    Nature.quiet: StatsDouble(hitpoints: 1, attack: 1, defense: 1, special_attack: 1.1, special_defense: 1, speed: 0.9),
+    Nature.bashful: StatsDouble(hitpoints: 1, attack: 1, defense: 1, special_attack: 1, special_defense: 1, speed: 1),
+    Nature.rash: StatsDouble(hitpoints: 1, attack: 1, defense: 1, special_attack: 1.1, special_defense: 0.9, speed: 1),
+    Nature.calm: StatsDouble(hitpoints: 1, attack: 0.9, defense: 1, special_attack: 1, special_defense: 1.1, speed: 1),
+    Nature.gentle: StatsDouble(hitpoints: 1, attack: 1, defense: 0.9, special_attack: 1, special_defense: 1.1, speed: 1),
+    Nature.sassy: StatsDouble(hitpoints: 1, attack: 1, defense: 1, special_attack: 1, special_defense: 1.1, speed: 0.9),
+    Nature.careful: StatsDouble(hitpoints: 1, attack: 1, defense: 1, special_attack: 0.9, special_defense: 1.1, speed: 1),
+    Nature.quirky: StatsDouble(hitpoints: 1, attack: 1, defense: 1, special_attack: 1, special_defense: 1, speed: 1)
+]
+
+// ############################################################ //
+
 // ############### SPECIES ############### //
 
 /* We only implement a few moves for Charizard - at the moment - */
@@ -135,13 +178,24 @@ let moveFlareBlitz = Move(id: 394, name: "Flare Blitz", description: "Flare Blit
 
 let moveGrowl = Move(id: 45, name: "Growl", description: "Growl lowers the target's Attack by one stage.", category: Category.status, type: Type.normal, power: 0, accuracy: 100, powerpoints: 40, priority: 0)
 
-let moveHeatWave = Move(id: 257, name: "Heat Wave", description: "Heat Wave deals damage and has a 10% chance of burning the target.", category: Category.special, type: Type.fire, power: 95, accuracy: 90, priority: 0)
+let moveHeatWave = Move(id: 257, name: "Heat Wave", description: "Heat Wave deals damage and has a 10% chance of burning the target.", category: Category.special, type: Type.fire, power: 95, accuracy: 90, powerpoints: 10, priority: 0)
 
 let charizardBaseValues = Stats(hitpoints: 78, attack: 84, defense: 78, special_attack: 109, special_defense: 85, speed: 100)
 
 let charizardEffortValues = Stats(hitpoints: 0, attack: 0, defense: 0, special_attack: 3, special_defense: 0, speed: 0)
 
 let charizard = Species(id: 006, name: "Charizard", evolutions: [], attacks: [moveAirSlash, moveDragonClaw, moveEmber, moveFlareBlitz, moveGrowl, moveHeatWave], type: (Type.fire, Type.flying), base_values: charizardBaseValues)
+
+// ###################################### //
+
+// ############### COMPUTING EFFECTIVE STATS ############### //
+
+func setEffectiveStat(lvl: Int, base: Int, individual: Int, effort: Int, nature_mode: Double) -> Int {
+    return Int(floor((Double((2 * base + individual + effort) * lvl))/Double(100) + 5) * nature_mode)
+}
+func setEffectiveHp(lvl: Int, base: Int, individual: Int, effort: Int) -> Int {
+    return Int((Double((2 * base + individual + effort) * lvl)) / Double(100)) + lvl + 10
+}
 
 // ###################################### //
 
@@ -159,14 +213,15 @@ struct Pokemon {
     let effort_values     : Stats
     var effective_stats   : Stats { //Computed property
         get {
-            let hitpoints = ((2*species.base_values.hitpoints + individual_values.hitpoints + (effort_values.hitpoints/4).rouded())*level/100).rounded() + level + 10
-            let attack = ((((2*species.base_values.attack + individual_values.attack + (effort_values.attack/4).rouded())*level/100).rounded() + 5)*nature).rounded()
-            let defense = ((((2*species.base_values.defense + individual_values.defense + (effort_values.defense/4).rouded())*level/100).rounded() + 5)*nature).rounded()
-            let special_attack = ((((2*species.base_values.special_attack + individual_values.special_attack + (effort_values.special_attack/4).rouded())*level/100).rounded() + 5)*nature).rounded()
-            let special_defense = ((((2*species.base_values.special_defense + individual_values.special_defense + (effort_values.special_defense/4).rouded())*level/100).rounded() + 5)*nature).rounded()
-            let speed = ((((2*species.base_values.speed + individual_values.speed + (effort_values.speed/4).rouded())*level/100).rounded() + 5)*nature).rounded()
+            let effectiveHitpoints = setEffectiveHp(lvl: level, base: species.base_values.hitpoints, individual: individual_values.hitpoints, effort: effort_values.hitpoints)
+            let effectiveAttack = setEffectiveStat(lvl: level, base: species.base_values.attack, individual: individual_values.attack, effort: effort_values.attack, nature_mode: (nature_coeff[nature]?.attack)!)
+            let effectiveDefense = setEffectiveStat(lvl: level, base: species.base_values.defense, individual: individual_values.defense, effort: effort_values.defense, nature_mode: (nature_coeff[nature]?.defense)!)
+            let effectiveSpecialAttack = setEffectiveStat(lvl: level, base: species.base_values.special_attack, individual: individual_values.special_attack, effort: effort_values.special_attack, nature_mode: (nature_coeff[nature]?.special_attack)!)
+            let effectiveSpecialDefense = setEffectiveStat(lvl: level, base: species.base_values.special_defense, individual: individual_values.special_defense, effort: effort_values.special_defense, nature_mode: (nature_coeff[nature]?.special_defense)!)
+            let effectiveSpeed = setEffectiveStat(lvl: level, base: species.base_values.speed, individual: individual_values.speed, effort: effort_values.speed, nature_mode: (nature_coeff[nature]?.speed)!)
+            return Stats(hitpoints: effectiveHitpoints, attack: effectiveAttack, defense: effectiveDefense, special_attack: effectiveSpecialAttack, special_defense: effectiveSpecialDefense, speed: effectiveSpeed)
         }
-      }
+    }
 }
 
 struct Trainer {
@@ -178,10 +233,33 @@ struct Environment {
     let terrain : Terrain
 }
 
-// http://bulbapedia.bulbagarden.net/wiki/Type/Type_chart
+// ############### TYPE COEFFICIENT MODIFIER ############### //
+
+let type_mode: [Type: [Type: Double]] = [
+    Type.normal: [.normal: 1, .fighting: 1, .flying: 1, .poison: 1, .ground: 1, .rock: 0.5, .bug: 1, .ghost:0, .steel: 0.5, .fire: 1, .water: 1, .grass: 1, .electric: 1, .psychic: 1, .ice: 1, .dragon: 1, .dark: 1, .fairy: 1],
+    Type.fighting: [.normal: 2, .fighting: 1, .flying: 0.5, .poison: 0.5, .ground: 1, .rock: 2, .bug: 0.5, .ghost:0, .steel: 2, .fire: 1, .water: 1, .grass: 1, .electric: 1, .psychic: 0.5, .ice: 2, .dragon: 1, .dark: 2, .fairy: 0.5],
+    Type.flying: [.normal: 1, .fighting: 2, .flying: 1, .poison: 1, .ground: 1, .rock: 0.5, .bug: 2, .ghost: 1, .steel: 0.5, .fire: 1, .water: 1, .grass: 2, .electric: 0.5, .psychic: 1, .ice: 1, .dragon: 1, .dark: 1, .fairy: 1],
+    Type.poison: [.normal: 1, .fighting: 1, .flying: 1, .poison: 0.5, .ground: 0.5, .rock: 0.5, .bug: 1, .ghost: 0.5, .steel:0, .fire: 1, .water: 1, .grass: 2, .electric: 1, .psychic: 1, .ice: 1, .dragon: 1, .dark: 1, .fairy: 2],
+    Type.ground: [.normal: 1, .fighting: 1, .flying:0, .poison: 2, .ground: 1, .rock: 2, .bug: 0.5, .ghost: 1, .steel: 2, .fire: 2, .water: 1, .grass: 0.5, .electric: 2, .psychic: 1, .ice: 1, .dragon: 1, .dark: 1, .fairy: 1],
+    Type.rock: [.normal: 1, .fighting: 0.5, .flying: 2, .poison: 1, .ground: 0.5, .rock: 1, .bug: 2, .ghost: 1, .steel: 0.5, .fire: 2, .water: 1, .grass: 1, .electric: 1, .psychic: 1, .ice: 2, .dragon: 1, .dark: 1, .fairy: 1],
+    Type.bug: [.normal: 1, .fighting: 0.5, .flying: 0.5, .poison: 0.5, .ground: 1, .rock: 1, .bug: 1, .ghost: 0.5, .steel: 0.5, .fire: 0.5, .water: 1, .grass: 2, .electric: 1, .psychic: 2, .ice: 1, .dragon: 1, .dark: 2, .fairy: 0.5],
+    Type.ghost: [.normal:0, .fighting: 1, .flying: 1, .poison: 1, .ground: 1, .rock: 1, .bug: 1, .ghost: 2, .steel: 1, .fire: 1, .water: 1, .grass: 1, .electric: 1, .psychic: 2, .ice: 1, .dragon: 1, .dark: 0.5, .fairy: 1],
+    Type.steel: [.normal: 1, .fighting: 1, .flying: 1, .poison: 1, .ground: 1, .rock: 2, .bug: 1, .ghost: 1, .steel: 0.5, .fire: 0.5, .water: 0.5, .grass: 1, .electric: 0.5, .psychic: 1, .ice: 2, .dragon: 1, .dark: 1, .fairy: 2],
+    Type.fire: [.normal: 1, .fighting: 1, .flying: 1, .poison: 1, .ground: 1, .rock: 0.5, .bug: 2, .ghost: 1, .steel: 2, .fire: 0.5, .water: 0.5, .grass: 2, .electric: 1, .psychic: 1, .ice: 2, .dragon: 0.5, .dark: 1, .fairy: 1],
+    Type.water: [.normal: 1, .fighting: 1, .flying: 1, .poison: 1, .ground: 2, .rock: 2, .bug: 1, .ghost: 1, .steel: 1, .fire: 2, .water: 0.5, .grass: 0.5, .electric: 1, .psychic: 1, .ice: 1, .dragon: 0.5, .dark: 1, .fairy: 1],
+    Type.grass: [.normal: 1, .fighting: 1, .flying: 0.5, .poison: 0.5, .ground: 2, .rock: 2, .bug: 0.5, .ghost: 1, .steel: 0.5, .fire: 0.5, .water: 2, .grass: 0.5, .electric: 1, .psychic: 1, .ice: 1, .dragon: 0.5, .dark: 1, .fairy: 1],
+    Type.electric: [.normal: 1, .fighting: 1, .flying: 2, .poison: 1, .ground:0, .rock: 1, .bug: 1, .ghost: 1, .steel: 1, .fire: 1, .water: 2, .grass: 0.5, .electric: 0.5, .psychic: 1, .ice: 1, .dragon: 0.5, .dark: 1, .fairy: 1],
+    Type.psychic: [.normal: 1, .fighting: 2, .flying: 1, .poison: 2, .ground: 1, .rock: 1, .bug: 1, .ghost: 1, .steel: 0.5, .fire: 1, .water: 1, .grass: 1, .electric: 1, .psychic: 0.5, .ice: 1, .dragon: 1, .dark:0, .fairy: 1],
+    Type.ice: [.normal: 1, .fighting: 1, .flying: 2, .poison: 1, .ground: 2, .rock: 1, .bug: 1, .ghost: 1, .steel: 0.5, .fire: 0.5, .water: 0.5, .grass: 2, .electric: 1, .psychic: 1, .ice: 0.5, .dragon: 2, .dark: 1, .fairy: 1],
+    Type.dragon: [.normal: 1, .fighting: 1, .flying: 1, .poison: 1, .ground: 1, .rock: 1, .bug: 1, .ghost: 1, .steel: 0.5, .fire: 1, .water: 1, .grass: 1, .electric: 1, .psychic: 1, .ice: 1, .dragon: 2, .dark: 1, .fairy:0],
+    Type.dark: [.normal: 1, .fighting: 0.5, .flying: 1, .poison: 1, .ground: 1, .rock: 1, .bug: 1, .ghost: 2, .steel: 1, .fire: 1, .water: 1, .grass: 1, .electric: 1, .psychic: 2, .ice: 1, .dragon: 1, .dark: 0.5, .fairy: 0.5],
+    Type.fairy: [.normal: 1, .fighting: 2, .flying: 1, .poison: 0.5, .ground: 1, .rock: 1, .bug: 1, .ghost: 1, .steel: 0.5, .fire: 0.5, .water: 1, .grass: 1, .electric: 1, .psychic: 1, .ice: 1, .dragon: 2, .dark: 2, .fairy: 1]
+]
+
+// ###################################### //
+
 func typeModifier(attacking: Type, defending : Type) -> Double {
-    // TODO: encode type/type chart
-    return 1
+     return (type_mode[attacking]?[defending])!
 }
 
 // http://bulbapedia.bulbagarden.net/wiki/Damage
