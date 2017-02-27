@@ -449,7 +449,27 @@ func battle(trainers: inout [Trainer], behavior: (State, Trainer) -> Move) -> ()
        let attMove = behavior(battle_state, trainers[turn])
        let attDamage = damage(environment: battle_state.environment, pokemon: battle_state.activePokemons.attacking, move: attMove, target: battle_state.activePokemons.defending)
        trainers[1-turn].pokemons[battle_state.activeIDs.defending].hitpoints = trainers[1-turn].pokemons[battle_state.activeIDs.defending].hitpoints > attDamage ? trainers[1-turn].pokemons[battle_state.activeIDs.defending].hitpoints - attDamage : 0
-       // Reste encore self damage si struggle et fainting + fin de combat
-       break
+       if trainers[1-turn].pokemons[battle_state.activeIDs.defending].hitpoints == 0 {
+          battle_state.remaining_pokemons[1-turn] = battle_state.remaining_pokemons[1-turn].filter{$0 != battle_state.activeIDs.defending}
+          if battle_state.remaining_pokemons[1-turn].isEmpty {
+             break
+          } else {
+             battle_state.activeIDs.defending = battle_state.remaining_pokemons[1-turn][0] // Cycle to next pokemon
+             battle_state.activePokemons.defending = trainers[1-turn].pokemons[battle_state.activeIDs.defending]
+          }
+       }
+       if attMove.name == "Struggle" {
+          trainers[turn].pokemons[battle_state.activeIDs.attacking].hitpoints = trainers[turn].pokemons[battle_state.activeIDs.attacking].hitpoints > attDamage/4 ? trainers[turn].pokemons[battle_state.activeIDs.attacking].hitpoints - attDamage/4 : 0
+          if trainers[turn].pokemons[battle_state.activeIDs.attacking].hitpoints == 0 {
+             battle_state.remaining_pokemons[turn] = battle_state.remaining_pokemons[turn].filter{$0 != battle_state.activeIDs.attacking}
+             if battle_state.remaining_pokemons[turn].isEmpty {
+                break
+             } else {
+                battle_state.activeIDs.attacking = battle_state.remaining_pokemons[turn][0] // Cycle to next pokemon
+                battle_state.activePokemons.attacking = trainers[turn].pokemons[battle_state.activeIDs.attacking]
+             }
+          }
+       }
+       turn = (turn + 1) % 2 // Next turn
    }
 }
