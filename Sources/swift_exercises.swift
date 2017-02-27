@@ -126,7 +126,7 @@ func ==(lhs: Species, rhs: Species) -> Bool {
 
 // create kangaskhan species
 let species_kangaskhan: Species = Species(
-	id: 155,
+	id: 115,
 	name: "Kangaskhan",
 	evolutions: [],
 	attacks: [move_reversal, move_earthquake, move_iceBeam, move_suckerPunch],
@@ -163,7 +163,7 @@ let move_reversal: Move = Move(
 	description: "Stronger if the user's HP is low.",
 	category: .physical,
 	type: .fighting,
-	power: computeReversalPower(currentHitpoints: Double(kangaskhan.hitpoints), maxHitpoints: Double(kangaskhan.effective_stats.hitpoints)),	// ?
+	power: computeReversalPower(currentHitpoints: Double(kangaskhan.current_stats.hitpoints), maxHitpoints: Double(kangaskhan.effective_stats.hitpoints)),	// ?
 	accuracy: 100,
 	powerpoints: 15,
 	priority: 0
@@ -208,11 +208,9 @@ let move_suckerPunch: Move = Move(
 
 struct Pokemon {
 	let nickname          : String?
-	var hitpoints         : Int // remaining hitpoints
-	// eventually remove this, and get HP from current_stats
 	let size              : Float
 	let weight            : Float
-	var experience        : Int
+	var experience        : Int	// fix xp/lvl so it's actually calculated
 	var level             : Double
 	let type			  : (Type, Type?)
 	let nature            : Nature
@@ -228,6 +226,7 @@ struct Pokemon {
 			return stats
 		}
 	}
+	var current_stats	: Stats
 }
 
 
@@ -277,7 +276,6 @@ func computeStats(base_values: Stats, individual_values: Stats, effort_values: S
 
 var kangaskhan = Pokemon(
 	nickname: "KANGS",
-	hitpoints: 0,	// eventually remove this, and get HP from current_stats
 	size: 2.2,
 	weight: 80,
 	experience: 1000000, // kangaskhan is a medium-fast leveler, MFXP = lvl^3
@@ -306,6 +304,13 @@ var kangaskhan = Pokemon(
 		special_defense: 30,
 		speed: 30),
 	effort_values_yield: Stats(	// are we even supposed to account for EV yield?
+		hitpoints: 2,
+		attack: 0,
+		defense: 0,
+		special_attack: 0,
+		special_defense: 0,
+		speed: 0),
+	current_stats: Stats(
 		hitpoints: 2,
 		attack: 0,
 		defense: 0,
@@ -354,25 +359,14 @@ func typeToInt(type: Type) -> Int {
 		// case nil: return -1	// ?????
 		// default: return -2 //
 	}
-
-	/*
-	/src/swift-exercises/Sources/swift_exercises.swift:326:3: warning: case will never be executed
-				case nil: return -1     // ?????
-				^
-	*/
-
 }
 
 // http://bulbapedia.bulbagarden.net/wiki/Type/Type_chart
-func typeModifier(attacking: Type, defending : (Type, Type?))-> Double {
+func typeModifier(attacking: Type, defending : Type)-> Double {
     // TODO: encode type/type chart
 
 	let attackingID: Int = typeToInt(type: attacking)
-	let defendingID0: Int = typeToInt(type: defending.0)
-	let defendingID1: Int
-	if (defending.1 != nil){
-		 defendingID1 = typeToInt(type: defending.1!) }
-	else { defendingID1 = -1}
+	let defendingID: Int = typeToInt(type: defending)
 
 	let multiplierMatrix: [[Double]] = [
 		[  1,  1,  1,  1,  1,0.5,  1,  0,0.5,  1,  1,  1,  1,  1,  1,  1,  1,  1], // normal
@@ -395,22 +389,20 @@ func typeModifier(attacking: Type, defending : (Type, Type?))-> Double {
 		[  1,  2,  1,0.5,  1,  1,  1,  1,0.5,0.5,  1,  1,  1,  1,  1,  2,  2,  1] // fairy
 	]
 
-	if (defendingID1 != -1)
-		{return ( Double(multiplierMatrix[attackingID][defendingID0])
-		* Double(multiplierMatrix[attackingID][defendingID1]) )}
-	else
-		{return (multiplierMatrix[attackingID][defendingID0])}
+	return (multiplierMatrix[attackingID][defendingID])
 
 
 }
 
 // http://bulbapedia.bulbagarden.net/wiki/Damage
-func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pokemon) -> Int {
+func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pokemon) -> Double {
 
 	var STAB : Double = 1 // initialise with non-STAB multiplier value
 	if ( (kangaskhan.type.0 == move.type) || (pokemon.type.1 == move.type) ) {STAB = 1.5}
 
-	let typeBonus: Double = 1 // actually calculate this
+	var typeBonus: Double = typeModifier(attacking: move.type, defending: target.type.0)
+	if (pokemon.type.1 != nil)
+		{typeBonus = typeBonus * typeModifier(attacking: move.type, defending: target.type.1!)}
 
 	var critical: Double = 1 // initialise with non-crit mult value
 	let randNum: Int = Int(drand48() * 257) // random int between 0 and 256 (included)
@@ -428,7 +420,7 @@ func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pok
 	let modifier : Double = STAB * typeBonus * critical * environmentBonus * randFactor
 
 	// TODO calculate actual damage
-	let damage : Int = Int(modifier)	// and other stuff ......
+	let damage : Double = Double(modifier)	// and other stuff ......
     return damage
 }
 
@@ -447,11 +439,17 @@ func battle(trainers: inout [Trainer], behavior: (State, Trainer) -> Move) -> ()
 	// introductory blah blah
 	// trainers send out the first respective pokemon
 	// while both trainers have at least 1 non-KO pokemon:
-		// display environment if relevant
-		// trainers pick a move, or switch pokemon
+		// display environment info if relevant
+		// trainers pick a move, or switch pokemon, or use an object
 			// pokemon: check it's valid and non-KO, priority 6
+			// obj: check it's valid, priority 6
 			// move: check that it's a valid move, and that it has PP left
-		// check priority and speed to see who goes first
+		// csame priority?
+			// y:
+				// both are non-damaging: random order
+				// one is damaging: non-damaging first
+				// both are damaging: speed determines order
+			// n: higher priority first
 		// first to move
 			// check status conditions, see if move can be executed (can always switch pokemon)
 				// move changes weather?
