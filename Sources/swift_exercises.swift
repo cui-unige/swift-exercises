@@ -186,7 +186,7 @@ let charizardIndividualValues = Stats(hitpoints: 82, attack: 89, defense: 75, sp
 
 let charizardEffortValues = Stats(hitpoints: 0, attack: 0, defense: 0, special_attack: 3, special_defense: 0, speed: 0)
 
-let charizard = Species(id: 006, name: "Charizard", evolutions: [], attacks: [moveAirSlash, moveDragonClaw, moveEmber, moveFlareBlitz, moveGrowl, moveHeatWave], type: (Type.fire, Type.flying), base_values: charizardBaseValues)
+let charizardSpecie = Species(id: 006, name: "Charizard", evolutions: [], attacks: [moveAirSlash, moveDragonClaw, moveEmber, moveFlareBlitz, moveGrowl, moveHeatWave], type: (Type.fire, Type.flying), base_values: charizardBaseValues)
 
 // ###################################### //
 
@@ -196,7 +196,7 @@ func setEffectiveStat(lvl: Int, base: Int, individual: Int, effort: Int, nature_
     return Int(floor((Double((2 * base + individual + effort) * lvl))/Double(100) + 5) * nature_mode)
 }
 func setEffectiveHp(lvl: Int, base: Int, individual: Int, effort: Int) -> Int {
-    return Int(floor((Double((2 * base + individual + floor(effort/4) * lvl)) / Double(100))) + lvl + 10)
+    return Int((Double((2 * base + individual + effort/4 ) * lvl)) / Double(100)) + lvl + 10
 }
 
 // ###################################### //
@@ -388,7 +388,7 @@ struct State {
     let player1: Trainer
     let player2: Trainer
     let pokemonAttack: Pokemon
-    let pokemonDefender: Pokemon
+    let pokemonDefense: Pokemon
     let pokemonMoveAttack: Move
     let pokemonMoveDefense: Move
     let pokemonEnvironment: Environment
@@ -396,16 +396,31 @@ struct State {
 
 // ############### LETS TRY AND FIGHT ############### //
 
-let charizard = Pokemon(nickname: "Jack", hitpoints: Species.base_values.hitpoints, size: 12, weight: 3000, experience: 0, level: 1, nature: Species.base_values.nature, species: Species.id, moves: Species.moves, individual_values: charizardIndividualValues, effort_values: charizardEffortValues)
+let charizard = Pokemon(nickname: "Jack",
+                        hitpoints: charizardSpecie.base_values.hitpoints, size: 12, weight: 3000, experience: 0, level: 1,
+                        nature: Nature.sassy, species: charizardSpecie, moves: [moveGrowl: 2, moveAirSlash: 4, moveHeatWave: 3],
+                        individual_values: charizardIndividualValues, effort_values: charizardEffortValues)
 
-todaysEnvironnement = Environment(weather: harsh_sunlight, terrain: grassy)
+let todaysEnvironnement = Environment(weather: Weather.harsh_sunlight(extremely: true), terrain: Terrain.grassy)
 
-Bob = Trainer(name: "Bob", pokemons:[charizard, charizard])
-Alice = Trainer(name: "Alice", pokemons: [charizard, charizard])
+let Bob = Trainer(name: "Bob", pokemons:[charizard, charizard])
+let Alice = Trainer(name: "Alice", pokemons: [charizard, charizard])
 
-currentState = State(player1: Bob, player2: Alice, pokemonAttack: Bob.pokemons.0, pokemonDefense: Alice.pokemons.0, pokemonMoveAttack: Bob.pokemons.0.moves.0, pokemonMoveDefense: Alice.pokemons.0.moves.3, pokemonEnvironment: todaysEnvironnement)
+let currentState = State(player1: Bob, player2: Alice, pokemonAttack: Bob.pokemons[0],
+                         pokemonDefense: Alice.pokemons[0], pokemonMoveAttack: moveAirSlash,
+                         pokemonMoveDefense: moveHeatWave, pokemonEnvironment: todaysEnvironnement)
 
-firstPlayer = max(currentState.pokemonAttack.effective_stats.effectiveSpeed, currentState.pokemonDefense.effective_stats.effectiveSpeed) //Pour savoir qui va commencer à jouer
+var firstPokemon: Pokemon? = nil
 
-func battle(trainers: inout [Trainer], behavior: (State, Trainer) -> Move) -> () {
+func firstPok(pokemonAttack: Pokemon, pokemonDefense: Pokemon) -> (){
+    if currentState.pokemonAttack.effective_stats.speed > currentState.pokemonDefense.effective_stats.speed{ // Pour savoir qui commence
+        return firstPokemon = pokemonAttack
+    } else {
+        return firstPokemon = pokemonDefense
     }
+}
+
+
+//func battle(trainers: inout [Trainer], behavior: (State, Trainer) -> Move) -> () {
+//    damages = damage(environment: todaysEnvironnement, pokemon: firstPokemon, move: currentState.firstPokemon, target: Pokemon)
+//    }
