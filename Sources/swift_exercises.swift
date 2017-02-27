@@ -121,8 +121,6 @@ func ==(lhs: Species, rhs: Species) -> Bool {
     return lhs.id == rhs.id
 }
 
-// wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww ho-oh a l'air chiant
-// tulio c'est un baka qui sèche les cours donc je lui montre comment ça marche git
 // TODO: create some species
 // Do you use an enum, a map or constants/variables?
 // http://bulbapedia.bulbagarden.net/wiki/List_of_Pokémon_by_National_Pokédex_number
@@ -175,13 +173,26 @@ func typeModifier(attacking: Type, defending : Type) -> Double {
                             [1, 	0.5, 	1, 	1, 	1, 	1, 	1, 	2, 	1, 	1, 	1, 	1, 	1, 	2, 	1, 	1, 	0.5, 	0.5,],
                             [1, 	2, 	1, 	0.5, 	1, 	1, 	1, 	1, 	0.5, 	0.5, 	1, 	1, 	1, 	1, 	1, 	2, 	2, 	1]]
 
-    print(chart[attacking.rawValue][defending.rawValue])
     return chart[attacking.rawValue][defending.rawValue]
 }
 
 // http://bulbapedia.bulbagarden.net/wiki/Damage
 func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pokemon) -> Int {
-    // TODO
+    let pkmType = pokemon.species.type;
+    let tarType = target.species.type;
+
+    let targets: Double = 1
+    let weather: Double = 1
+    let badge: Double = 1
+    let critical: Double = 1
+    let random: Double = 1
+    let stab: Double = (move.type == pkmType.0 || move.type == pkmType.1!) ? 1.5 : 1
+    let type: Double = typeModifier(attacking: move.type, defending: tarType.0) * ((tarType.1 != nil) ? typeModifier(attacking: move.type, defending: tarType.1!) : 1)
+    let burn: Double = 1
+    let other: Double = 1
+
+    let modifier: Double = targets * weather * badge * critical * random * stab * type * burn * other
+
     return 0
 }
 
