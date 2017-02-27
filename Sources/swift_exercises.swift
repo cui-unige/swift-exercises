@@ -100,12 +100,12 @@ func ==(lhs: Move, rhs: Move) -> Bool {
 
 // http://bulbapedia.bulbagarden.net/wiki/Statistic
 struct Stats {
-    let hitpoints       : Double
-    let attack          : Double
-    let defense         : Double
-    let special_attack  : Double
-    let special_defense : Double
-    let speed           : Double
+    var hitpoints       : Double
+    var attack          : Double
+    var defense         : Double
+    var special_attack  : Double
+    var special_defense : Double
+    var speed           : Double
 }
 
 struct Species : Hashable {
@@ -222,11 +222,60 @@ struct Pokemon {
 	let individual_values : Stats
 	var effort_values     : Stats
 	let effort_values_yield: Stats
-	var effective_stats	  : Stats
-	var current_stats	  : Stats
+	var effective_stats	  : Stats {
+		get {
+			let stats = computeStats(base_values: base_values, individual_values: individual_values, effort_values: effort_values, level: level)
+			return stats
+		}
+	}
 }
 
-let kangaskhan = Pokemon(
+
+
+func computeStats(base_values: Stats, individual_values: Stats, effort_values: Stats, level: Double) -> Stats {
+	//expressions broken up because they're too long for the compiler
+
+	let hitpointsTemp: Double = 2 * base_values.hitpoints + individual_values.hitpoints
+	let hitpointsTemp2: Double = hitpointsTemp + floor(effort_values.hitpoints / 4)
+	let hitpointsTemp3: Double = floor((hitpointsTemp2 * level)/100)
+	let hitpoints: Double = hitpointsTemp3 + level + 10
+
+	let attackTemp: Double = floor(Double(effort_values.attack) / 4)
+	let attackTemp2: Double = (2 * base_values.attack + individual_values.attack + attackTemp) * level
+	let attackTemp3: Double = floor(attackTemp2 / 100)
+	let attack: Double = (attackTemp3 + 5) * 1	// natureMultiplier(attack) instead of '1',
+
+	let defenseTemp: Double = floor(Double(effort_values.defense) / 4)
+	let defenseTemp2: Double = (2 * base_values.defense + individual_values.defense + defenseTemp) * level
+	let defenseTemp3: Double = floor(defenseTemp2 / 100)
+	let defense: Double = (defenseTemp3 + 5) * 1	// natureMultiplier(defense) instead of '1',
+
+	let special_attackTemp: Double = floor(Double(effort_values.special_attack) / 4)
+	let special_attackTemp2: Double = (2 * base_values.special_attack + individual_values.special_attack + special_attackTemp) * level
+	let special_attackTemp3: Double = floor(special_attackTemp2 / 100)
+	let special_attack: Double = (special_attackTemp3 + 5) * 1	// natureMultiplier(special_attack) instead of '1',
+
+	let special_defenseTemp: Double = floor(Double(effort_values.special_defense) / 4)
+	let special_defenseTemp2: Double = (2 * base_values.special_defense + individual_values.special_defense + special_defenseTemp) * level
+	let special_defenseTemp3: Double = floor(special_defenseTemp2 / 100)
+	let special_defense: Double = (special_defenseTemp3 + 5) * 1	// natureMultiplier(special_defense) instead of '1',
+
+	let speedTemp: Double = floor(Double(effort_values.speed) / 4)
+	let speedTemp2: Double = (2 * base_values.speed + individual_values.speed + speedTemp) * level
+	let speedTemp3: Double = floor(speedTemp2 / 100)
+	let speed: Double = (speedTemp3 + 5) * 1	// natureMultiplier(speed) instead of '1',
+
+	return Stats(
+		hitpoints: hitpoints,
+		attack: attack,
+		defense: defense,
+		special_attack: special_attack,
+		special_defense: special_defense,
+		speed: speed)
+}
+
+
+var kangaskhan = Pokemon(
 	nickname: "KANGS",
 	hitpoints: 0,	// eventually remove this, and get HP from current_stats
 	size: 2.2,
@@ -248,105 +297,22 @@ let kangaskhan = Pokemon(
 		defense: 31,
 		special_attack: 31,
 		special_defense: 31,
-		speed: 31
-	),
+		speed: 31),
 	effort_values: Stats(
 		hitpoints: 200,
 		attack: 200,
 		defense: 30,
 		special_attack: 20,
 		special_defense: 30,
-		speed: 30
-	),
+		speed: 30),
 	effort_values_yield: Stats(	// are we even supposed to account for EV yield?
 		hitpoints: 2,
 		attack: 0,
 		defense: 0,
 		special_attack: 0,
 		special_defense: 0,
-		speed: 0
-	),
-	effective_stats: Stats(	// temporary, remove these and fix calculations
-		hitpoints: 0,
-		attack: 0,
-		defense: 0,
-		special_attack: 0,
-		special_defense: 0,
-		speed: 0),
-	current_stats: Stats(	// temporary, remove these and fix calculations
-		hitpoints: 0,
-		attack: 0,
-		defense: 0,
-		special_attack: 0,
-		special_defense: 0,
 		speed: 0)
-	/*		,
-	// http://bulbapedia.bulbagarden.net/wiki/Individual_values#Determination_of_stats_2
-	// https://developer.apple.com/library/content/documentation/Swift/Conceptual/Swift_Programming_Language/Properties.html#//apple_ref/doc/uid/TP40014097-CH14-ID259
-	effective_stats: Stats(
-		hitpoints: Int 			= 10 + kangaskhan.level + floor( ( Double( 2 * kangaskhan_species.base_values.hitpoints + kangaskhan.individual_values.hitpoints + floor(Double(kangaskhan.effort_values.hitpoints / 4 ) ) * kangaskhan.level ) )  / 100 ),
-		attack: Int 			= floor( ( Double( (2 * base_values.attack + individual_values.attack  + floor(Double(effort_values.attack) / 4) ) * level) ) / 100 ) * natureMultiplier[kangaskhan.nature],
-		defense: Int 			= floor( ( Double( (2 * base_values.defense + individual_values.defense  + floor(Double(effort_values.defense) / 4) ) * level) ) / 100 ) * natureMultiplier[kangaskhan.nature],
-		special_attack: Int 	= floor( ( Double( (2 * base_values.special_attack + individual_values.special_attack  + floor(Double(effort_values.special_attack) / 4) ) * level) ) / 100 ) * natureMultiplier[nature],
-		special_defense: Int 	= floor( ( Double( (2 * base_values.special_defense + individual_values.special_defense  + floor(Double(effort_values.special_defense) / 4) ) * level) ) / 100 ) * natureMultiplier[nature],
-		speed: Int 				= floor( ( Double( (2 * base_values.speed + individual_values.speed  + floor(Double(effort_values.speed) / 4) ) * level) ) / 100 ) * natureMultiplier[nature]
-	),
-	// current_stats
-	*/
-
 )
-
-
-
-
-func computeStats(pokemon: Pokemon) -> Stats {
-	//let hitpoints: Int 			= 10 + kangaskhan.level + floor( ( Double( 2 * species_kangaskhan.base_values.hitpoints + kangaskhan.individual_values.hitpoints + floor(Double(kangaskhan.effort_values.hitpoints / 4 ) ) * kangaskhan.level ) )  / 100 ),
-	//expressions broken up because they're too long for the compiler
-	let hitpointsTemp: Double = 2 * pokemon.species.base_values.hitpoints + pokemon.individual_values.hitpoints
-	let hitpointsTemp2: Double = hitpointsTemp + floor(pokemon.effort_values.hitpoints / 4)
-	let hitpointsTemp3: Double = floor((hitpointsTemp2 * pokemon.level)/100)
-	let hitpoints: Double = hitpointsTemp3 + pokemon.level + 10
-
-	let attackTemp: Double = floor(Double(pokemon.effort_values.attack) / 4)
-	let attackTemp2: Double = (2 * pokemon.species.base_values.attack + pokemon.individual_values.attack + attackTemp) * pokemon.level
-	let attackTemp3: Double = floor(attackTemp2 / 100)
-	let attack: Double = (attackTemp3 + 5) * 1	// natureMultiplier[pokemon] instead of '1',
-
-	let defenseTemp: Double = floor(Double(pokemon.effort_values.defense) / 4)
-	let defenseTemp2: Double = (2 * pokemon.species.base_values.defense + pokemon.individual_values.defense + defenseTemp) * pokemon.level
-	let defenseTemp3: Double = floor(defenseTemp2 / 100)
-	let defense: Double = (defenseTemp3 + 5) * 1	// natureMultiplier[pokemon] instead of '1',
-
-	let special_attackTemp: Double = floor(Double(pokemon.effort_values.special_attack) / 4)
-	let special_attackTemp2: Double = (2 * pokemon.species.base_values.special_attack + pokemon.individual_values.special_attack + special_attackTemp) * pokemon.level
-	let special_attackTemp3: Double = floor(special_attackTemp2 / 100)
-	let special_attack: Double = (special_attackTemp3 + 5) * 1	// natureMultiplier[pokemon] instead of '1',
-
-	let special_defenseTemp: Double = floor(Double(pokemon.effort_values.special_defense) / 4)
-	let special_defenseTemp2: Double = (2 * pokemon.species.base_values.special_defense + pokemon.individual_values.special_defense + special_defenseTemp) * pokemon.level
-	let special_defenseTemp3: Double = floor(special_defenseTemp2 / 100)
-	let special_defense: Double = (special_defenseTemp3 + 5) * 1	// natureMultiplier[pokemon] instead of '1',
-
-	let speedTemp: Double = floor(Double(pokemon.effort_values.speed) / 4)
-	let speedTemp2: Double = (2 * pokemon.species.base_values.speed + pokemon.individual_values.speed + speedTemp) * pokemon.level
-	let speedTemp3: Double = floor(speedTemp2 / 100)
-	let speed: Double = (speedTemp3 + 5) * 1	// natureMultiplier[pokemon] instead of '1',
-
-	return Stats(
-		hitpoints: hitpoints,
-		attack: attack,
-		defense: defense,
-		special_attack: special_attack,
-		special_defense: special_defense,
-		speed: speed)
-}
-
-
-
-
-
-
-
 
 
 // http://bulbapedia.bulbagarden.net/wiki/Nature
@@ -385,8 +351,8 @@ func typeToInt(type: Type) -> Int {
 		case .dragon: return 15
 		case .dark: return 16
 		case .fairy: return 17
-		case nil: return -1	// ?????
-		default: return -2 //
+		// case nil: return -1	// ?????
+		// default: return -2 //
 	}
 
 	/*
@@ -404,14 +370,10 @@ func typeModifier(attacking: Type, defending : (Type, Type?))-> Double {
 	let attackingID: Int = typeToInt(type: attacking)
 	let defendingID0: Int = typeToInt(type: defending.0)
 	let defendingID1: Int
-	// let defendingID1: Int = -1	// temporary
 	if (defending.1 != nil){
 		 defendingID1 = typeToInt(type: defending.1!) }
 	else { defendingID1 = -1}
-	// initialisation of defendingID1 never used?????????
 
-
-//
 	let multiplierMatrix: [[Double]] = [
 		[  1,  1,  1,  1,  1,0.5,  1,  0,0.5,  1,  1,  1,  1,  1,  1,  1,  1,  1], // normal
 		[  2,  1,0.5,0.5,  1,  2,0.5,  0,  2,  1,  1,  1,  1,0.5,  2,  1,  2,0.5], // fighting
@@ -466,10 +428,8 @@ func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pok
 	let modifier : Double = STAB * typeBonus * critical * environmentBonus * randFactor
 
 	// TODO calculate actual damage
-
-
-
-    return 0
+	let damage : Int = Int(modifier)	// and other stuff ......
+    return damage
 }
 
 struct State {
