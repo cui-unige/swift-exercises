@@ -126,13 +126,16 @@ func ==(lhs: Species, rhs: Species) -> Bool {
 // http://bulbapedia.bulbagarden.net/wiki/List_of_Pokémon_by_National_Pokédex_number
 
 // Moves of Snorlax
-let BodySlam = Move(id: 34, name: "Body Slam", description: "The user drops the target with its full body weight. This may also leave the target with paralysis.", category: physical, type: normal, power: 85, accuracy: 100, powerpoints: 15, priority: , hashValue: )
-let HyperBeam = Move(id: 63, name: "Hyper Beam", description: "The target is attacked with a powerfulbeam. The user can't move on the next turn.", category: special, type: normal, power: 150, accuracy: 90, powerpoints: 5, priority: , hashValue: )
-let Earthquake = Move(id: 89, name: "Earthquake", description: "The user sets off an earthquake that strikes every Pokémon around it.", category: physical, type: ground, power: 100, accuracy: 100, powerpoints: 10, priority: 3, hashValue: )
-let SelfDestruct = Move(id: 120, name: "Self-Destruct", description: "The user attacks everything around it by causing an explosion. The user faints upon this move.", category: physical, type: normal, power: 200, accuracy: 100, powerpoints: 5, priority: , hashValue: )
+let BodySlam = Move(id: 34, name: "Body Slam", description: "The user drops the target with its full body weight. This may also leave the target with paralysis.", category: .physical, type: .normal, power: 85, accuracy: 100, powerpoints: 15, priority: 1)
+let HyperBeam = Move(id: 63, name: "Hyper Beam", description: "The target is attacked with a powerfulbeam. The user can't move on the next turn.", category: .special, type: .normal, power: 150, accuracy: 90, powerpoints: 5, priority: 2)
+let Earthquake = Move(id: 89, name: "Earthquake", description: "The user sets off an earthquake that strikes every Pokémon around it.", category: .physical, type: .ground, power: 100, accuracy: 100, powerpoints: 10, priority: 3)
+let SelfDestruct = Move(id: 120, name: "Self-Destruct", description: "The user attacks everything around it by causing an explosion. The user faints upon this move.", category: .physical, type: .normal, power: 200, accuracy: 100, powerpoints: 5, priority: 4)
+
+// Base values of Snorlax
+let baseValues = Stats(hitpoints: 160, attack: 110, defense: 65, special_attack: 65, special_defense: 110, speed: 30)
 
 //Creation of Snorlax
-let Snorlax = Species(id: 143, name= "Snorlax", evolutions: [], attacks: Set = [BodySlam, HyperBeam, Earthquake, SelfDestruct], type: (normal, nil), base_values: Stats(hitpoints: 160, attack: 110, defense: 65, special_attack: 65, special_defense: 110, speed: 30), hashValue: )
+let Snorlax = Species(id: 143, name: "Snorlax", evolutions: [], attacks: [BodySlam, HyperBeam, Earthquake, SelfDestruct], type: (.normal, nil), base_values: baseValues)
 
 struct Pokemon {
     let nickname          : String?
