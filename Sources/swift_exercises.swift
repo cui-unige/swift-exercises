@@ -403,15 +403,15 @@ func typeModifier(attacking: Type, defending : (Type, Type?))-> Double {
 
 	let attackingID: Int = typeToInt(type: attacking)
 	let defendingID0: Int = typeToInt(type: defending.0)
-	let defendingID1: Int = typeToInt(type: defending.1!)
+	let defendingID1: Int
 	// let defendingID1: Int = -1	// temporary
 	if (defending.1 != nil){
-		let defendingID1: Int = typeToInt(type: defending.1!) }
-	else {let defendingID1: Int = -1}
+		 defendingID1 = typeToInt(type: defending.1!) }
+	else { defendingID1 = -1}
 	// initialisation of defendingID1 never used?????????
 
 
-
+//
 	let multiplierMatrix: [[Double]] = [
 		[  1,  1,  1,  1,  1,0.5,  1,  0,0.5,  1,  1,  1,  1,  1,  1,  1,  1,  1], // normal
 		[  2,  1,0.5,0.5,  1,  2,0.5,  0,  2,  1,  1,  1,  1,0.5,  2,  1,  2,0.5], // fighting
@@ -430,7 +430,7 @@ func typeModifier(attacking: Type, defending : (Type, Type?))-> Double {
 		[  1,  1,  2,  1,  2,  1,  1,  1,0.5,0.5,0.5,  2,  1,  1,0.5,  2,  1,  1], // ice
 		[  1,  1,  1,  1,  1,  1,  1,  1,0.5,  1,  1,  1,  1,  1,  1,  2,  1,  0], // dragon
 		[  1,0.5,  1,  1,  1,  1,  1,  2,  1,  1,  1,  1,  1,  2,  1,  1,0.5,0.5], // dark
-		[  1,  2,  1,0.5,  1,  1,  1,  1,0.5,0.5,  1,  1,  1,  1,  1,  2,  2,  1], // fairy
+		[  1,  2,  1,0.5,  1,  1,  1,  1,0.5,0.5,  1,  1,  1,  1,  1,  2,  2,  1] // fairy
 	]
 
 	if (defendingID1 != -1)
