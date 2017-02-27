@@ -1,4 +1,6 @@
 //210 Granbull
+//import Foundation
+
 
 // http://bulbapedia.bulbagarden.net/wiki/Type
 enum Type {
@@ -145,6 +147,19 @@ let granbull_species = Species(
 
   )
 
+  func calcul_stat_hp(base_stat: Int, iv: Int, ev: Int, level: Int ) -> Int{
+    //J'ai du ajouter une variable temporaire pour que le compilateur ne timeout pas sur une expression
+    var temp:Int=((2 * level + iv + (ev / 4)) * level) //Je ne sais pas si ev/4 arrondit correctement.
+    temp=(temp / 100) //idem
+    return temp + level + 10
+  }
+
+  func calcul_stat_other(base_stat: Int, iv: Int, ev: Int, level: Int, nature: Float ) -> Int{
+    var temp:Int=((2 * level + iv + (ev / 4)) * level)
+    temp=(temp / 100) + 5
+    return Int(Float(temp) * nature)
+  }
+
 struct Pokemon {
     let nickname          : String?
     let hitpoints         : Int // remaining hitpoints
@@ -159,8 +174,19 @@ struct Pokemon {
     let effort_values     : Stats
     // TODO: implement the effective stats as a computed property:
     // https://developer.apple.com/library/content/documentation/Swift/Conceptual/Swift_Programming_Language/Properties.html#//apple_ref/doc/uid/TP40014097-CH14-ID259
-    // var effective_stats   : Stats {
-    // }
+    // TODO add nature
+     var effective_stats   : Stats {
+
+
+       return Stats(
+         hitpoints: calcul_stat_hp(base_stat: species.base_values.hitpoints, iv: individual_values.hitpoints, ev: effort_values.hitpoints, level:level ),
+         attack: calcul_stat_other(base_stat: species.base_values.attack, iv: individual_values.attack, ev: effort_values.attack, level:level, nature:1),
+         defense: calcul_stat_other(base_stat: species.base_values.defense, iv: individual_values.defense, ev: effort_values.defense, level:level, nature:1),
+         special_attack: calcul_stat_other(base_stat: species.base_values.special_attack, iv: individual_values.special_attack, ev: effort_values.special_attack, level:level, nature:1),
+         special_defense: calcul_stat_other(base_stat: species.base_values.special_defense, iv: individual_values.special_defense, ev: effort_values.special_defense, level:level, nature:1),
+         speed: calcul_stat_other(base_stat: species.base_values.speed, iv: individual_values.speed, ev: effort_values.speed, level:level, nature:1))
+
+     }
 }
 
 
