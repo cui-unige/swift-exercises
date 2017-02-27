@@ -126,6 +126,7 @@ func ==(lhs: Species, rhs: Species) -> Bool {
 // http://bulbapedia.bulbagarden.net/wiki/List_of_Pokémon_by_National_Pokédex_number
 
 // Dracaufeu
+/*
 let moveAirSlash = Move(id: 1, name: "Air Slash", description: "Air Slash deals damage and has a 30% chance of causing the target to flinch", category: Category.special, type: Type.flying, power: 75, accuracy: 95, powerpoints: 20, priority: 0)
 
 let moveDragonClaw = Move(id: 2, name: "Dragon Claw", description: "Dragon Claw deals damage with no additional effect.", category: Category.physical, type: Type.dragon, power: 80, accuracy: 100, powerpoints: 15, priority: 0)
@@ -141,6 +142,7 @@ let moveHeatWave = Move(id: 6, name: "Heat Wave", description: "Heat Wave deals 
 let charizardStat = Stats(hitpoints: 0, attack: 0, defense: 0, special_attack: 3, special_defense: 0, speed: 0)
 
 let charizard = Species(id: 006, name: "Charizard", evolutions: [], attacks: [moveAirSlash, moveDragonClaw, moveEmber, moveFlareBlitz, moveGrowl, moveHeatWave], type: (Type.fire, nil), base_values: charizardStat)
+*/
 
 // Pikachu
 let pikachuStats = Stats(hitpoints: 35, attack: 55, defense: 30, special_attack: 50,special_defense: 40, speed: 90)
@@ -175,6 +177,16 @@ let raichu = Species(id: 026,
               )
 
 
+func calcule_effective_stats(pokemon: Pokemon, caracteristique: Species) -> Int {
+    let var1 = 2*(pokemon.species.base_values.hitpoints + pokemon.individual_values.hitpoints);
+    let var2 = pokemon.effort_values.hitpoints/4).rounded(.down);
+
+    let resultat = (((var1 + var2) * pokemon.level)/100).round(.down) ;
+
+    return resultat;
+}
+
+
 struct Pokemon {
     let nickname          : String?
     let hitpoints         : Int // remaining hitpoints
@@ -188,21 +200,25 @@ struct Pokemon {
     let individual_values : Stats
     let effort_values     : Stats
     var effective_stats   : Stats { // effective_stats for Generations I and II)
-                              get {
-                                  let hitpoints: Int = ((((species.base_values.hitpoints + individual_values.hitpoints)*2 + ((effort_values.hitpoints).rounded(.up)/4).rounded(.down))* level)/100).round(.down) + level + 10
-                                  let attack: Int = ((((species.base_values.attack + individual_values.attack)*2 + ((effort_values.attack).rounded(.up)/4).rounded(.down))* level)/100).round(.down) + 5
-                                  let defense: Int = ((((species.base_values.defense + individual_values.defense)*2 + ((effort_values.defense).rounded(.up)/4).rounded(.down))* level)/100).round(.down) + 5
-                                  let special_attack: Int = ((((species.base_values.special_attack + individual_values.special_attack)*2 + ((effort_values.special_attack).rounded(.up)/4).rounded(.down))* level)/100).round(.down) + 5
-                                  let special_defense: Int = ((((species.base_values.special_defense + individual_values.special_defense)*2 + ((effort_values.special_defense).rounded(.up)/4).rounded(.down))* level)/100).round(.down) + 5
-                                  let speed: Int = ((((species.base_values.speed + individual_values.speed)*2 + ((effort_values.speed).rounded(.up)/4).rounded(.down))* level)/100).round(.down) + 5
-                              }
+                              get { // finir la multiplication par * Nature
+                                  let hitpoints: Int = /*((((self.species.base_values.hitpoints + self.individual_values.hitpoints)*2 + (self.effort_values.hitpoints/4).rounded(.down)) * self.level)/100).round(.down)*/ calcule_effective_stats(pokemon: self, caracteristique: self.species.hitpoints)+ self.level + 10;
+                                  let attack: Int = 0 ; /*((((self.species.base_values.attack + self.individual_values.attack)*2 + (self.effort_values.attack/4).rounded(.down)) * self.level)/100).round(.down) + 5 // * Nature */
+                              */
+                                  let defense: Int = 0;/*((((self.species.base_values.defense + self.individual_values.defense)*2 + (self.effort_values.defense/4).rounded(.down)) * self.level)/100).round(.down) + 5  //  * Nature */
+                              */
+                                  let special_attack: Int = 0 ;/*((((self.species.base_values.special_attack + self.individual_values.special_attack)*2 + (self.effort_values.special_attack/4).rounded(.down)) * self.level)/100).round(.down) + 5 // * Nature
+                              */
+                                  let special_defense: Int = 0 ;/*((((self.species.base_values.special_defense + self.individual_values.special_defense)*2 + (self.effort_values.special_defense/4).rounded(.down)) * self.level)/100).round(.down) + 5 // * Nature
+                              */
+                                  let speed: Int = 0 ;/*((((self.species.base_values.speed + self.individual_values.speed)*2 + (self.effort_values.speed/4).rounded(.down)) * self.level)/100).round(.down) + 5 // * Nature
+                        */      }
                             }
     // TODO: implement the effective stats as a computed property:
     // https://developer.apple.com/library/content/documentation/Swift/Conceptual/Swift_Programming_Language/Properties.html#//apple_ref/doc/uid/TP40014097-CH14-ID259
     // var effective_stats   : Stats {
     // }
 }
-
+/*
 struct Trainer {
     let pokemons : [Pokemon]
 }
