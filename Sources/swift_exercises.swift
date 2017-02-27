@@ -32,32 +32,32 @@ enum Category {
 }
 
 // http://bulbapedia.bulbagarden.net/wiki/Nature
-enum Nature {
-    case hardy
-    case lonely
-    case brave
-    case adamant
-    case naughty
-    case bold
-    case docile
-    case relaxed
-    case impish
-    case lax
-    case timid
-    case hasty
-    case serious
-    case jolly
-    case naive
-    case modest
-    case mild
-    case quiet
-    case bashful
-    case rash
-    case calm
-    case gentle
-    case sassy
-    case careful
-    case quirky
+enum Nature: Int {
+    case hardy = 0
+    case lonely = 1
+    case brave = 2
+    case adamant = 3
+    case naughty = 4
+    case bold = 5
+    case docile = 6
+    case relaxed = 7
+    case impish = 8
+    case lax = 9
+    case timid = 10
+    case hasty = 11
+    case serious = 12
+    case jolly = 13
+    case naive = 14
+    case modest = 15
+    case mild = 16
+    case quiet = 17
+    case bashful = 18
+    case rash = 19
+    case calm = 20
+    case gentle = 21
+    case sassy = 22
+    case careful = 23
+    case quirky = 24
 }
 
 // http://bulbapedia.bulbagarden.net/wiki/Weather
@@ -131,7 +131,6 @@ func ==(lhs: Species, rhs: Species) -> Bool {
 
 struct Pokemon {
     let nickname          : String?
-    let hitpoints         : Int // remaining hitpoints
     let size              : Int
     let weight            : Int
     let experience        : Int
@@ -143,8 +142,56 @@ struct Pokemon {
     let effort_values     : Stats
     // TODO: implement the effective stats as a computed property:
     // https://developer.apple.com/library/content/documentation/Swift/Conceptual/Swift_Programming_Language/Properties.html#//apple_ref/doc/uid/TP40014097-CH14-ID259
-    // var effective_stats   : Stats {
-    // }
+    var effective_stats   : Stats {
+      get {
+        // attack, defence, special attack, special defense, speed
+        let natureChart: [[Double]] = [[1.1, 0.9, 1, 1, 1],
+                                  [1.1, 1, 1, 1, 0.9],
+                                  [1.1, 1, 0.9, 1, 1],
+                                  [1.1, 1, 1, 0.9, 1],
+                                  [0.9, 1.1, 1, 1, 1],
+                                  [1, 1, 1, 1, 1],
+                                  [1, 1.1, 1, 1, 0.9],
+                                  [1, 1.1, 0.9, 1, 1],
+                                  [1, 1.1, 1, 0.9, 1],
+                                  [0.9, 1.1, 1, 1, 1.1],
+                                  [1, 0.9, 1, 1, 1.1],
+                                  [1, 1, 1, 1, 1],
+                                  [1, 1.1, 0.9, 1, 1.1],
+                                  [1, 1.1, 1, 0.9, 1.1],
+                                  [0.9, 1, 1.1, 1, 1],
+                                  [1, 0.9, 1.1, 1, 1],
+                                  [1, 1, 1.1, 1, 0.9],
+                                  [1, 1, 1, 1, 1],
+                                  [1, 1, 1.1, 0.9, 1],
+                                  [0.9, 1, 1, 1.1, 1],
+                                  [1, 0.9, 1, 1.1, 1],
+                                  [1, 1, 1, 1.1, 0.9],
+                                  [1, 1, 0.9, 1.1, 1],
+                                  [1, 1, 1, 1, 1]]
+
+        // var to compute the different stats in multiple lines without declaring tons of temporary variables
+        var hp = Int((2 * species.base_values.hitpoints + individual_values.hitpoints + Int(effort_values.hitpoints / 4) * level) / 100)
+        hp = hp + level + 10;
+
+        var att = Int((2 * species.base_values.attack + individual_values.attack + Int(effort_values.attack / 4) * level) / 100)
+        att = Int(Double(att + 5) * natureChart[nature.rawValue][0])
+
+        var def = Int((2 * species.base_values.defense + individual_values.defense + Int(effort_values.defense / 4) * level) / 100)
+        def = Int(Double(def + 5) * natureChart[nature.rawValue][1])
+
+        var satt = Int((2 * species.base_values.special_attack + individual_values.special_attack + Int(effort_values.special_attack / 4) * level) / 100)
+        satt = Int(Double(satt + 5) * natureChart[nature.rawValue][2])
+
+        var sdef = Int((2 * species.base_values.special_defense + individual_values.special_defense + Int(effort_values.special_defense / 4) * level) / 100)
+        sdef = Int(Double(sdef + 5) * natureChart[nature.rawValue][3])
+
+        var spe = Int((2 * species.base_values.speed + individual_values.speed + Int(effort_values.speed / 4) * level) / 100)
+        spe = Int(Double(spe + 5) * natureChart[nature.rawValue][4])
+
+        return Stats(hitpoints: hp, attack: att, defense: def, special_attack: satt, special_defense: sdef, speed: spe)
+      }
+    }
 }
 
 struct Trainer {
@@ -185,11 +232,11 @@ func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pok
     let pkmType = pokemon.species.type;
     let tarType = target.species.type;
 
-    let targets: Double = 1
+    let targets: Double = 1 // won't be implemented
     let weather: Double = 1
-    let badge: Double = 1
-    let critical: Double = Int(random() % 256) > (pokemon.species.base_values.speed / 2) ? 1.5 : 0
-    let random_value: Double = 1
+    let badge: Double = 1 // won't be implemented
+    let critical: Double = Int(random() % 256) > (pokemon.species.base_values.speed / 2) ? 1.5 : 1
+    let random_value: Double = (100 - Double(random() % 16))/100
     let stab: Double = (move.type == pkmType.0 || move.type == pkmType.1!) ? 1.5 : 1
     let type: Double = typeModifier(attacking: move.type, defending: tarType.0) * ((tarType.1 != nil) ? typeModifier(attacking: move.type, defending: tarType.1!) : 1)
     let burn: Double = 1
