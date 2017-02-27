@@ -80,6 +80,18 @@ enum Terrain {
     case misty
 }
 
+let earthquake: Move = Move(
+    id: 89,
+    name: "Earthquake",
+    description: "Tough but useless vs. flying foes.",
+    category: .physical,
+    type: .ground,
+    power: 100,
+    accuracy: 100,
+    powerpoints: 10,
+    priority: 0
+)
+
 // http://bulbapedia.bulbagarden.net/wiki/Move
 struct Move : Hashable {
     let id          : Int
@@ -129,17 +141,36 @@ func ==(lhs: Species, rhs: Species) -> Bool {
 // Do you use an enum, a map or constants/variables?
 // http://bulbapedia.bulbagarden.net/wiki/List_of_Pokémon_by_National_Pokédex_number
 
+let hooh: Pokemon = Pokemon(
+  nickname: "fuck pokemon",
+  size: 3.8,
+  weight: 199,
+  level: 100,
+  nature: .relaxed,
+  species: Species(
+    id: 253, name: "Ho-Oh", evolutions: [], attacks: [], type: (.fire, .flying), base_values: Stats(hitpoints: 106, attack: 130, defense: 90, special_attack: 110, special_defense: 154, speed: 90)
+  ),
+  moves: [:],
+  individual_values: Stats(hitpoints: 15, attack: 21, defense: 23, special_attack: 12, special_defense: 26, speed: 24),
+  effort_values: Stats(hitpoints: 66, attack: 100, defense: 60, special_attack: 30, special_defense: 75, speed: 90)
+)
+
+
+
 struct Pokemon {
     let nickname          : String?
-    let size              : Int
-    let weight            : Int
-    let experience        : Int
+    let size              : Double
+    let weight            : Double
     let level             : Int
+    var experience        : Int {
+      return 4*level*level*level/45
+    }
     let nature            : Nature
     let species           : Species
     let moves             : [Move: Int] // Move -> remaining powerpoints
     let individual_values : Stats
     let effort_values     : Stats
+
     // TODO: implement the effective stats as a computed property:
     // https://developer.apple.com/library/content/documentation/Swift/Conceptual/Swift_Programming_Language/Properties.html#//apple_ref/doc/uid/TP40014097-CH14-ID259
     var effective_stats   : Stats {
@@ -169,6 +200,8 @@ struct Pokemon {
                                   [1, 1, 1, 1.1, 0.9],
                                   [1, 1, 0.9, 1.1, 1],
                                   [1, 1, 1, 1, 1]]
+
+        // ****************************** ASK 4 HALP CUZ IDK HOW TO TEST THIS SHIT AND WHETHER I HAVE TO USE SELF.
 
         // var to compute the different stats in multiple lines without declaring tons of temporary variables
         var hp = Int((2 * species.base_values.hitpoints + individual_values.hitpoints + Int(effort_values.hitpoints / 4) * level) / 100)
@@ -232,11 +265,11 @@ func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pok
     let pkmType = pokemon.species.type;
     let tarType = target.species.type;
 
-    let targets: Double = 1 // won't be implemented
+    let targets: Double = 1 // won't be implemented... soon
     let weather: Double = 1
-    let badge: Double = 1 // won't be implemented
+    let badge: Double = 1 // won't be implemented... son
     let critical: Double = Int(random() % 256) > (pokemon.species.base_values.speed / 2) ? 1.5 : 1
-    let random_value: Double = (100 - Double(random() % 16))/100
+    let random_value: Double = (100 - Double(random() % 16)) / 100
     let stab: Double = (move.type == pkmType.0 || move.type == pkmType.1!) ? 1.5 : 1
     let type: Double = typeModifier(attacking: move.type, defending: tarType.0) * ((tarType.1 != nil) ? typeModifier(attacking: move.type, defending: tarType.1!) : 1)
     let burn: Double = 1
@@ -248,7 +281,7 @@ func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pok
 }
 
 struct State {
-    // TODO: describe a battle state
+
 }
 
 func battle(trainers: inout [Trainer], behavior: (State, Trainer) -> Move) -> () {
