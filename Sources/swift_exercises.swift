@@ -157,822 +157,179 @@ struct Environment {
 // http://bulbapedia.bulbagarden.net/wiki/Type/Type_chart
 func typeModifier(attacking: Type, defending : Type) -> Double {
 
-    if attacking == normal {
+    switch (attacking, defending){
 
-        switch defending {
+/* Attacking Type normal */
+    case (.normal, .normal) : return 1
+    case (.normal, .fighting) : return 1
+    case (.normal, .flying) : return 1
+    case (.normal, .poison) : return 1
+    case (.normal, .ground) : return 1
+    case (.normal, .rock) : return 1
+    case (.normal, .bug) : return 1
+    case (.normal, .ghost) : return 1
+    case (.normal, .steel) : return 1
+    case (.normal, .fire) : return 1
+    case (.normal, .water) : return 1
+    case (.normal, .grass) : return 1
+    case (.normal, .electric) : return 1
+    case (.normal, .psychic) : return 1
+    case (.normal, .ice) : return 1
+    case (.normal, .dragon) : return 1
+    case (.normal, .dark) : return 1
+    case (.normal, .fairy) : return 1
 
-        case normal :
-            return 1
-        case fire :
-            return 1
-        case water :
-            return 1
-        case electric :
-            return 1
-        case grass :
-            return 1
-        case ice :
-            return 1
-        case fighting :
-            return 1
-        case poison :
-            return 1
-        case ground :
-            return 1
-        case flying :
-            return 1
-        case psychic :
-            return 1
-        case bug :
-            return 1
-        case rock :
-            return 0.5
-        case ghost :
-            return 0
-        case dragon :
-            return 1
-        case dark :
-            return 1
-        case steel :
-            return 0.5
-        case fairy :
-            return 1
-        default :
-          print("Error in the defending type : type is not known");
-          return nil;
-        }
+  /* Attacking Type fighting */
 
-    } else if attacking == fire {
+    case(.fighting, .normal) : return 1
+    case(.fighting, .fighting) : return 1
+    case(.fighting, .flying) : return 1
+    case(.fighting, .poison) : return 1
+    case(.fighting, .ground) : return 1
+    case(.fighting, .rock) : return 1
+    case(.fighting, .bug) : return 1
+    case(.fighting, .ghost) : return 1
+    case(.fighting, .steel) : return 1
+    case(.fighting, .fire) : return 1
+    case(.fighting, .water) : return 1
+    case(.fighting, .grass) : return 1
+    case(.fighting, .electric) : return 1
+    case(.fighting, .psychic) : return 1
+    case(.fighting, .ice) : return 1
+    case(.fighting, .dragon) : return 1
+    case(.fighting, .dark) : return 1
+    case(.fighting, .fairy) : return 1
 
-        switch defending {
+  /* Attacking Type flying */
+    case(.flying, .normal) : return 1
+    case(.flying, .fighting) : return 1
+    case(.flying, .flying) : return 1
+    case(.flying, .poison) : return 1
+    case(.flying, .ground) : return 1
+    case(.flying, .rock) : return 1
+    case(.flying, .bug) : return 1
+    case(.flying, .ghost) : return 1
+    case(.flying, .steel) : return 1
+    case(.flying, .fire) : return 1
+    case(.flying, .water) : return 1
+    case(.flying, .grass) : return 1
+    case(.flying, .electric) : return 1
+    case(.flying, .psychic) : return 1
+    case(.flying, .ice) : return 1
+    case(.flying, .dragon) : return 1
+    case(.flying, .dark) : return 1
+    case(.flying, .fairy) : return 1
 
-        case normal :
-            return 1
-        case fire :
-            return 0.5
-        case water :
-            return 0.5
-        case electric :
-            return 1
-        case grass :
-            return 2
-        case ice :
-            return 2
-        case fighting :
-            return 1
-        case poison :
-            return 1
-        case ground :
-            return 1
-        case flying :
-            return 1
-        case psychic :
-            return 1
-        case bug :
-            return 2
-        case rock :
-            return 0.5
-        case ghost :
-            return 1
-        case dragon :
-            return 0.5
-        case dark :
-            return 1
-        case steel :
-            return 2
-        case fairy :
-            return 1
-        default :
-          print("Error in the defending type : type is not known");
-          return nil;
-        }
+  /* Attacking Type poison */
 
-    } else if attacking == water {
+    case (.poison, .normal) : return 1
+    case (.poison, .fighting) : return 1
+    case (.poison, .flying) : return 1
+    case (.poison, .poison) : return 1
+    case (.poison, .ground) : return 1
+    case (.poison, .rock) : return 1
+    case (.poison, .bug) : return 1
+    case (.poison, .normal) : return 1
+    case (.poison, .ghost) : return 1
+    case (.poison, .steel) : return 1
+    case (.poison, .fire) : return 1
+    case (.poison, .water) : return 1
+    case (.poison, .grass) : return 1
+    case (.poison, .electric) : return 1
+    case (.poison, .psychic) : return 1
+    case (.poison, .ice) : return 1
+    case (.poison, .dragon) : return 1
+    case (.poison, .dark) : return 1
+    case (.poison, .fairy) : return 1
 
-        switch defending {
+  /* Attacking Type ground */
 
-        case normal :
-            return 1
-        case fire :
-            return 2
-        case water :
-            return 0.5
-        case electric :
-            return 1
-        case grass :
-            return 0.5
-        case ice :
-            return 1
-        case fighting :
-            return 1
-        case poison :
-            return 1
-        case ground :
-            return 2
-        case flying :
-            return 1
-        case psychic :
-            return 1
-        case bug :
-            return 1
-        case rock :
-            return 2
-        case ghost :
-            return 1
-        case dragon :
-            return 0.5
-        case dark :
-            return 1
-        case steel :
-            return 1
-        case fairy :
-            return 1
-        default :
-          print("Error in the defending type : type is not known");
-          return nil;
-        }
+    case(.ground, .normal) : return 1
+    case(.ground, .fighting) : return 1
+    case(.ground, .flying) : return 1
+    case(.ground, .poison) : return 1
+    case(.ground, .ground) : return 1
+    case(.ground, .rock) : return 1
+    case(.ground, .bug) : return 1
+    case(.ground, .ghost) : return 1
+    case(.ground, .steel) : return 1
+    case(.ground, .fire) : return 1
+    case(.ground, .water) : return 1
+    case(.ground, .grass) : return 1
+    case(.ground, .electric) : return 1
+    case(.ground, .psychic) : return 1
+    case(.ground, .ice) : return 1
+    case(.ground, .dragon) : return 1
+    case(.ground, .dark) : return 1
+    case(.ground, .fairy) : return 1
 
-    } else if attacking == electric {
+  /* Attacking Type rock */
 
-        switch defending {
+    case(.rock, .normal) : return 1
+    case(.rock, .fighting) : return 1
+    case(.rock, .flying) : return 1
+    case(.rock, .poison) : return 1
+    case(.rock, .ground) : return 1
+    case(.rock, .rock) : return 1
+    case(.rock, .bug) : return 1
+    case(.rock, .ghost) : return 1
+    case(.rock, .steel) : return 1
+    case(.rock, .fire) : return 1
+    case(.rock, .water) : return 1
+    case(.rock, .grass) : return 1
+    case(.rock, .electric) : return 1
+    case(.rock, .psychic) : return 1
+    case(.rock, .ice) : return 1
+    case(.rock, .dragon) : return 1
+    case(.rock, .dark) : return 1
+    case(.rock, .fairy) : return 1
 
-        case normal :
-            return 1
-        case fire :
-            return 1
-        case water :
-            return 2
-        case electric :
-            return 0.5
-        case grass :
-            return 0.5
-        case ice :
-            return 1
-        case fighting :
-            return 1
-        case poison :
-            return 1
-        case ground :
-            return 0
-        case flying :
-            return 2
-        case psychic :
-            return 1
-        case bug :
-            return 1
-        case rock :
-            return 1
-        case ghost :
-            return 1
-        case dragon :
-            return 0.5
-        case dark :
-            return 1
-        case steel :
-            return 1
-        case fairy :
-            return 1
-        default :
-          print("Error in the defending type : type is not known");
-          return nil;
-        }
+  /*  Attacking Type bug */
 
-    } else if attacking == grass {
+    case(.bug, .normal) : return 1
+    case(.bug, .fighting) : return 1
+    case(.bug, .flying) : return 1
+    case(.bug, .poison) : return 1
+    case(.bug, .ground) : return 1
+    case(.bug, .rock) : return 1
+    case(.bug, .bug) : return 1
+    case(.bug, .ghost) : return 1
+    case(.bug, .steel) : return 1
+    case(.bug, .fire) : return 1
+    case(.bug, .water) : return 1
+    case(.bug, .grass) : return 1
+    case(.bug, .electric) : return 1
+    case(.bug, .psychic) : return 1
+    case(.bug, .ice) : return 1
+    case(.bug, .dragon) : return 1
+    case(.bug, .dark) : return 1
+    case(.bug, .fairy) : return 1
 
-        switch defending {
 
-        case normal :
-            return 1
-        case fire :
-            return 0.5
-        case water :
-            return 2
-        case electric :
-            return 1
-        case grass :
-            return 0.5
-        case ice :
-            return 1
-        case fighting :
-            return 1
-        case poison :
-            return 0.5
-        case ground :
-            return 2
-        case flying :
-            return 0.5
-        case psychic :
-            return 1
-        case bug :
-            return 0.5
-        case rock :
-            return 2
-        case ghost :
-            return 1
-        case dragon :
-            return 0.5
-        case dark :
-            return 1
-        case steel :
-            return 0.5
-        case fairy :
-            return 1
-        default :
-          print("Error in the defending type : type is not known");
-          return nil;
-        }
+  /* Attacking Type ghost */
 
-    } else if attacking == ice {
+    case(.ghost, .normal) : return 1
+    case(.ghost, .fighting) : return 1
+    case(.ghost, .flying) : return 1
+    case(.ghost, .poison) : return 1
+    case(.ghost, .ground) : return 1
+    case(.ghost, .rock) : return 1
+    case(.ghost, .bug) : return 1
+    case(.ghost, .ghost) : return 1
+    case(.ghost, .steel) : return 1
+    case(.ghost, .fire) : return 1
+    case(.ghost, .water) : return 1
+    case(.ghost, .grass) : return 1
+    case(.ghost, .electric) : return 1
+    case(.ghost, .psychic) : return 1
+    case(.ghost, .ice) : return 1
+    case(.ghost, .dragon) : return 1
+    case(.ghost, .dark) : return 1
+    case(.ghost, .fairy) : return 1
 
-        switch defending {
-
-        case normal :
-            return 1
-        case fire :
-            return 0.5
-        case water :
-            return 0.5
-        case electric :
-            return 1
-        case grass :
-            return 2
-        case ice :
-            return 0.5
-        case fighting :
-            return 1
-        case poison :
-            return 1
-        case ground :
-            return 2
-        case flying :
-            return 2
-        case psychic :
-            return 1
-        case bug :
-            return 1
-        case rock :
-            return 1
-        case ghost :
-            return 1
-        case dragon :
-            return 2
-        case dark :
-            return 1
-        case steel :
-            return 0.5
-        case fairy :
-            return 1
-        default :
-          print("Error in the defending type : type is not known");
-          return nil;
-        }
-
-    } else if attacking == fighting {
-
-        switch defending {
-
-        case normal :
-            return 2
-        case fire :
-            return 1
-        case water :
-            return 1
-        case electric :
-            return 1
-        case grass :
-            return 1
-        case ice :
-            return 2
-        case fighting :
-            return 1
-        case poison :
-            return 0.5
-        case ground :
-            return 1
-        case flying :
-            return 0.5
-        case psychic :
-            return 0.5
-        case bug :
-            return 0.5
-        case rock :
-            return 2
-        case ghost :
-            return 0
-        case dragon :
-            return 1
-        case dark :
-            return 2
-        case steel :
-            return 2
-        case fairy :
-            return 0.5
-        default :
-          print("Error in the defending type : type is not known");
-          return nil;
-        }
-
-    } else if attacking == poison {
-
-        switch defending {
-
-        case normal :
-            return 1
-        case fire :
-            return 1
-        case water :
-            return 1
-        case electric :
-            return 1
-        case grass :
-            return 2
-        case ice :
-            return 1
-        case fighting :
-            return 1
-        case poison :
-            return 0.5
-        case ground :
-            return 0.5
-        case flying :
-            return 1
-        case psychic :
-            return 1
-        case bug :
-            return 1
-        case rock :
-            return 0.5
-        case ghost :
-            return 0.5
-        case dragon :
-            return 1
-        case dark :
-            return 1
-        case steel :
-            return 0
-        case fairy :
-            return 2
-        default :
-          print("Error in the defending type : type is not known");
-          return nil;
-        }
-
-    } else if attacking == ground {
-
-        switch defending {
-
-        case normal :
-            return 1
-        case fire :
-            return 2
-        case water :
-            return 1
-        case electric :
-            return 2
-        case grass :
-            return 0.5
-        case ice :
-            return 1
-        case fighting :
-            return 1
-        case poison :
-            return 2
-        case ground :
-            return 1
-        case flying :
-            return 0
-        case psychic :
-            return 1
-        case bug :
-            return 0.5
-        case rock :
-            return 2
-        case ghost :
-            return 1
-        case dragon :
-            return 1
-        case dark :
-            return 1
-        case steel :
-            return 2
-        case fairy :
-            return 1
-        default :
-          print("Error in the defending type : type is not known");
-          return nil;
-        }
-
-    } else if attacking == flying {
-
-        switch defending {
-
-        case normal :
-            return 1
-        case fire :
-            return 1
-        case water :
-            return 1
-        case electric :
-            return 0.5
-        case grass :
-            return 2
-        case ice :
-            return 1
-        case fighting :
-            return 2
-        case poison :
-            return 1
-        case ground :
-            return 1
-        case flying :
-            return 1
-        case psychic :
-            return 1
-        case bug :
-            return 2
-        case rock :
-            return 0.5
-        case ghost :
-            return 1
-        case dragon :
-            return 1
-        case dark :
-            return 1
-        case steel :
-            return 0.5
-        case fairy :
-            return 1
-        default :
-          print("Error in the defending type : type is not known");
-          return nil;
-        }
-
-    } else if attacking == psychic {
-
-        switch defending {
-
-        case normal :
-            return 1
-        case fire :
-            return 1
-        case water :
-            return 1
-        case electric :
-            return 1
-        case grass :
-            return 1
-        case ice :
-            return 1
-        case fighting :
-            return 2
-        case poison :
-            return 2
-        case ground :
-            return 1
-        case flying :
-            return 1
-        case psychic :
-            return 0.5
-        case bug :
-            return 1
-        case rock :
-            return 1
-        case ghost :
-            return 1
-        case dragon :
-            return 1
-        case dark :
-            return 0
-        case steel :
-            return 0.5
-        case fairy :
-            return 1
-        default :
-          print("Error in the defending type : type is not known");
-          return nil;
-        }
-
-    } else if attacking == bug {
-
-        switch defending {
-
-        case normal :
-            return 1
-        case fire :
-            return 0.5
-        case water :
-            return 1
-        case electric :
-            return 1
-        case grass :
-            return 2
-        case ice :
-            return 1
-        case fighting :
-            return 0.5
-        case poison :
-            return 0.5
-        case ground :
-            return 1
-        case flying :
-            return 0.5
-        case psychic :
-            return 2
-        case bug :
-            return 1
-        case rock :
-            return 1
-        case ghost :
-            return 0.5
-        case dragon :
-            return 1
-        case dark :
-            return 2
-        case steel :
-            return 0.5
-        case fairy :
-            return 0.5
-        default :
-          print("Error in the defending type : type is not known");
-          return nil;
-        }
-
-    } else if attacking == rock {
-
-        switch defending {
-
-        case normal :
-            return 1
-        case fire :
-            return 2
-        case water :
-            return 1
-        case electric :
-            return 1
-        case grass :
-            return 1
-        case ice :
-            return 2
-        case fighting :
-            return 0.5
-        case poison :
-            return 1
-        case ground :
-            return 0.5
-        case flying :
-            return 2
-        case psychic :
-            return 1
-        case bug :
-            return 2
-        case rock :
-            return 1
-        case ghost :
-            return 1
-        case dragon :
-            return 1
-        case dark :
-            return 1
-        case steel :
-            return 0.5
-        case fairy :
-            return 1
-        default :
-          print("Error in the defending type : type is not known");
-          return nil;
-        }
-
-    } else if attacking == ghost {
-
-        switch defending {
-
-        case normal :
-            return 0
-        case fire :
-            return 1
-        case water :
-            return 1
-        case electric :
-            return 1
-        case grass :
-            return 1
-        case ice :
-            return 1
-        case fighting :
-            return 1
-        case poison :
-            return 1
-        case ground :
-            return 1
-        case flying :
-            return 1
-        case psychic :
-            return 2
-        case bug :
-            return 1
-        case rock :
-            return 1
-        case ghost :
-            return 2
-        case dragon :
-            return 1
-        case dark :
-            return 0.5
-        case steel :
-            return 1
-        case fairy :
-            return 1
-        default :
-          print("Error in the defending type : type is not known");
-          return nil;
-        }
-
-    } else if attacking == dragon {
-
-        switch defending {
-
-        case normal :
-            return 1
-        case fire :
-            return 1
-        case water :
-            return 1
-        case electric :
-            return 1
-        case grass :
-            return 1
-        case ice :
-            return 1
-        case fighting :
-            return 1
-        case poison :
-            return 1
-        case ground :
-            return 1
-        case flying :
-            return 1
-        case psychic :
-            return 1
-        case bug :
-            return 1
-        case rock :
-            return 1
-        case ghost :
-            return 1
-        case dragon :
-            return 2
-        case dark :
-            return 1
-        case steel :
-            return 0.5
-        case fairy :
-            return 0
-        default :
-          print("Error in the defending type : type is not known");
-          return nil;
-        }
-
-    } else if attacking == dark {
-
-        switch defending {
-
-        case normal :
-            return 1
-        case fire :
-            return 1
-        case water :
-            return 1
-        case electric :
-            return 1
-        case grass :
-            return 1
-        case ice :
-            return 1
-        case fighting :
-            return 0.5
-        case poison :
-            return 1
-        case ground :
-            return 1
-        case flying :
-            return 1
-        case psychic :
-            return 2
-        case bug :
-            return 1
-        case rock :
-            return 1
-        case ghost :
-            return 2
-        case dragon :
-            return 1
-        case dark :
-            return 0.5
-        case steel :
-            return 1
-        case fairy :
-            return 0.5
-        default :
-          print("Error in the defending type : type is not known");
-          return nil;
-        }
-
-    } else if attacking == steel {
-
-        switch defending {
-
-        case normal :
-            return 1
-        case fire :
-            return 0.5
-        case water :
-            return 0.5
-        case electric :
-            return 0.5
-        case grass :
-            return 1
-        case ice :
-            return 2
-        case fighting :
-            return 1
-        case poison :
-            return 1
-        case ground :
-            return 1
-        case flying :
-            return 1
-        case psychic :
-            return 1
-        case bug :
-            return 1
-        case rock :
-            return 2
-        case ghost :
-            return 1
-        case dragon :
-            return 1
-        case dark :
-            return 1
-        case steel :
-            return 0.5
-        case fairy :
-            return 2
-        default :
-          print("Error in the defending type : type is not known");
-          return nil;
-        }
-
-    } else if attacking == fairy {
-
-        switch defending {
-
-        case normal :
-            return 1
-        case fire :
-            return 0.5
-        case water :
-            return 1
-        case electric :
-            return 1
-        case grass :
-            return 1
-        case ice :
-            return 1
-        case fighting :
-            return 2
-        case poison :
-            return 0.5
-        case ground :
-            return 1
-        case flying :
-            return 1
-        case psychic :
-            return 1
-        case bug :
-            return 1
-        case rock :
-            return 1
-        case ghost :
-            return 1
-        case dragon :
-            return 2
-        case dark :
-            return 2
-        case steel :
-            return 0.5
-        case fairy :
-            return 1
-        default :
-          print("Error in the defending type : type is not known");
-          return nil;
-        }
-
-    } else {
-
-      print("Error in the attack type : type is not known");
-      return nil;
 
     }
+
 }
 
 // http://bulbapedia.bulbagarden.net/wiki/Damage
