@@ -133,7 +133,7 @@ let granbull_species = Species(
   name: "Granbull",
   evolutions: [],
   attacks: [],
-  type: (fairy, nil),
+  type: (.fairy, nil),
   base_values:Stats(
     hitpoints: 90,
     attack: 120,
