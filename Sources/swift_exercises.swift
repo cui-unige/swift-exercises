@@ -100,12 +100,12 @@ func ==(lhs: Move, rhs: Move) -> Bool {
 
 // http://bulbapedia.bulbagarden.net/wiki/Statistic
 struct Stats {
-    let hitpoints       : Int
-    let attack          : Int
-    let defense         : Int
-    let special_attack  : Int
-    let special_defense : Int
-    let speed           : Int
+    let hitpoints       : Double
+    let attack          : Double
+    let defense         : Double
+    let special_attack  : Double
+    let special_defense : Double
+    let speed           : Double
 }
 
 struct Species : Hashable {
@@ -143,11 +143,11 @@ let species_kangaskhan: Species = Species(
 
 // fancy movesets are irrelevant, pick some other moves that aren't just plain damage
 
-func computeReversalPower(currentHitpoints: Int, maxHitpoints: Int) -> Int
+func computeReversalPower(currentHitpoints: Double, maxHitpoints: Double) -> Int
 {
 	// returns damage dealt by the 'reversal' move
 	// see http://bulbapedia.bulbagarden.net/wiki/Reversal_(move)
-	let HPRatio: Double = Double(currentHitpoints) / Double(maxHitpoints)
+	let HPRatio: Double = currentHitpoints / maxHitpoints
 
 	if (0.0417 > HPRatio) {return 200}
 	else if (0.1042 > HPRatio) {return 150}
@@ -163,7 +163,7 @@ let move_reversal: Move = Move(
 	description: "Stronger if the user's HP is low.",
 	category: .physical,
 	type: .fighting,
-	power: computeReversalPower(currentHitpoints: kangaskhan.hitpoints, maxHitpoints: kangaskhan.effective_stats.hitpoints),	// ?
+	power: computeReversalPower(currentHitpoints: Double(kangaskhan.hitpoints), maxHitpoints: Double(kangaskhan.effective_stats.hitpoints)),	// ?
 	accuracy: 100,
 	powerpoints: 15,
 	priority: 0
@@ -213,7 +213,7 @@ struct Pokemon {
 	let size              : Float
 	let weight            : Float
 	var experience        : Int
-	var level             : Int
+	var level             : Double
 	let type			  : (Type, Type?)
 	let nature            : Nature
 	let species           : Species
@@ -221,6 +221,7 @@ struct Pokemon {
 	let base_values		  : Stats
 	let individual_values : Stats
 	var effort_values     : Stats
+	let effort_values_yield: Stats
 	var effective_stats	  : Stats
 	var current_stats	  : Stats
 }
@@ -257,6 +258,14 @@ let kangaskhan = Pokemon(
 		special_defense: 30,
 		speed: 30
 	),
+	effort_values_yield: Stats(	// are we even supposed to account for EV yield?
+		hitpoints: 2,
+		attack: 0,
+		defense: 0,
+		special_attack: 0,
+		special_defense: 0,
+		speed: 0
+	),
 	effective_stats: Stats(	// temporary, remove these and fix calculations
 		hitpoints: 0,
 		attack: 0,
@@ -286,6 +295,59 @@ let kangaskhan = Pokemon(
 	*/
 
 )
+
+
+
+
+func computeStats(pokemon: Pokemon) -> Stats {
+	//let hitpoints: Int 			= 10 + kangaskhan.level + floor( ( Double( 2 * species_kangaskhan.base_values.hitpoints + kangaskhan.individual_values.hitpoints + floor(Double(kangaskhan.effort_values.hitpoints / 4 ) ) * kangaskhan.level ) )  / 100 ),
+	//expressions broken up because they're too long for the compiler
+	let hitpointsTemp: Double = 2 * pokemon.species.base_values.hitpoints + pokemon.individual_values.hitpoints
+	let hitpointsTemp2: Double = hitpointsTemp + floor(pokemon.effort_values.hitpoints / 4)
+	let hitpointsTemp3: Double = floor((hitpointsTemp2 * pokemon.level)/100)
+	let hitpoints: Double = hitpointsTemp3 + pokemon.level + 10
+
+	let attackTemp: Double = floor(Double(pokemon.effort_values.attack) / 4)
+	let attackTemp2: Double = (2 * pokemon.species.base_values.attack + pokemon.individual_values.attack + attackTemp) * pokemon.level
+	let attackTemp3: Double = floor(attackTemp2 / 100)
+	let attack: Double = (attackTemp3 + 5) * 1	// natureMultiplier[pokemon] instead of '1',
+
+	let defenseTemp: Double = floor(Double(pokemon.effort_values.defense) / 4)
+	let defenseTemp2: Double = (2 * pokemon.species.base_values.defense + pokemon.individual_values.defense + defenseTemp) * pokemon.level
+	let defenseTemp3: Double = floor(defenseTemp2 / 100)
+	let defense: Double = (defenseTemp3 + 5) * 1	// natureMultiplier[pokemon] instead of '1',
+
+	let special_attackTemp: Double = floor(Double(pokemon.effort_values.special_attack) / 4)
+	let special_attackTemp2: Double = (2 * pokemon.species.base_values.special_attack + pokemon.individual_values.special_attack + special_attackTemp) * pokemon.level
+	let special_attackTemp3: Double = floor(special_attackTemp2 / 100)
+	let special_attack: Double = (special_attackTemp3 + 5) * 1	// natureMultiplier[pokemon] instead of '1',
+
+	let special_defenseTemp: Double = floor(Double(pokemon.effort_values.special_defense) / 4)
+	let special_defenseTemp2: Double = (2 * pokemon.species.base_values.special_defense + pokemon.individual_values.special_defense + special_defenseTemp) * pokemon.level
+	let special_defenseTemp3: Double = floor(special_defenseTemp2 / 100)
+	let special_defense: Double = (special_defenseTemp3 + 5) * 1	// natureMultiplier[pokemon] instead of '1',
+
+	let speedTemp: Double = floor(Double(pokemon.effort_values.speed) / 4)
+	let speedTemp2: Double = (2 * pokemon.species.base_values.speed + pokemon.individual_values.speed + speedTemp) * pokemon.level
+	let speedTemp3: Double = floor(speedTemp2 / 100)
+	let speed: Double = (speedTemp3 + 5) * 1	// natureMultiplier[pokemon] instead of '1',
+
+	return Stats(
+		hitpoints: hitpoints,
+		attack: attack,
+		defense: defense,
+		special_attack: special_attack,
+		special_defense: special_defense,
+		speed: speed)
+}
+
+
+
+
+
+
+
+
 
 // http://bulbapedia.bulbagarden.net/wiki/Nature
 // let natureMultiplier: [Nature: Stats](
@@ -384,15 +446,15 @@ func typeModifier(attacking: Type, defending : (Type, Type?))-> Double {
 func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pokemon) -> Int {
 
 	var STAB : Double = 1 // initialise with non-STAB multiplier value
-	if ( (kangaskhan.type.0 == move.type) || (kangaskhan.type.1 == move.type) ) {STAB = 1.5}
+	if ( (kangaskhan.type.0 == move.type) || (pokemon.type.1 == move.type) ) {STAB = 1.5}
 
 	let typeBonus: Double = 1 // actually calculate this
 
 	var critical: Double = 1 // initialise with non-crit mult value
 	let randNum: Int = Int(drand48() * 257) // random int between 0 and 256 (included)
-	let threshold: Int = Int(round(Double(kangaskhan.base_values.speed / 2)))
+	let threshold: Int = Int(round(pokemon.base_values.speed / 2))
 	if ( randNum < threshold)
-		{critical = ( Double(2 * kangaskhan.level + 5) / Double(kangaskhan.level + 5) ) }
+		{critical = ( (2 * pokemon.level + 5) / (pokemon.level + 5) ) }
 
 	let environmentBonus: Double = 1 // actually calculate this
 
@@ -438,15 +500,16 @@ func battle(trainers: inout [Trainer], behavior: (State, Trainer) -> Move) -> ()
 					// y, first: set new first stats (self)
 					// y, second: set new second stats
 				// move deals damage?
-					// calculate damage
-					// deal damage to second
-					// second (foe) KO?
-						// y: opponent tries sending out another pokemon
-						// n: move has status effects on second?
-							//y: apply status effects
-					// deal recoil damage to first (self) if appropriate
-						// self KO?
-							// y: first tries sending out another pokemon
+					// calculate hit probability
+						// calculate damage
+						// deal damage to second
+						// second (foe) KO?
+							// y: opponent tries sending out another pokemon
+							// n: move has status effects on second?	// check the order of these
+								//y: apply status effects
+						// deal recoil damage to first (self) if appropriate
+							// self KO?
+								// y: first tries sending out another pokemon
 		// second KO? n:
 			// check status conditions, see if move can be executed (can always switch pokemon)
 				// move changes weather?
@@ -455,16 +518,18 @@ func battle(trainers: inout [Trainer], behavior: (State, Trainer) -> Move) -> ()
 					// y, second: set new first stats (self)
 					// y, first: set new second stats
 				// move deals damage?
-					// calculate damage
-					// deal damage to first
-					// first (foe) KO?
-						// y: opponent tries sending out another pokemon
-						// n: move has status effects on first?
-							//y: apply status effects
-					// deal recoil damage to second (self) if appropriate
-						// self KO?
-							// y: second tries sending out another pokemon
+					// calculate hit probability
+						// calculate damage
+						// deal damage to first
+						// first (foe) KO?
+							// y: opponent tries sending out another pokemon
+							// n: move has status effects on first?
+								//y: apply status effects
+						// deal recoil damage to second (self) if appropriate
+							// self KO?
+								// y: second tries sending out another pokemon
 		// nonzero status conditions on either pokemon: apply effects
+			// KO? try sending out another pokemon
 
 }
 
