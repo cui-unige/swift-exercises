@@ -59,6 +59,12 @@ enum Nature {
     case quirky
 }
 
+struct Item {
+   let id: Int
+   let name: String
+   let effect: String // String type is a placeholder, this would ultimately need to link to a function, or something to determine the effects in regard to the program
+}
+
 // http://bulbapedia.bulbagarden.net/wiki/Weather
 enum Weather {
     case clear_skies
@@ -302,6 +308,7 @@ struct Pokemon {
 
 struct Trainer {
     var pokemons : [Pokemon]
+    var backpack: [Item]
 }
 
 struct Environment {
@@ -407,30 +414,60 @@ func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pok
    return damageOutput
 }
 
+struct PokemonInFight {
+   let pokemon: Pokemon
+   let index: Int // Where to find the pokemon in its trainer's list
+   var availableMoves: Array<Move>{
+      get {
+         return Array(pokemon.moves.keys).filter{pokemon.moves[$0]! > 0}
+      }
+   }
+}
+
 struct State {
    var environment: Environment
-   var activePokemons: (attacking: Pokemon, defending: Pokemon)
-   var activeIDs: (attacking: Int, defending: Int)
-   var availableMoves: Array<Move> {
+   var activePokemons: [PokemonInFight]
+   var order: (first: Int, last: Int) { // Indicates which of the 2 active pokemons acts first
       get{
-         return Array(activePokemons.attacking.moves.keys).filter{activePokemons.attacking.moves[$0]! > 0}
+         if activePokemons[0].pokemon.effective_stats.speed >= activePokemons[1].pokemon.effective_stats.speed {
+            return (first: activePokemons[0].index, last: activePokemons[1].index)
+         } else {
+            return (first: activePokemons[1].index, last: activePokemons[0].index)
+         }
       }
    }
    var remaining_pokemons: [[Int]]
+   var escape_attempts: (Int, Int)
 }
 
-// Function to randomly chose a next attack (normal attacks only)
-func dumbOffense(state: State, trainer: Trainer) -> Move {
-   if state.availableMoves.isEmpty {
+// Function to randomly chose a next attack
+func dumbOffense(state: State, trainerNum: Int) -> Move {
+   if state.activePokemons[trainerNum].availableMoves.isEmpty {
       return move_struggle
    }
    #if os(Linux)
-      let diceRoll = Int(random() % state.availableMoves.count)
+      let diceRoll = Int(random() % state.activePokemons[trainerNum].availableMoves.count)
    #else
-      let diceRoll = Int(arc4random_uniform(state.availableMoves.count))
+      let diceRoll = Int(arc4random_uniform(state.activePokemons[trainerNum].availableMoves.count))
    #endif
-   let move_pick = state.availableMoves[diceRoll]
+   let move_pick = state.activePokemons[trainerNum].availableMoves[diceRoll]
    return move_pick
+}
+
+func select_action(trainer: Trainer) -> String {
+   // Here defaults to attack, but could be 'Use item', 'Change pokemon' or 'Run'
+   return "Attack"
+}
+
+func try_escape(who: Pokemon, against: Pokemon, totalTries: Int) -> Bool {
+   #if os(Linux)
+      let diceRoll = Int(random() % 256)
+   #else
+      let diceRoll = Int(arc4random_uniform(256))
+   #endif
+   let ratio = Double(who.effective_stats.speed) * 128.0 / Double(against.effective_stats.speed)
+   let total = (Int(ratio) + 30 * totalTries) % 256
+   return diceRoll < total
 }
 
 func battle(trainers: inout [Trainer], behavior: (State, Trainer) -> Move) -> () {
@@ -440,36 +477,66 @@ func battle(trainers: inout [Trainer], behavior: (State, Trainer) -> Move) -> ()
          weather: .clear_skies,
          terrain: .normal
       ),
-      activePokemons: (attacking: trainers[0].pokemons[0], defending: trainers[1].pokemons[0]), // First pokemons by default
-      activeIDs: (attacking: 0, defending: 0),
-      remaining_pokemons: [[Int](0 ..< trainers[0].pokemons.count), [Int](0 ..< trainers[1].pokemons.count)] // All pokemons available (no animal abuse yet...)
+      activePokemons: [ // First pokemons by default
+         PokemonInFight(pokemon: Array(trainers)[0].pokemons[0], index: 0),
+         PokemonInFight(pokemon: Array(trainers)[1].pokemons[0], index: 0)
+      ],
+      remaining_pokemons: [[Int](0 ..< trainers[0].pokemons.count), [Int](0 ..< trainers[1].pokemons.count)], // All pokemons available (no animal abuse yet...)
+      escape_attempts: (0, 0)
    )
-   var turn = 0
-   while true {
-       let attMove = behavior(battle_state, trainers[turn])
-       let attDamage = damage(environment: battle_state.environment, pokemon: battle_state.activePokemons.attacking, move: attMove, target: battle_state.activePokemons.defending)
-       trainers[1-turn].pokemons[battle_state.activeIDs.defending].hitpoints = trainers[1-turn].pokemons[battle_state.activeIDs.defending].hitpoints > attDamage ? trainers[1-turn].pokemons[battle_state.activeIDs.defending].hitpoints - attDamage : 0
-       if trainers[1-turn].pokemons[battle_state.activeIDs.defending].hitpoints == 0 {
-          battle_state.remaining_pokemons[1-turn] = battle_state.remaining_pokemons[1-turn].filter{$0 != battle_state.activeIDs.defending}
-          if battle_state.remaining_pokemons[1-turn].isEmpty {
-             break
-          } else {
-             battle_state.activeIDs.defending = battle_state.remaining_pokemons[1-turn][0] // Cycle to next pokemon
-             battle_state.activePokemons.defending = trainers[1-turn].pokemons[battle_state.activeIDs.defending]
-          }
-       }
-       if attMove.name == "Struggle" {
-          trainers[turn].pokemons[battle_state.activeIDs.attacking].hitpoints = trainers[turn].pokemons[battle_state.activeIDs.attacking].hitpoints > attDamage/4 ? trainers[turn].pokemons[battle_state.activeIDs.attacking].hitpoints - attDamage/4 : 0
-          if trainers[turn].pokemons[battle_state.activeIDs.attacking].hitpoints == 0 {
-             battle_state.remaining_pokemons[turn] = battle_state.remaining_pokemons[turn].filter{$0 != battle_state.activeIDs.attacking}
-             if battle_state.remaining_pokemons[turn].isEmpty {
-                break
-             } else {
-                battle_state.activeIDs.attacking = battle_state.remaining_pokemons[turn][0] // Cycle to next pokemon
-                battle_state.activePokemons.attacking = trainers[turn].pokemons[battle_state.activeIDs.attacking]
-             }
-          }
-       }
-       turn = (turn + 1) % 2 // Next turn
+   FIGHT: while true { // Loop until fight ends
+      // Choose action
+      let action1 = select_action(trainer: trainers[0])
+      let action2 = select_action(trainer: trainers[1])
+
+      var attMove1: Move?
+      switch action1 {
+      case "Use item":
+         // Call item function
+         break
+      case "Change pokemon":
+         // Function to change active pokemon
+         break
+      case "Run":
+         battle_state.escape_attempts.0 += 1
+         if try_escape(who: battle_state.activePokemons[0].pokemon, against: battle_state.activePokemons[1].pokemon, totalTries: battle_state.escape_attempts.0) {
+            break FIGHT
+         }
+      default:
+         // Do nothing
+         break
+      }
+
+      // Apply continuous effects
+
+
+      // Take action
+
+
+      /* CONTINUE HERE !!! */
+      //  let attMove = behavior(battle_state, trainers[battle_state.turn])
+      //  let attDamage = damage(environment: battle_state.environment, pokemon: battle_state.activePokemons.attacking, move: attMove, target: battle_state.activePokemons.defending)
+      //  trainers[1-battle_state.turn].pokemons[battle_state.activeIDs.defending].hitpoints = trainers[1-battle_state.turn].pokemons[battle_state.activeIDs.defending].hitpoints > attDamage ? trainers[1-battle_state.turn].pokemons[battle_state.activeIDs.defending].hitpoints - attDamage : 0
+      //  if trainers[1-battle_state.turn].pokemons[battle_state.activeIDs.defending].hitpoints == 0 {
+      //     battle_state.remaining_pokemons[1-battle_state.turn] = battle_state.remaining_pokemons[1-battle_state.turn].filter{$0 != battle_state.activeIDs.defending}
+      //     if battle_state.remaining_pokemons[1-battle_state.turn].isEmpty {
+      //        break
+      //     } else {
+      //        battle_state.activeIDs.defending = battle_state.remaining_pokemons[1-battle_state.turn][0] // Cycle to next pokemon
+      //        battle_state.activePokemons.defending = trainers[1-battle_state.turn].pokemons[battle_state.activeIDs.defending]
+      //     }
+      //  }
+      //  if attMove.name == "Struggle" {
+      //     trainers[battle_state.turn].pokemons[battle_state.activeIDs.attacking].hitpoints = trainers[battle_state.turn].pokemons[battle_state.activeIDs.attacking].hitpoints > attDamage/4 ? trainers[battle_state.turn].pokemons[battle_state.activeIDs.attacking].hitpoints - attDamage/4 : 0
+      //     if trainers[battle_state.turn].pokemons[battle_state.activeIDs.attacking].hitpoints == 0 {
+      //        battle_state.remaining_pokemons[battle_state.turn] = battle_state.remaining_pokemons[battle_state.turn].filter{$0 != battle_state.activeIDs.attacking}
+      //        if battle_state.remaining_pokemons[battle_state.turn].isEmpty {
+      //           break
+      //        } else {
+      //           battle_state.activeIDs.attacking = battle_state.remaining_pokemons[battle_state.turn][0] // Cycle to next pokemon
+      //           battle_state.activePokemons.attacking = trainers[battle_state.turn].pokemons[battle_state.activeIDs.attacking]
+      //        }
+      //     }
+      //  }
    }
 }
