@@ -182,6 +182,8 @@ let moveHeatWave = Move(id: 257, name: "Heat Wave", description: "Heat Wave deal
 
 let charizardBaseValues = Stats(hitpoints: 78, attack: 84, defense: 78, special_attack: 109, special_defense: 85, speed: 100)
 
+let charizardIndividualValues = Stats(hitpoints: 82, attack: 89, defense: 75, special_attack: 119, special_defense: 82, speed: 110)
+
 let charizardEffortValues = Stats(hitpoints: 0, attack: 0, defense: 0, special_attack: 3, special_defense: 0, speed: 0)
 
 let charizard = Species(id: 006, name: "Charizard", evolutions: [], attacks: [moveAirSlash, moveDragonClaw, moveEmber, moveFlareBlitz, moveGrowl, moveHeatWave], type: (Type.fire, Type.flying), base_values: charizardBaseValues)
@@ -194,7 +196,7 @@ func setEffectiveStat(lvl: Int, base: Int, individual: Int, effort: Int, nature_
     return Int(floor((Double((2 * base + individual + effort) * lvl))/Double(100) + 5) * nature_mode)
 }
 func setEffectiveHp(lvl: Int, base: Int, individual: Int, effort: Int) -> Int {
-    return Int((Double((2 * base + individual + effort) * lvl)) / Double(100)) + lvl + 10
+    return Int(floor((Double((2 * base + individual + floor(effort/4) * lvl)) / Double(100))) + lvl + 10)
 }
 
 // ###################################### //
@@ -225,6 +227,7 @@ struct Pokemon {
 }
 
 struct Trainer {
+    let name : String
     let pokemons : [Pokemon]
 }
 
@@ -382,9 +385,27 @@ func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pok
 // ###################################### //
 
 struct State {
-    // TODO: describe a battle state
+    let player1: Trainer
+    let player2: Trainer
+    let pokemonAttack: Pokemon
+    let pokemonDefender: Pokemon
+    let pokemonMoveAttack: Move
+    let pokemonMoveDefense: Move
+    let pokemonEnvironment: Environment
 }
 
+// ############### LETS TRY AND FIGHT ############### //
+
+let charizard = Pokemon(nickname: "Jack", hitpoints: Species.base_values.hitpoints, size: 12, weight: 3000, experience: 0, level: 1, nature: Species.base_values.nature, species: Species.id, moves: Species.moves, individual_values: charizardIndividualValues, effort_values: charizardEffortValues)
+
+todaysEnvironnement = Environment(weather: harsh_sunlight, terrain: grassy)
+
+Bob = Trainer(name: "Bob", pokemons:[charizard, charizard])
+Alice = Trainer(name: "Alice", pokemons: [charizard, charizard])
+
+currentState = State(player1: Bob, player2: Alice, pokemonAttack: Bob.pokemons.0, pokemonDefense: Alice.pokemons.0, pokemonMoveAttack: Bob.pokemons.0.moves.0, pokemonMoveDefense: Alice.pokemons.0.moves.3, pokemonEnvironment: todaysEnvironnement)
+
+firstPlayer = max(currentState.pokemonAttack.effective_stats.effectiveSpeed, currentState.pokemonDefense.effective_stats.effectiveSpeed) //Pour savoir qui va commencer à jouer
+
 func battle(trainers: inout [Trainer], behavior: (State, Trainer) -> Move) -> () {
-    // TODO: simulate battle
-}
+    }
