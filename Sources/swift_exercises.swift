@@ -1,3 +1,7 @@
+// For random numbers in linux:
+import Glibc
+import Foundation
+
 // http://bulbapedia.bulbagarden.net/wiki/Type
 enum Type: Int {
     case bug = 6
@@ -184,14 +188,14 @@ func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pok
     let targets: Double = 1
     let weather: Double = 1
     let badge: Double = 1
-    let critical: Double = 1
-    let random: Double = 1
+    let critical: Double = Int(random() % 256) > (pokemon.species.base_values.speed / 2) ? 1.5 : 0
+    let random_value: Double = 1
     let stab: Double = (move.type == pkmType.0 || move.type == pkmType.1!) ? 1.5 : 1
     let type: Double = typeModifier(attacking: move.type, defending: tarType.0) * ((tarType.1 != nil) ? typeModifier(attacking: move.type, defending: tarType.1!) : 1)
     let burn: Double = 1
     let other: Double = 1
 
-    let modifier: Double = targets * weather * badge * critical * random * stab * type * burn * other
+    let modifier: Double = targets * weather * badge * critical * random_value * stab * type * burn * other
 
     return 0
 }
