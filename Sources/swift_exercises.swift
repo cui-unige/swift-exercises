@@ -121,9 +121,24 @@ func ==(lhs: Species, rhs: Species) -> Bool {
     return lhs.id == rhs.id
 }
 
-// TODO: create some species
-// Do you use an enum, a map or constants/variables?
-// http://bulbapedia.bulbagarden.net/wiki/List_of_Pokémon_by_National_Pokédex_number
+let movePound = Move( id: 1,
+                      name: "Pound",
+
+)
+
+let speciesMew = Species( id: 151,
+                          name: "Mew",
+                          evolutions: [],
+                          attacks: [],
+                          type: psychic,
+                          base_values: (hitpoints: 100,
+                                        attack: 100,
+                                        defense: 100,
+                                        special_attack: 100,
+                                        special_defense: 100,
+                                        speed: 100
+                          )
+)
 
 struct Pokemon {
     let nickname          : String?
@@ -154,7 +169,10 @@ struct Environment {
 
 // http://bulbapedia.bulbagarden.net/wiki/Type/Type_chart
 func typeModifier(attacking: Type, defending : Type) -> Double {
-    // TODO: encode type/type chart
+    switch attacking {
+        case .psychic
+
+    }
     return 1
 }
 
