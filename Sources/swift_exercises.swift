@@ -121,7 +121,7 @@ struct Species : Hashable {
     let id          : Int
     let name        : String
     let evolutions  : Set<Species>
-    let attacks     : Set<Move>
+    let attacks     : [Move]
     let type        : (Type, Type?)
     let base_values : Stats
     var hashValue   : Int {
@@ -180,13 +180,15 @@ let moveGrowl = Move(id: 45, name: "Growl", description: "Growl lowers the targe
 
 let moveHeatWave = Move(id: 257, name: "Heat Wave", description: "Heat Wave deals damage and has a 10% chance of burning the target.", category: Category.special, type: Type.fire, power: 95, accuracy: 90, powerpoints: 10, priority: 0)
 
+let allAttacks = [moveAirSlash, moveDragonClaw, moveEmber, moveFlareBlitz, moveGrowl, moveHeatWave]
+
 let charizardBaseValues = Stats(hitpoints: 78, attack: 84, defense: 78, special_attack: 109, special_defense: 85, speed: 100)
 
 let charizardIndividualValues = Stats(hitpoints: 82, attack: 89, defense: 75, special_attack: 119, special_defense: 82, speed: 110)
 
 let charizardEffortValues = Stats(hitpoints: 0, attack: 0, defense: 0, special_attack: 3, special_defense: 0, speed: 0)
 
-let charizardSpecie = Species(id: 006, name: "Charizard", evolutions: [], attacks: [moveAirSlash, moveDragonClaw, moveEmber, moveFlareBlitz, moveGrowl, moveHeatWave], type: (Type.fire, Type.flying), base_values: charizardBaseValues)
+let charizardSpecie = Species(id: 006, name: "Charizard", evolutions: [], attacks: allAttacks, type: (Type.fire, Type.flying), base_values: charizardBaseValues)
 
 // ###################################### //
 
@@ -203,7 +205,7 @@ func setEffectiveHp(lvl: Int, base: Int, individual: Int, effort: Int) -> Int {
 
 struct Pokemon {
     let nickname          : String?
-    let hitpoints         : Int // remaining hitpoints
+    var hitpoints         : Int // remaining hitpoints
     let size              : Int
     let weight            : Int
     let experience        : Int
@@ -406,21 +408,38 @@ let todaysEnvironnement = Environment(weather: Weather.harsh_sunlight(extremely:
 let Bob = Trainer(name: "Bob", pokemons:[charizard, charizard])
 let Alice = Trainer(name: "Alice", pokemons: [charizard, charizard])
 
-let currentState = State(player1: Bob, player2: Alice, pokemonAttack: Bob.pokemons[0],
-                         pokemonDefense: Alice.pokemons[0], pokemonMoveAttack: moveAirSlash,
-                         pokemonMoveDefense: moveHeatWave, pokemonEnvironment: todaysEnvironnement)
+let randInt1 = randomNumber(min: 0, max: Bob.pokemons.count) //So that we can randomly take a pokemon in the trainer's set
+let randInt2 = randomNumber(min: 0, max: Alice.pokemons.count)
+
+let randInt3 = randomNumber(min:0, max: allAttacks.count) //So that we can randomly determine which attack is going to be perfomed
+let randInt4 = randomNumber(min:0, max: allAttacks.count)
+
+let currentState = State(player1: Bob, player2: Alice, pokemonAttack: Bob.pokemons[randInt1],
+                         pokemonDefense: Alice.pokemons[randInt2], pokemonMoveAttack: allAttacks[randInt3],
+                         pokemonMoveDefense: allAttacks[randInt4], pokemonEnvironment: todaysEnvironnement)
 
 var firstPokemon: Pokemon? = nil
+var targetPokemon: Pokemon? = nil
+var globalMove: Move? = nil
+var damages: Int = 0
 
 func firstPok(pokemonAttack: Pokemon, pokemonDefense: Pokemon) -> (){
     if currentState.pokemonAttack.effective_stats.speed > currentState.pokemonDefense.effective_stats.speed{ // Pour savoir qui commence
-        return firstPokemon = pokemonAttack
+        firstPokemon = pokemonAttack
+        targetPokemon = pokemonDefense
+        globalMove = currentState.pokemonMoveAttack
     } else {
-        return firstPokemon = pokemonDefense
+        firstPokemon = pokemonDefense
+        targetPokemon = pokemonAttack
+        globalMove = currentState.pokemonMoveDefense
     }
 }
 
 
-//func battle(trainers: inout [Trainer], behavior: (State, Trainer) -> Move) -> () {
-//    damages = damage(environment: todaysEnvironnement, pokemon: firstPokemon, move: currentState.firstPokemon, target: Pokemon)
-//    }
+func battle(trainers: inout [Trainer], behavior: (State, Trainer) -> Move) -> () {
+    let player1: Trainer = trainers[0]
+    let player2: Trainer = trainers[1]
+    firstPok(pokemonAttack: player1.pokemons[randInt1], pokemonDefense: player2.pokemons[randInt2])
+    damages = damage(environment: todaysEnvironnement, pokemon: firstPokemon!, move: globalMove!, target: targetPokemon!)
+    targetPokemon!.hitpoints = targetPokemon!.hitpoints - damages //Remaining hitpoints
+}
