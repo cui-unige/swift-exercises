@@ -441,7 +441,7 @@ struct State {
 }
 
 // Function to randomly chose a next attack
-func dumbOffense(state: State, trainerNum: Int) -> Move {
+func dumbOffense(_ state: State, _ trainerNum: Int) -> Move {
    if state.activePokemons[trainerNum].availableMoves.isEmpty {
       return move_struggle
    }
@@ -459,6 +459,15 @@ func select_action(trainer: Trainer) -> String {
    return "Attack"
 }
 
+func change_pokemon(state: inout State, trainers: [Trainer],trainerNum: Int) { // The choice is random, here, but could be modified to ask a user
+   #if os(Linux)
+      let diceRoll = Int(random() % state.remaining_pokemons[trainerNum].count)
+   #else
+      let diceRoll = Int(arc4random_uniform(state.remaining_pokemons[trainerNum].count))
+   #endif
+   state.activePokemons[trainerNum] = PokemonInFight(pokemon: trainers[trainerNum].pokemons[diceRoll], index: diceRoll)
+}
+
 func try_escape(who: Pokemon, against: Pokemon, totalTries: Int) -> Bool {
    #if os(Linux)
       let diceRoll = Int(random() % 256)
@@ -470,7 +479,7 @@ func try_escape(who: Pokemon, against: Pokemon, totalTries: Int) -> Bool {
    return diceRoll < total
 }
 
-func battle(trainers: inout [Trainer], behavior: (State, Trainer) -> Move) -> () {
+func battle(trainers: inout [Trainer], behavior: (State, Int) -> Move) -> () {
    // Initial state
    var battle_state = State(
       environment: Environment(
@@ -489,29 +498,58 @@ func battle(trainers: inout [Trainer], behavior: (State, Trainer) -> Move) -> ()
       let action1 = select_action(trainer: trainers[0])
       let action2 = select_action(trainer: trainers[1])
 
-      var attMove1: Move?
+      // Assess action1 and exec if not an attack
+      let attMove1: Move?
       switch action1 {
       case "Use item":
          // Call item function
-         break
+         attMove1 = nil
       case "Change pokemon":
-         // Function to change active pokemon
-         break
+         change_pokemon(state: &battle_state, trainers: trainers,trainerNum: 0)
+         attMove1 = nil
       case "Run":
          battle_state.escape_attempts.0 += 1
          if try_escape(who: battle_state.activePokemons[0].pokemon, against: battle_state.activePokemons[1].pokemon, totalTries: battle_state.escape_attempts.0) {
             break FIGHT
          }
+      case "Attack":
+         attMove1 = behavior(battle_state, 0)
       default:
-         // Do nothing
-         break
+         // Error message "Unknown action"
+         attMove1 = nil
       }
 
       // Apply continuous effects
-
+      switch battle_state.environment.weather {
+      case .sandstorm:
+         let types1 = battle_state.activePokemons[0].pokemon.species.type
+         let types2 = battle_state.activePokemons[1].pokemon.species.type
+         if types1.0 != .rock, types1.0 != .ground, types1.0 != .steel, types1.1 != .rock, types1.1 != .ground, types1.1 != .steel {
+            let envDamage1 = Int(Double(battle_state.activePokemons[0].pokemon.effective_stats.hitpoints) * 0.0625)
+            trainers[0].pokemons[battle_state.activePokemons[0].index].hitpoints -= envDamage1 < trainers[0].pokemons[battle_state.activePokemons[0].index].hitpoints ? envDamage1 : 0
+         }
+         if types2.0 != .rock, types2.0 != .ground, types2.0 != .steel, types2.1 != .rock, types2.1 != .ground, types2.1 != .steel {
+            let envDamage2 = Int(Double(battle_state.activePokemons[1].pokemon.effective_stats.hitpoints) * 0.0625)
+            trainers[1].pokemons[battle_state.activePokemons[1].index].hitpoints -= envDamage2 < trainers[1].pokemons[battle_state.activePokemons[1].index].hitpoints ? envDamage2 : 0
+         }
+      case .hail:
+         let types1 = battle_state.activePokemons[0].pokemon.species.type
+         let types2 = battle_state.activePokemons[1].pokemon.species.type
+         if types1.0 != .ice, types1.1 != .ice {
+            let envDamage1 = Int(Double(battle_state.activePokemons[0].pokemon.effective_stats.hitpoints) * 0.0625)
+            trainers[0].pokemons[battle_state.activePokemons[0].index].hitpoints -= envDamage1 < trainers[0].pokemons[battle_state.activePokemons[0].index].hitpoints ? envDamage1 : 0
+         }
+         if types2.0 != .ice, types2.1 != .ice {
+            let envDamage2 = Int(Double(battle_state.activePokemons[1].pokemon.effective_stats.hitpoints) * 0.0625)
+            trainers[1].pokemons[battle_state.activePokemons[1].index].hitpoints -= envDamage2 < trainers[1].pokemons[battle_state.activePokemons[1].index].hitpoints ? envDamage2 : 0
+         }
+      default:
+         break
+      }
+      /* Status effects not implemented yet */
 
       // Take action
-
+      /* Not implemented yet */
 
       /* CONTINUE HERE !!! */
       //  let attMove = behavior(battle_state, trainers[battle_state.turn])
