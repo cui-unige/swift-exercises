@@ -184,21 +184,6 @@ func effective_stats_other(Base: Int, IV: Int, EV: Int, level: Int, nature_multi
 }
 
 
-func effective_stats(Base : Int, IV : Int, EV : Int, level : Int, nature_multiplier : Double)   -> Stats {
-
-    let effective_hitpoints       = effective_stats_HP(Base : Pokemon.species.base_values.hitpoints, IV : Pokemon.individual_values.hitpoints, EV: Pokemon.effort_values.hitpoints, level: Pokemon.level)
-    let effective_attack          = effective_stats_other(Base : Pokemon.species.base_values.attack, IV : Pokemon.individual_values.attack, EV: Pokemon.effort_values.attack, level: Pokemon.level, nature_multiplier: (nature_coeff[Pokemon.nature]?.attack)!)
-    let effective_defense         = effective_stats_other(Base : Pokemon.species.base_values.defense, IV : Pokemon.individual_values.defense, EV: Pokemon.effort_values.defense, level: Pokemon.level, nature_multiplier: (nature_coeff[Pokemon.nature]?.defense)!)
-    let effective_special_attack  = effective_stats_other(Base : Pokemon.species.base_values.special_attack, IV : Pokemon.individual_values.special_attack, EV: Pokemon.effort_values.special_attack, level: Pokemon.level, nature_multiplier: (nature_coeff[Pokemon.nature]?.special_attack)!)
-    let effective_special_defense = effective_stats_other(Base : Pokemon.species.base_values.special_defense, IV : Pokemon.individual_values.special_defense, EV: Pokemon.effort_values.special_defense, level: Pokemon.level, nature_multiplier: (nature_coeff[Pokemon.nature]?.special_defense)!)
-    let effective_speed           = effective_stats_other(Base : Pokemon.species.base_values.speed, IV : Pokemon.individual_values.speed, EV: Pokemon.effort_values.speed, level: Pokemon.level, nature_multiplier: (nature_coeff[Pokemon.nature]?.speed)!)
-
-  let effective_stats_return = Stats(hitpoints : effective_hitpoints, attack : effective_attack, defense : effective_defense, special_attack : effective_special_attack, special_defense : effective_special_defense, speed : effective_speed)
-  return effective_stats_return
-
-}
-
-
 
 struct Pokemon {
     let nickname          : String?
@@ -222,6 +207,23 @@ struct Pokemon {
     let TyranitarPokemon = Pokemon(nickname : nil, hitpoints : )
     */
 }
+
+
+func effective_stats(Pokemon : Pokemon, nature_multiplier : Double)   -> Stats {
+
+    let effective_hitpoints       = effective_stats_HP(Base : Pokemon.species.base_values.hitpoints, IV : Pokemon.individual_values.hitpoints, EV: Pokemon.effort_values.hitpoints, level: Pokemon.level)
+    let effective_attack          = effective_stats_other(Base : Pokemon.species.base_values.attack, IV : Pokemon.individual_values.attack, EV: Pokemon.effort_values.attack, level: Pokemon.level, nature_multiplier: (nature_coeff[Pokemon.nature]?.attack)!)
+    let effective_defense         = effective_stats_other(Base : Pokemon.species.base_values.defense, IV : Pokemon.individual_values.defense, EV: Pokemon.effort_values.defense, level: Pokemon.level, nature_multiplier: (nature_coeff[Pokemon.nature]?.defense)!)
+    let effective_special_attack  = effective_stats_other(Base : Pokemon.species.base_values.special_attack, IV : Pokemon.individual_values.special_attack, EV: Pokemon.effort_values.special_attack, level: Pokemon.level, nature_multiplier: (nature_coeff[Pokemon.nature]?.special_attack)!)
+    let effective_special_defense = effective_stats_other(Base : Pokemon.species.base_values.special_defense, IV : Pokemon.individual_values.special_defense, EV: Pokemon.effort_values.special_defense, level: Pokemon.level, nature_multiplier: (nature_coeff[Pokemon.nature]?.special_defense)!)
+    let effective_speed           = effective_stats_other(Base : Pokemon.species.base_values.speed, IV : Pokemon.individual_values.speed, EV: Pokemon.effort_values.speed, level: Pokemon.level, nature_multiplier: (nature_coeff[Pokemon.nature]?.speed)!)
+
+  let effective_stats_return = Stats(hitpoints : effective_hitpoints, attack : effective_attack, defense : effective_defense, special_attack : effective_special_attack, special_defense : effective_special_defense, speed : effective_speed)
+  return effective_stats_return
+
+}
+// let TyranitarStast_effectives = effective_stats()
+
 
 struct Trainer {
     let pokemons : [Pokemon]
