@@ -465,7 +465,8 @@ func change_pokemon(state: inout State, trainers: [Trainer],trainerNum: Int) { /
    #else
       let diceRoll = Int(arc4random_uniform(state.remaining_pokemons[trainerNum].count))
    #endif
-   state.activePokemons[trainerNum] = PokemonInFight(pokemon: trainers[trainerNum].pokemons[diceRoll], index: diceRoll)
+   let pick = state.remaining_pokemons[trainerNum][diceRoll]
+   state.activePokemons[trainerNum] = PokemonInFight(pokemon: trainers[trainerNum].pokemons[pick], index: pick)
 }
 
 func try_escape(who: Pokemon, against: Pokemon, totalTries: Int) -> Bool {
@@ -479,6 +480,23 @@ func try_escape(who: Pokemon, against: Pokemon, totalTries: Int) -> Bool {
    return diceRoll < total
 }
 
+func make_attack(move: Move, trainers: inout [Trainer], trainerNum: Int, state: State) {
+   switch move.category {
+   case .physical:
+      let damageDealt = damage(environment: state.environment, pokemon: state.activePokemons[trainerNum].pokemon, move: move, target: state.activePokemons[1-trainerNum].pokemon)
+      trainers[1-trainerNum].pokemons[1-trainerNum].hitpoints = trainers[1-trainerNum].pokemons[1-trainerNum].hitpoints > damageDealt ? trainers[1-trainerNum].pokemons[1-trainerNum].hitpoints - damageDealt : 0
+   case .special:
+      /* Not implemented yet */
+      break
+   case .status:
+      /* Not implemented yet */
+      break
+   }
+}
+
+/******************************************************************************/
+/**************************** Main Battle Function ****************************/
+/******************************************************************************/
 func battle(trainers: inout [Trainer], behavior: (State, Int) -> Move) -> () {
    // Initial state
    var battle_state = State(
@@ -498,29 +516,48 @@ func battle(trainers: inout [Trainer], behavior: (State, Int) -> Move) -> () {
       let action1 = select_action(trainer: trainers[0])
       let action2 = select_action(trainer: trainers[1])
 
-      // Assess action1 and exec if not an attack
-      let attMove1: Move?
+      var attMove: [Move?] = [nil, nil]
+      // Assess first trainer's action and exec if not an attack
       switch action1 {
       case "Use item":
          // Call item function
-         attMove1 = nil
+         attMove[0] = nil
       case "Change pokemon":
          change_pokemon(state: &battle_state, trainers: trainers,trainerNum: 0)
-         attMove1 = nil
+         attMove[0] = nil
       case "Run":
          battle_state.escape_attempts.0 += 1
          if try_escape(who: battle_state.activePokemons[0].pokemon, against: battle_state.activePokemons[1].pokemon, totalTries: battle_state.escape_attempts.0) {
             break FIGHT
          }
       case "Attack":
-         attMove1 = behavior(battle_state, 0)
+         attMove[0] = behavior(battle_state, 0)
       default:
          // Error message "Unknown action"
-         attMove1 = nil
+         attMove[0] = nil
+      }
+      // Assess second trainer's action and exec if not an attack
+      switch action2 {
+      case "Use item":
+         // Call item function
+         attMove[1] = nil
+      case "Change pokemon":
+         change_pokemon(state: &battle_state, trainers: trainers,trainerNum: 1)
+         attMove[1] = nil
+      case "Run":
+         battle_state.escape_attempts.1 += 1
+         if try_escape(who: battle_state.activePokemons[1].pokemon, against: battle_state.activePokemons[0].pokemon, totalTries: battle_state.escape_attempts.1) {
+            break FIGHT
+         }
+      case "Attack":
+         attMove[1] = behavior(battle_state, 1)
+      default:
+         // Error message "Unknown action"
+         attMove[1] = nil
       }
 
       // Apply continuous effects
-      switch battle_state.environment.weather {
+      switch battle_state.environment.weather { // Weather effects (damage only)
       case .sandstorm:
          let types1 = battle_state.activePokemons[0].pokemon.species.type
          let types2 = battle_state.activePokemons[1].pokemon.species.type
@@ -546,10 +583,18 @@ func battle(trainers: inout [Trainer], behavior: (State, Int) -> Move) -> () {
       default:
          break
       }
-      /* Status effects not implemented yet */
+      /* Status effects (like poison) not implemented yet */
 
       // Take action
-      /* Not implemented yet */
+      let order = battle_state.activePokemons[0].pokemon.effective_stats.speed >= battle_state.activePokemons[1].pokemon.effective_stats.speed ? (first: 0, last: 1) : (first: 1, last: 0)
+      if let attack = attMove[order.first] {
+         make_attack(move: attack, trainers: &trainers, trainerNum: order.first, state: battle_state)
+         /* Check if dead and if struggle */
+      }
+      if let attack = attMove[order.last] {
+         make_attack(move: attack, trainers: &trainers, trainerNum: order.last, state: battle_state)
+         /* Check if dead and if struggle */
+      }
 
       /* CONTINUE HERE !!! */
       //  let attMove = behavior(battle_state, trainers[battle_state.turn])
