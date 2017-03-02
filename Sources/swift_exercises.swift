@@ -484,13 +484,26 @@ func make_attack(move: Move, trainers: inout [Trainer], trainerNum: Int, state: 
    switch move.category {
    case .physical:
       let damageDealt = damage(environment: state.environment, pokemon: state.activePokemons[trainerNum].pokemon, move: move, target: state.activePokemons[1-trainerNum].pokemon)
-      trainers[1-trainerNum].pokemons[1-trainerNum].hitpoints = trainers[1-trainerNum].pokemons[1-trainerNum].hitpoints > damageDealt ? trainers[1-trainerNum].pokemons[1-trainerNum].hitpoints - damageDealt : 0
+      trainers[1-trainerNum].pokemons[state.activePokemons[1-trainerNum].index].hitpoints = trainers[1-trainerNum].pokemons[state.activePokemons[1-trainerNum].index].hitpoints > damageDealt ? trainers[1-trainerNum].pokemons[1-trainerNum].hitpoints - damageDealt : 0
+      if move.name == "Struggle" {
+         trainers[trainerNum].pokemons[state.activePokemons[trainerNum].index].hitpoints = trainers[trainerNum].pokemons[state.activePokemons[trainerNum].index].hitpoints > damageDealt/4 ? trainers[trainerNum].pokemons[trainerNum].hitpoints - damageDealt/4 : 0
+      }
    case .special:
       /* Not implemented yet */
       break
    case .status:
       /* Not implemented yet */
       break
+   }
+}
+
+func has_fainted(state: inout State, trainers: [Trainer], trainerNum: Int) -> Bool {
+   let pokeIndex = state.activePokemons[trainerNum].index
+   if trainers[trainerNum].pokemons[pokeIndex].hitpoints == 0 { // if dead
+      state.remaining_pokemons[trainerNum] = state.remaining_pokemons[trainerNum].filter{$0 != pokeIndex} // not available anymore
+      return true
+   } else {
+      return false
    }
 }
 
@@ -589,37 +602,37 @@ func battle(trainers: inout [Trainer], behavior: (State, Int) -> Move) -> () {
       let order = battle_state.activePokemons[0].pokemon.effective_stats.speed >= battle_state.activePokemons[1].pokemon.effective_stats.speed ? (first: 0, last: 1) : (first: 1, last: 0)
       if let attack = attMove[order.first] {
          make_attack(move: attack, trainers: &trainers, trainerNum: order.first, state: battle_state)
-         /* Check if dead and if struggle */
+         if has_fainted(state: &battle_state, trainers: trainers, trainerNum: order.last) {
+            if battle_state.remaining_pokemons[order.last].isEmpty {
+               break FIGHT
+            } else {
+               change_pokemon(state: &battle_state, trainers: trainers, trainerNum: order.last)
+            }
+         }
+         if has_fainted(state: &battle_state, trainers: trainers, trainerNum: order.first) {
+            if battle_state.remaining_pokemons[order.first].isEmpty {
+               break FIGHT
+            } else {
+               change_pokemon(state: &battle_state, trainers: trainers, trainerNum: order.first)
+            }
+         }
       }
       if let attack = attMove[order.last] {
          make_attack(move: attack, trainers: &trainers, trainerNum: order.last, state: battle_state)
-         /* Check if dead and if struggle */
+         if has_fainted(state: &battle_state, trainers: trainers, trainerNum: order.last) {
+            if battle_state.remaining_pokemons[order.last].isEmpty {
+               break FIGHT
+            } else {
+               change_pokemon(state: &battle_state, trainers: trainers, trainerNum: order.last)
+            }
+         }
+         if has_fainted(state: &battle_state, trainers: trainers, trainerNum: order.first) {
+            if battle_state.remaining_pokemons[order.first].isEmpty {
+               break FIGHT
+            } else {
+               change_pokemon(state: &battle_state, trainers: trainers, trainerNum: order.first)
+            }
+         }
       }
-
-      /* CONTINUE HERE !!! */
-      //  let attMove = behavior(battle_state, trainers[battle_state.turn])
-      //  let attDamage = damage(environment: battle_state.environment, pokemon: battle_state.activePokemons.attacking, move: attMove, target: battle_state.activePokemons.defending)
-      //  trainers[1-battle_state.turn].pokemons[battle_state.activeIDs.defending].hitpoints = trainers[1-battle_state.turn].pokemons[battle_state.activeIDs.defending].hitpoints > attDamage ? trainers[1-battle_state.turn].pokemons[battle_state.activeIDs.defending].hitpoints - attDamage : 0
-      //  if trainers[1-battle_state.turn].pokemons[battle_state.activeIDs.defending].hitpoints == 0 {
-      //     battle_state.remaining_pokemons[1-battle_state.turn] = battle_state.remaining_pokemons[1-battle_state.turn].filter{$0 != battle_state.activeIDs.defending}
-      //     if battle_state.remaining_pokemons[1-battle_state.turn].isEmpty {
-      //        break
-      //     } else {
-      //        battle_state.activeIDs.defending = battle_state.remaining_pokemons[1-battle_state.turn][0] // Cycle to next pokemon
-      //        battle_state.activePokemons.defending = trainers[1-battle_state.turn].pokemons[battle_state.activeIDs.defending]
-      //     }
-      //  }
-      //  if attMove.name == "Struggle" {
-      //     trainers[battle_state.turn].pokemons[battle_state.activeIDs.attacking].hitpoints = trainers[battle_state.turn].pokemons[battle_state.activeIDs.attacking].hitpoints > attDamage/4 ? trainers[battle_state.turn].pokemons[battle_state.activeIDs.attacking].hitpoints - attDamage/4 : 0
-      //     if trainers[battle_state.turn].pokemons[battle_state.activeIDs.attacking].hitpoints == 0 {
-      //        battle_state.remaining_pokemons[battle_state.turn] = battle_state.remaining_pokemons[battle_state.turn].filter{$0 != battle_state.activeIDs.attacking}
-      //        if battle_state.remaining_pokemons[battle_state.turn].isEmpty {
-      //           break
-      //        } else {
-      //           battle_state.activeIDs.attacking = battle_state.remaining_pokemons[battle_state.turn][0] // Cycle to next pokemon
-      //           battle_state.activePokemons.attacking = trainers[battle_state.turn].pokemons[battle_state.activeIDs.attacking]
-      //        }
-      //     }
-      //  }
-   }
+   } // FIGHT loop
 }
