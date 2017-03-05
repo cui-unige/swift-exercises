@@ -125,8 +125,54 @@ func ==(lhs: Species, rhs: Species) -> Bool {
 // Do you use an enum, a map or constants/variables?
 // http://bulbapedia.bulbagarden.net/wiki/List_of_Pokémon_by_National_Pokédex_number
 
-// Dracaufeu
-/*
+// Carapuce Arthur Louis Deschamps
+/* Some moves/attacks definition */
+let bubble = Move(
+    id: 1,
+    name: "Bubble",
+    description: "A spray of countless bubbles is jetted at the opposing Pokémon. This may also lower their Speed stat.",
+    category: Category.special,
+    type: Type.water,
+    power: 40,
+    accuracy: 100,
+    powerpoints: 30,
+    priority: 1
+)
+
+let water_gun = Move(
+    id: 2,
+    name: "Water Gun",
+    description: "The target is blasted with a forceful shot of water.",
+    category: Category.special,
+    type: Type.water,
+    power: 40,
+    accuracy: 100,
+    powerpoints: 25,
+    priority: 1
+)
+
+/* Squirtle definition */
+let squirtle_stat = Stats(
+    hitpoints: 44,
+    attack: 48,
+    defense: 65,
+    special_attack: 50,
+    special_defense: 64,
+    speed: 43
+)
+
+let squirtle = Species(
+    id: 007,
+    name: "Squirtle",
+    evolutions: [],
+    attacks: [water_gun, bubble],
+    type: (Type.water, nil),
+    base_values: squirtle_stat
+)
+
+// Dracaufeu Théo David Giovanna
+
+// attacks
 let moveAirSlash = Move(id: 1, name: "Air Slash", description: "Air Slash deals damage and has a 30% chance of causing the target to flinch", category: Category.special, type: Type.flying, power: 75, accuracy: 95, powerpoints: 20, priority: 0)
 
 let moveDragonClaw = Move(id: 2, name: "Dragon Claw", description: "Dragon Claw deals damage with no additional effect.", category: Category.physical, type: Type.dragon, power: 80, accuracy: 100, powerpoints: 15, priority: 0)
@@ -137,14 +183,13 @@ let moveFlareBlitz = Move(id: 4, name: "Flare Blitz", description: "Flare Blitz 
 
 let moveGrowl = Move(id: 5, name: "Growl", description: "Growl lowers the target's Attack by one stage.", category: Category.status, type: Type.normal, power: 0, accuracy: 100, powerpoints: 40, priority: 0)
 
-let moveHeatWave = Move(id: 6, name: "Heat Wave", description: "Heat Wave deals damage and has a 10% chance of burning the target.", category: Category.special, type: Type.fire, power: 95, accuracy: 90, priority: 0)
-
 let charizardStat = Stats(hitpoints: 0, attack: 0, defense: 0, special_attack: 3, special_defense: 0, speed: 0)
 
-let charizard = Species(id: 006, name: "Charizard", evolutions: [], attacks: [moveAirSlash, moveDragonClaw, moveEmber, moveFlareBlitz, moveGrowl, moveHeatWave], type: (Type.fire, nil), base_values: charizardStat)
-*/
+// Dracaufeu Species
+let charizard = Species(id: 006, name: "Charizard", evolutions: [], attacks: [moveAirSlash, moveDragonClaw, moveEmber, moveFlareBlitz, moveGrowl], type: (Type.fire, nil), base_values: charizardStat)
 
-// Pikachu
+
+// Pikachu Aslam Cader
 
 // Raichu Stats
 let raichuStats = Stats(hitpoints: 60, attack: 90, defense: 55, special_attack: 90,special_defense: 80, speed: 110)
@@ -173,11 +218,22 @@ let thunderShockAttack = Move(id: 84,
                                      priority:0
                                    )
 
+let quickattack = Move(            id: 98,
+                                    name: "Quick attack",
+                                    description: "offensive quick attack",
+                                    category: .physical,
+                                    type: .normal,
+                                    power:40,
+                                    accuracy:100,
+                                    powerpoints:30,
+                                    priority:1
+                        )
+
 // Pikachu Species
 let pikachu = Species(id: 025,
                      name: "Pikachu",
                      evolutions: [raichu],
-                     attacks: [thunderShockAttack],
+                     attacks: [thunderShockAttack, quickattack],
                      type: (.electric, nil),
                      base_values: pikachuStats
              )
@@ -792,12 +848,12 @@ func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pok
   }
 
 
-  struct State{
+struct State{
 
-  }
+}
 
 
 
-  func battle(trainers: inout [Trainer], behavior: (State, Trainer) -> Move) -> () {
-      // TODO: simulate battle
-  }
+func battle(trainers: inout [Trainer], behavior: (State, Trainer) -> Move) -> () {
+    // TODO: simulate battle
+}
