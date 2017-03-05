@@ -145,45 +145,190 @@ let charizard = Species(id: 006, name: "Charizard", evolutions: [], attacks: [mo
 */
 
 // Pikachu
+
+// Raichu Stats
+let raichuStats = Stats(hitpoints: 60, attack: 90, defense: 55, special_attack: 90,special_defense: 80, speed: 110)
+
+// Raichu Species
+let raichu = Species(id: 026,
+       name: "Raichu",
+       evolutions: [],
+       attacks: [thunderShockAttack],
+       type: (.electric, nil),
+       base_values: raichuStats
+)
+
+// Pikachu Stats
 let pikachuStats = Stats(hitpoints: 35, attack: 55, defense: 30, special_attack: 50,special_defense: 40, speed: 90)
 
+// Pikachu moves
 let thunderShockAttack = Move(id: 84,
                                      name: "Thunder Shock",
                                      description: "paralyze target",
-                                     category: special,
-                                     type: electric,
+                                     category: .special,
+                                     type: .electric,
                                      power:40,
                                      accuracy:100,
                                      powerpoints:30,
-                                     priority:0 ///////////// ???????????????,
+                                     priority:0
                                    )
 
-
+// Pikachu Species
 let pikachu = Species(id: 025,
-                      name: "Pikachu",
-                      evolutions: [raichu],
-                      attacks: [thunderShockAttack],
-                      type: (electric, nil),
-                      base_values: pikachuStats
-              )
-let raichuStats = Stats(hitpoints: 60, attack: 90, defense: 55, special_attack: 90,special_defense: 80, speed: 110)
+                     name: "Pikachu",
+                     evolutions: [raichu],
+                     attacks: [thunderShockAttack],
+                     type: (.electric, nil),
+                     base_values: pikachuStats
+             )
 
-let raichu = Species(id: 026,
-                      name: "Raichu",
-                      evolutions: [],
-                      attacks: [thunderShockAttack],
-                      type: (electric, nil),
-                      base_values: raichuStats
-              )
+// Fonction qui renvoie la partie de gauche des effective stats pour cette formule: http://bulbapedia.bulbagarden.net/wiki/Statistic
+func calcule_effective_stats(Base: Int, IV: Int, EV: Int, Level: Int) -> Int {
+let var1: Int = EV/4 // Lors de la division par 4 d'un int, il devient un int
+let var2: Int = (2*Base + IV + var1)*Level/100 //idem
+
+return var2;
+}
+
+// Création de Stats_enum qui permet de faire un case dans la fonction qui suit
+enum Stats_enum {
+  case hitpoints
+  case attack
+  case defense
+  case special_attack
+  case special_defense
+  case speed
+}
+
+/* Fonction qui calcule le multiplicateur Nature selon la nature du Pokémon et le stat concerné
+
+  renvoie 110 s'il s'agit d'un increased stat
+  renvoie 90 s'il s'agit d'un decreased stat
+  sinon 100 --> pas d'augmentation ni de pénalisation
+
+  nécessaire
+  http://bulbapedia.bulbagarden.net/wiki/Nature */
+func calcul_avantage_Nature(saNature: Nature, son_stat: Stats_enum ) -> Int {
+
+    switch(saNature, son_stat){
+
+      /* Nature: hardy, n'a pas d'avantage ou d'inconvéniant */
 
 
-func calcule_effective_stats(pokemon: Pokemon, caracteristique: Species) -> Int {
-    let var1 = 2*(pokemon.species.base_values.hitpoints + pokemon.individual_values.hitpoints);
-    let var2 = pokemon.effort_values.hitpoints/4).rounded(.down);
+      /* Nature: lonely */
+    case(.lonely, .attack): return 110
+    case(.lonely, .defense): return 90
 
-    let resultat = (((var1 + var2) * pokemon.level)/100).round(.down) ;
+      /* Nature: brave */
 
-    return resultat;
+    case(.brave, .attack): return 110
+    case(.brave, .speed): return 90
+
+      /* Nature: adamant */
+
+    case(.adamant, .attack): return 110
+    case(.adamant, .special_attack): return 90
+
+      /* Nature naughty */
+
+    case(.naughty, .attack): return 110
+    case(.naughty, .special_defense): return 90
+
+      /* Nature bold */
+
+    case(.bold, .defense): return 110
+    case(.bold, .attack): return 90
+
+      /* Nature docile, rien à faire */
+
+      /* Nature relaxed */
+
+    case(.relaxed, .defense): return 110
+    case(.relaxed, .speed): return 90
+
+      /* Nature impish */
+
+    case(.impish, .defense): return 110
+    case(.impish, .special_attack): return 90
+
+      /* Nature lax */
+
+    case(.lax, .defense): return 110
+    case(.lax, .special_defense): return 90
+
+      /* Nature timid */
+
+    case(.timid, .speed): return 110
+    case(.timid, .attack): return 90
+
+      /* Nature hasty */
+
+    case(.hasty, .speed): return 110
+    case(.hasty, .defense): return 90
+
+      /* Nature serious, rien à faire */
+
+
+      /* Nature jolly */
+
+    case(.jolly, .speed): return 110
+    case(.jolly, .special_attack): return 90
+
+      /* Nature naive */
+
+    case(.naive, .speed): return 110
+    case(.naive, .special_defense): return 90
+
+      /* Nature modest */
+
+    case(.modest, .special_attack): return 110
+    case(.modest, .attack): return 90
+
+      /* Nature mild */
+
+    case(.mild, .special_attack): return 110
+    case(.mild, .defense): return 90
+
+      /* Nature quiet */
+
+    case(.quiet, .special_attack): return 110
+    case(.quiet, .speed): return 90
+
+      /* Nature bashful, rien à faire */
+
+
+      /* Nature rash */
+
+    case(.rash, .special_attack): return 110
+    case(.rash, .special_defense): return 90
+
+      /* Nature calm */
+
+    case(.calm, .special_defense): return 110
+    case(.calm, .attack): return 90
+
+      /* Nature gentle */
+
+    case(.gentle, .special_defense): return 110
+    case(.gentle, .defense): return 90
+
+      /* Nature sassy */
+
+    case(.sassy, .special_defense): return 110
+    case(.sassy, .speed): return 90
+
+      /* Nature careful */
+
+    case(.careful, .special_defense): return 110
+    case(.careful, .special_attack): return 90
+
+      /* Nature quirky, RIEN à faire */
+
+      /* Cas par défaut (100%) */
+
+    default: return 100
+
+    }
 }
 
 
@@ -200,25 +345,25 @@ struct Pokemon {
     let individual_values : Stats
     let effort_values     : Stats
     var effective_stats   : Stats { // effective_stats for Generations I and II)
-                              get { // finir la multiplication par * Nature
-                                  let hitpoints: Int = /*((((self.species.base_values.hitpoints + self.individual_values.hitpoints)*2 + (self.effort_values.hitpoints/4).rounded(.down)) * self.level)/100).round(.down)*/ calcule_effective_stats(pokemon: self, caracteristique: self.species.hitpoints)+ self.level + 10;
-                                  let attack: Int = 0 ; /*((((self.species.base_values.attack + self.individual_values.attack)*2 + (self.effort_values.attack/4).rounded(.down)) * self.level)/100).round(.down) + 5 // * Nature */
-                              */
-                                  let defense: Int = 0;/*((((self.species.base_values.defense + self.individual_values.defense)*2 + (self.effort_values.defense/4).rounded(.down)) * self.level)/100).round(.down) + 5  //  * Nature */
-                              */
-                                  let special_attack: Int = 0 ;/*((((self.species.base_values.special_attack + self.individual_values.special_attack)*2 + (self.effort_values.special_attack/4).rounded(.down)) * self.level)/100).round(.down) + 5 // * Nature
-                              */
-                                  let special_defense: Int = 0 ;/*((((self.species.base_values.special_defense + self.individual_values.special_defense)*2 + (self.effort_values.special_defense/4).rounded(.down)) * self.level)/100).round(.down) + 5 // * Nature
-                              */
-                                  let speed: Int = 0 ;/*((((self.species.base_values.speed + self.individual_values.speed)*2 + (self.effort_values.speed/4).rounded(.down)) * self.level)/100).round(.down) + 5 // * Nature
-                        */      }
+                            get{ // chercher comment faire pour la multiplication par Nature
+                                  let hitpoints: Int = calcule_effective_stats(Base:self.species.base_values.hitpoints, IV: self.individual_values.hitpoints, EV: self.effort_values.hitpoints, Level: self.level) + self.level + 10
+                                  let attack: Int = calcule_effective_stats(Base: self.species.base_values.attack, IV: self.individual_values.attack, EV: self.effort_values.attack, Level: self.level) * calcul_avantage_Nature(saNature: self.nature, son_stat: .attack)/100
+                                  let defense: Int = calcule_effective_stats(Base: self.species.base_values.defense, IV: self.individual_values.defense, EV: self.effort_values.defense, Level:self.level) * calcul_avantage_Nature(saNature: self.nature, son_stat: .defense)/100
+                                  let special_attack: Int = calcule_effective_stats(Base: self.species.base_values.special_attack, IV: self.individual_values.special_attack, EV: self.effort_values.special_attack, Level:self.level) * calcul_avantage_Nature(saNature: self.nature, son_stat: .special_attack)/100
+                                  let special_defense: Int = calcule_effective_stats(Base: self.species.base_values.special_defense , IV: self.individual_values.special_defense, EV: self.effort_values.special_defense, Level:self.level) * calcul_avantage_Nature(saNature: self.nature, son_stat: .special_defense)/100
+                                  let speed: Int = calcule_effective_stats(Base: self.species.base_values.speed, IV: self.individual_values.speed, EV: self.effort_values.speed, Level:self.level) * calcul_avantage_Nature(saNature: self.nature, son_stat: .speed)/100
+
+                                  // On retourne la structure calculé
+                                  return Stats(hitpoints: hitpoints, attack: attack, defense: defense, special_attack: special_attack, special_defense: special_defense, speed: speed)
                             }
+
+                          }
     // TODO: implement the effective stats as a computed property:
     // https://developer.apple.com/library/content/documentation/Swift/Conceptual/Swift_Programming_Language/Properties.html#//apple_ref/doc/uid/TP40014097-CH14-ID259
     // var effective_stats   : Stats {
     // }
 }
-/*
+
 struct Trainer {
     let pokemons : [Pokemon]
 }
@@ -228,29 +373,431 @@ struct Environment {
     let terrain : Terrain
 }
 
-// http://bulbapedia.bulbagarden.net/wiki/Type/Type_chart
 func typeModifier(attacking: Type, defending : Type) -> Double {
     // TODO: encode type/type chart
-    return 1
-}
+    switch (attacking, defending){
 
-// http://bulbapedia.bulbagarden.net/wiki/Damage
+    /* Attacking Type normal */
+    case (.normal, .normal)   : return 1
+    case (.normal, .fighting) : return 1
+    case (.normal, .flying)   : return 1
+    case (.normal, .poison)   : return 1
+    case (.normal, .ground)   : return 1
+    case (.normal, .rock)     : return 0.5
+    case (.normal, .bug)      : return 1
+    case (.normal, .ghost)    : return 0
+    case (.normal, .steel)    : return 0.5
+    case (.normal, .fire)     : return 1
+    case (.normal, .water)    : return 1
+    case (.normal, .grass)    : return 1
+    case (.normal, .electric) : return 1
+    case (.normal, .psychic)  : return 1
+    case (.normal, .ice)      : return 1
+    case (.normal, .dragon)   : return 1
+    case (.normal, .dark)     : return 1
+    case (.normal, .fairy)    : return 1
+
+    /* Attacking Type fighting */
+
+    case(.fighting, .normal)   : return 2
+    case(.fighting, .fighting) : return 1
+    case(.fighting, .flying)   : return 0.5
+    case(.fighting, .poison)   : return 0.5
+    case(.fighting, .ground)   : return 1
+    case(.fighting, .rock)     : return 2
+    case(.fighting, .bug)      : return 0.5
+    case(.fighting, .ghost)    : return 0
+    case(.fighting, .steel)    : return 2
+    case(.fighting, .fire)     : return 1
+    case(.fighting, .water)    : return 1
+    case(.fighting, .grass)    : return 1
+    case(.fighting, .electric) : return 1
+    case(.fighting, .psychic)  : return 0.5
+    case(.fighting, .ice)      : return 2
+    case(.fighting, .dragon)   : return 1
+    case(.fighting, .dark)     : return 2
+    case(.fighting, .fairy)    : return 0.5
+
+    /* Attacking Type flying */
+
+    case(.flying, .normal)   : return 1
+    case(.flying, .fighting) : return 2
+    case(.flying, .flying)   : return 1
+    case(.flying, .poison)   : return 1
+    case(.flying, .ground)   : return 1
+    case(.flying, .rock)     : return 0.5
+    case(.flying, .bug)      : return 2
+    case(.flying, .ghost)    : return 1
+    case(.flying, .steel)    : return 0.5
+    case(.flying, .fire)     : return 1
+    case(.flying, .water)    : return 1
+    case(.flying, .grass)    : return 2
+    case(.flying, .electric) : return 0.5
+    case(.flying, .psychic)  : return 1
+    case(.flying, .ice)      : return 1
+    case(.flying, .dragon)   : return 1
+    case(.flying, .dark)     : return 1
+    case(.flying, .fairy)    : return 1
+
+    /* Attacking Type poison */
+
+    case (.poison, .normal)   : return 1
+    case (.poison, .fighting) : return 1
+    case (.poison, .flying)   : return 1
+    case (.poison, .poison)   : return 0.5
+    case (.poison, .ground)   : return 0.5
+    case (.poison, .rock)     : return 0.5
+    case (.poison, .bug)      : return 1
+    case (.poison, .ghost)    : return 0.5
+    case (.poison, .steel)    : return 0
+    case (.poison, .fire)     : return 1
+    case (.poison, .water)    : return 1
+    case (.poison, .grass)    : return 2
+    case (.poison, .electric) : return 1
+    case (.poison, .psychic)  : return 1
+    case (.poison, .ice)      : return 1
+    case (.poison, .dragon)   : return 1
+    case (.poison, .dark)     : return 1
+    case (.poison, .fairy)    : return 2
+
+    /* Attacking Type ground */
+
+    case(.ground, .normal)   : return 1
+    case(.ground, .fighting) : return 1
+    case(.ground, .flying)   : return 0
+    case(.ground, .poison)   : return 2
+    case(.ground, .ground)   : return 1
+    case(.ground, .rock)     : return 2
+    case(.ground, .bug)      : return 0.5
+    case(.ground, .ghost)    : return 1
+    case(.ground, .steel)    : return 2
+    case(.ground, .fire)     : return 2
+    case(.ground, .water)    : return 1
+    case(.ground, .grass)    : return 0.5
+    case(.ground, .electric) : return 2
+    case(.ground, .psychic)  : return 1
+    case(.ground, .ice)      : return 1
+    case(.ground, .dragon)   : return 1
+    case(.ground, .dark)     : return 1
+    case(.ground, .fairy)    : return 1
+
+    /* Attacking Type rock */
+
+    case(.rock, .normal)   : return 1
+    case(.rock, .fighting) : return 0.5
+    case(.rock, .flying)   : return 2
+    case(.rock, .poison)   : return 1
+    case(.rock, .ground)   : return 0.5
+    case(.rock, .rock)     : return 1
+    case(.rock, .bug)      : return 2
+    case(.rock, .ghost)    : return 1
+    case(.rock, .steel)    : return 0.5
+    case(.rock, .fire)     : return 2
+    case(.rock, .water)    : return 1
+    case(.rock, .grass)    : return 1
+    case(.rock, .electric) : return 1
+    case(.rock, .psychic)  : return 1
+    case(.rock, .ice)      : return 2
+    case(.rock, .dragon)   : return 1
+    case(.rock, .dark)     : return 1
+    case(.rock, .fairy)    : return 1
+
+    /*  Attacking Type bug */
+
+    case(.bug, .normal)   : return 1
+    case(.bug, .fighting) : return 0.5
+    case(.bug, .flying)   : return 0.5
+    case(.bug, .poison)   : return 0.5
+    case(.bug, .ground)   : return 1
+    case(.bug, .rock)     : return 1
+    case(.bug, .bug)      : return 1
+    case(.bug, .ghost)    : return 0.5
+    case(.bug, .steel)    : return 0.5
+    case(.bug, .fire)     : return 0.5
+    case(.bug, .water)    : return 1
+    case(.bug, .grass)    : return 2
+    case(.bug, .electric) : return 1
+    case(.bug, .psychic)  : return 2
+    case(.bug, .ice)      : return 1
+    case(.bug, .dragon)   : return 1
+    case(.bug, .dark)     : return 2
+    case(.bug, .fairy)    : return 0.5
+
+
+    /* Attacking Type ghost */
+
+    case(.ghost, .normal)   : return 0
+    case(.ghost, .fighting) : return 1
+    case(.ghost, .flying)   : return 1
+    case(.ghost, .poison)   : return 1
+    case(.ghost, .ground)   : return 1
+    case(.ghost, .rock)     : return 1
+    case(.ghost, .bug)      : return 1
+    case(.ghost, .ghost)    : return 2
+    case(.ghost, .steel)    : return 1
+    case(.ghost, .fire)     : return 1
+    case(.ghost, .water)    : return 1
+    case(.ghost, .grass)    : return 1
+    case(.ghost, .electric) : return 1
+    case(.ghost, .psychic)  : return 2
+    case(.ghost, .ice)      : return 1
+    case(.ghost, .dragon)   : return 1
+    case(.ghost, .dark)     : return 0.5
+    case(.ghost, .fairy)    : return 1
+
+    /* Attacking Type: steel */
+
+    case(.steel, .normal): return 1
+    case(.steel, .fighting): return 1
+    case(.steel, .flying): return 1
+    case(.steel, .poison): return 1
+    case(.steel, .ground): return 1
+    case(.steel, .rock): return 2
+    case(.steel, .bug): return 1
+    case(.steel, .ghost): return 1
+    case(.steel, .steel): return 0.5
+    case(.steel, .fire): return 0.5
+    case(.steel, .water): return 0.5
+    case(.steel, .grass): return 1
+    case(.steel, .electric): return 0.5
+    case(.steel, .psychic): return 1
+    case(.steel, .ice): return 2
+    case(.steel, .dragon): return 1
+    case(.steel, .dark): return 1
+    case(.steel, .fairy): return 2
+
+    /* Attacking Type: fire */
+
+    case(.fire, .normal): return 1
+    case(.fire, .fighting): return 1
+    case(.fire, .flying): return 1
+    case(.fire, .poison): return 1
+    case(.fire, .ground): return 1
+    case(.fire, .rock): return 0.5
+    case(.fire, .bug): return 2
+    case(.fire, .ghost): return 1
+    case(.fire, .steel): return 2
+    case(.fire, .fire): return 0.5
+    case(.fire, .water): return 0.5
+    case(.fire, .grass): return 2
+    case(.fire, .electric): return 1
+    case(.fire, .psychic): return 1
+    case(.fire, .ice): return 2
+    case(.fire, .dragon): return 0.5
+    case(.fire, .dark): return 1
+    case(.fire, .fairy): return 1
+
+    /* Attacking Type: water */
+
+    case(.water, .normal): return 1
+    case(.water, .fighting): return 1
+    case(.water, .flying): return 1
+    case(.water, .poison): return 1
+    case(.water, .ground): return 2
+    case(.water, .rock): return 2
+    case(.water, .bug): return 1
+    case(.water, .ghost): return 1
+    case(.water, .steel): return 1
+    case(.water, .fire): return 2
+    case(.water, .water): return 0.5
+    case(.water, .grass): return 0.5
+    case(.water, .electric): return 1
+    case(.water, .psychic): return 1
+    case(.water, .ice): return 1
+    case(.water, .dragon): return 0.5
+    case(.water, .dark): return 1
+    case(.water, .fairy): return 1
+
+    /* Attacking Type: grass */
+
+    case(.grass, .normal): return 1
+    case(.grass, .fighting): return 1
+    case(.grass, .flying): return 0.5
+    case(.grass, .poison): return 0.5
+    case(.grass, .ground): return 2
+    case(.grass, .rock): return 2
+    case(.grass, .bug): return 0.5
+    case(.grass, .ghost): return 1
+    case(.grass, .steel): return 0.5
+    case(.grass, .fire): return 0.5
+    case(.grass, .water): return 2
+    case(.grass, .grass): return 0.5
+    case(.grass, .electric): return 1
+    case(.grass, .psychic): return 1
+    case(.grass, .ice): return 1
+    case(.grass, .dragon): return 0.5
+    case(.grass, .dark): return 1
+    case(.grass, .fairy): return 1
+
+    /* Attacking Type: electric */
+
+    case(.electric, .normal): return 1
+    case(.electric, .fighting): return 1
+    case(.electric, .flying): return 2
+    case(.electric, .poison): return 1
+    case(.electric, .ground): return 0
+    case(.electric, .rock): return 1
+    case(.electric, .bug): return 1
+    case(.electric, .ghost): return 1
+    case(.electric, .steel): return 1
+    case(.electric, .fire): return 1
+    case(.electric, .water): return 2
+    case(.electric, .grass): return 0.5
+    case(.electric, .electric): return 0.5
+    case(.electric, .psychic): return 1
+    case(.electric, .ice): return 1
+    case(.electric, .dragon): return 0.5
+    case(.electric, .dark): return 1
+    case(.electric, .fairy): return 1
+
+    /* Attacking Type: psychic */
+
+    case(.psychic, .normal): return 1
+    case(.psychic, .fighting): return 2
+    case(.psychic, .flying): return 1
+    case(.psychic, .poison): return 2
+    case(.psychic, .ground): return 1
+    case(.psychic, .rock): return 1
+    case(.psychic, .bug): return 1
+    case(.psychic, .ghost): return 1
+    case(.psychic, .steel): return 0.5
+    case(.psychic, .fire): return 1
+    case(.psychic, .water): return 1
+    case(.psychic, .grass): return 1
+    case(.psychic, .electric): return 1
+    case(.psychic, .psychic): return 0.5
+    case(.psychic, .ice): return 1
+    case(.psychic, .dragon): return 1
+    case(.psychic, .dark): return 0
+    case(.psychic, .fairy): return 1
+
+    /* Attacking Type: ice */
+
+    case(.ice, .normal): return 1
+    case(.ice, .fighting): return 1
+    case(.ice, .flying): return 2
+    case(.ice, .poison): return 1
+    case(.ice, .ground): return 2
+    case(.ice, .rock): return 1
+    case(.ice, .bug): return 1
+    case(.ice, .ghost): return 1
+    case(.ice, .steel): return 0.5
+    case(.ice, .fire): return 0.5
+    case(.ice, .water): return 0.5
+    case(.ice, .grass): return 2
+    case(.ice, .electric): return 1
+    case(.ice, .psychic): return 1
+    case(.ice, .ice): return 0.5
+    case(.ice, .dragon): return 2
+    case(.ice, .dark): return 1
+    case(.ice, .fairy): return 1
+
+    /* Attacking Type: dragon */
+
+    case(.dragon, .normal): return 1
+    case(.dragon, .fighting): return 1
+    case(.dragon, .flying): return 1
+    case(.dragon, .poison): return 1
+    case(.dragon, .ground): return 1
+    case(.dragon, .rock): return 1
+    case(.dragon, .bug): return 1
+    case(.dragon, .ghost): return 1
+    case(.dragon, .steel): return 0.5
+    case(.dragon, .fire): return 1
+    case(.dragon, .water): return 1
+    case(.dragon, .grass): return 1
+    case(.dragon, .electric): return 1
+    case(.dragon, .psychic): return 1
+    case(.dragon, .ice): return 1
+    case(.dragon, .dragon): return 2
+    case(.dragon, .dark): return 1
+    case(.dragon, .fairy): return 0
+
+    /* Attacking Type: dark */
+
+    case(.dark, .normal): return 1
+    case(.dark, .fighting): return 0.5
+    case(.dark, .flying): return 1
+    case(.dark, .poison): return 1
+    case(.dark, .ground): return 1
+    case(.dark, .rock): return 1
+    case(.dark, .bug): return 1
+    case(.dark, .ghost): return 2
+    case(.dark, .steel): return 1
+    case(.dark, .fire): return 1
+    case(.dark, .water): return 1
+    case(.dark, .grass): return 1
+    case(.dark, .electric): return 1
+    case(.dark, .psychic): return 2
+    case(.dark, .ice): return 1
+    case(.dark, .dragon): return 1
+    case(.dark, .dark): return 0.5
+    case(.dark, .fairy): return 0.5
+
+    /* Attacking Type: fairy */
+
+    case(.fairy, .normal): return 1
+    case(.fairy, .fighting): return 2
+    case(.fairy, .flying): return 1
+    case(.fairy, .poison): return 0.5
+    case(.fairy, .ground): return 1
+    case(.fairy, .rock): return 1
+    case(.fairy, .bug): return 1
+    case(.fairy, .ghost): return 1
+    case(.fairy, .steel): return 0.5
+    case(.fairy, .fire): return 0.5
+    case(.fairy, .water): return 1
+    case(.fairy, .grass): return 1
+    case(.fairy, .electric): return 1
+    case(.fairy, .psychic): return 1
+    case(.fairy, .ice): return 1
+    case(.fairy, .dragon): return 2
+    case(.fairy, .dark): return 2
+    case(.fairy, .fairy): return 1
+
+    }
+
+  }
+
+/* Fonction damage
+http://bulbapedia.bulbagarden.net/wiki/Damage
+
+--Est ce que l'on doit faire le modifier comme dans la formule?
+--Si attaque status: damage = 0?
+
+ */
+
 func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pokemon) -> Int {
-    // TODO
-    //let damage_value = ( (2*pokemon.level+10)*
-    let damage_value = 0;
-    return damage_value;
-}
 
-struct State {
-      /*
-      Pokemon1: Pokemon;
-      Pokemon2: Pokemon;
+    let var1_damage: Int = ((2 * pokemon.level)/5) + 2
 
-      */
-    // TODO: describe a battle state
-}
+    switch (move.category){
 
-func battle(trainers: inout [Trainer], behavior: (State, Trainer) -> Move) -> () {
-    // TODO: simulate battle
-}
+    case(.physical):
+
+        let var2_damage: Int = (var1_damage * move.power * pokemon.effective_stats.attack) / (50*target.effective_stats.defense)
+
+        return Int(Double(var2_damage + 2) * typeModifier(attacking: pokemon.species.type.0, defending : target.species.type.0))
+
+    case(.special):
+
+      let var2_damage: Int = (var1_damage * move.power * pokemon.effective_stats.special_attack) / (50*target.effective_stats.special_defense)
+
+      return Int(Double(var2_damage + 2) * typeModifier(attacking: pokemon.species.type.0, defending : target.species.type.0))
+
+    case(.status): return 0
+  }
+
+
+  }
+
+
+  struct State{
+
+  }
+
+
+
+  func battle(trainers: inout [Trainer], behavior: (State, Trainer) -> Move) -> () {
+      // TODO: simulate battle
+  }
