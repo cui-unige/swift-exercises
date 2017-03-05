@@ -190,68 +190,145 @@ let charizardSpecie = Species(id: 006, name: "Charizard", evolutions: [], attack
 
 // ####### Other pokemons - given by Arthur ########## //
 
-//let bubble = Move(
-//    id: 1,
-//    name: "Bubble",
-//    description: "A spray of countless bubbles is jetted at the opposing Pokémon. This may also lower their Speed stat.",
-//    category: Category.special,
-//    type: Type.water,
-//    power: 40,
-//    accuracy: 100,
-//    powerpoints: 30,
-//    priority: 1
-//)
-//
-//let water_gun = Move(
-//    id: 2,
-//    name: "Water Gun",
-//    description: "The target is blasted with a forceful shot of water.",
-//    category: Category.special,
-//    type: Type.water,
-//    power: 40,
-//    accuracy: 100,
-//    powerpoints: 25,
-//    priority: 1
-//)
-//
-///* Squirtle definition */
-//let squirtleBaseValues = Stats(
-//    hitpoints: 44,
-//    attack: 48,
-//    defense: 65,
-//    special_attack: 50,
-//    special_defense: 64,
-//    speed: 43
-//)
-//
-//let squirtleIndividualValues = Stats(
-//    hitpoints: 47,
-//    attack: 42,
-//    defense: 69,
-//    special_attack: 47,
-//    special_defense: 61,
-//    speed: 41
-//)
-//
-//let squirtleEffortValues = Stats(
-//    hitpoints: 0,
-//    attack: 0,
-//    defense: 1,
-//    special_attack: 0,
-//    special_defense: 0,
-//    speed: 0
-//)
-//
-//
-//
-//let squirtleSpecie = Species(
-//    id: 007,
-//    name: "Squirtle",
-//    evolutions: [wartortle, blastoise],
-//    attacks: [water_gun, bubble],
-//    type: (Type.water, nil),
-//    base_values: squirtle_stat
-//)
+let bubble = Move(
+    id: 1,
+    name: "Bubble",
+    description: "A spray of countless bubbles is jetted at the opposing Pokémon. This may also lower their Speed stat.",
+    category: Category.special,
+    type: Type.water,
+    power: 40,
+    accuracy: 100,
+    powerpoints: 30,
+    priority: 1
+)
+
+let water_gun = Move(
+    id: 2,
+    name: "Water Gun",
+    description: "The target is blasted with a forceful shot of water.",
+    category: Category.special,
+    type: Type.water,
+    power: 40,
+    accuracy: 100,
+    powerpoints: 25,
+    priority: 1
+)
+
+/* Squirtle definition */
+let squirtleBaseValues = Stats(
+    hitpoints: 44,
+    attack: 48,
+    defense: 65,
+    special_attack: 50,
+    special_defense: 64,
+    speed: 43
+)
+
+let squirtleIndividualValues = Stats(
+    hitpoints: 47,
+    attack: 42,
+    defense: 69,
+    special_attack: 47,
+    special_defense: 61,
+    speed: 41
+)
+
+let squirtleEffortValues = Stats(
+    hitpoints: 0,
+    attack: 0,
+    defense: 1,
+    special_attack: 0,
+    special_defense: 0,
+    speed: 0
+)
+
+
+
+let squirtleSpecie = Species(
+    id: 007,
+    name: "Squirtle",
+    evolutions: [],
+    attacks: [water_gun, bubble],
+    type: (Type.water, nil),
+    base_values: squirtleBaseValues
+)
+
+// ####### Other pokemons - given by Aslam ########## //
+
+
+// Raichu Stats
+let raichuBaseValues = Stats(hitpoints: 60, attack: 90, defense: 55, special_attack: 90,special_defense: 80, speed: 110)
+
+let raichuIndividualValues = Stats(
+    hitpoints: 58,
+    attack: 94,
+    defense: 53,
+    special_attack: 91,
+    special_defense: 80,
+    speed: 110
+)
+
+let raichuEffortValues = Stats(
+    hitpoints: 0,
+    attack: 0,
+    defense: 0,
+    special_attack: 0,
+    special_defense: 0,
+    speed: 3
+)
+
+
+// Raichu Species
+let raichuSpecie = Species(id: 026,
+                     name: "Raichu",
+                     evolutions: [],
+                     attacks: [thunderShockAttack],
+                     type: (.electric, nil),
+                     base_values: raichuBaseValues
+)
+
+// Pikachu Stats
+let pikachuBaseValues = Stats(hitpoints: 35, attack: 55, defense: 30, special_attack: 50,special_defense: 40, speed: 90)
+
+let pikachuIndividualValues = Stats(
+    hitpoints: 33,
+    attack: 53,
+    defense: 34,
+    special_attack: 51,
+    special_defense: 39,
+    speed: 93
+)
+
+let pikachuEffortValues = Stats(
+    hitpoints: 0,
+    attack: 0,
+    defense: 0,
+    special_attack: 0,
+    special_defense: 0,
+    speed: 2
+)
+
+
+// Pikachu moves
+let thunderShockAttack = Move(id: 84,
+                              name: "Thunder Shock",
+                              description: "paralyze target",
+                              category: .special,
+                              type: .electric,
+                              power:40,
+                              accuracy:100,
+                              powerpoints:30,
+                              priority:0
+)
+
+// Pikachu Species
+let pikachuSpecie = Species(id: 025,
+                      name: "Pikachu",
+                      evolutions: [raichuSpecie],
+                      attacks: [thunderShockAttack],
+                      type: (.electric, nil),
+                      base_values: pikachuBaseValues
+)
 
 // ############### COMPUTING EFFECTIVE STATS ############### //
 
@@ -455,20 +532,39 @@ struct State {
 
 // ############### INITIALIZATION ############### //
 
+// ############### POKEMONS ############# //
+
 let charizard_1 = Pokemon(nickname: "Jack",
-                        hitpoints: 120, size: 12, weight: 3000, experience: 0, level: 1,
+                        hitpoints: 82, size: 12, weight: 3000, experience: 0, level: 1,
                         nature: Nature.sassy, species: charizardSpecie, moves: [moveGrowl: 2, moveAirSlash: 4, moveHeatWave: 3],
                         individual_values: charizardIndividualValues, effort_values: charizardEffortValues)
 
 let charizard_2 = Pokemon(nickname: "Paul",
-                          hitpoints: 100, size: 12, weight: 3000, experience: 0, level: 1,
+                          hitpoints: 80, size: 10, weight: 5000, experience: 0, level: 1,
                           nature: Nature.sassy, species: charizardSpecie, moves: [moveGrowl: 1, moveAirSlash: 3, moveHeatWave: 1],
                           individual_values: charizardIndividualValues, effort_values: charizardEffortValues)
 
+let squirtle = Pokemon(nickname: "Arthur",
+                          hitpoints: 47, size: 3, weight: 300, experience: 0, level: 1,
+                          nature: Nature.calm, species: squirtleSpecie, moves: [bubble: 4],
+                          individual_values: squirtleIndividualValues, effort_values: squirtleEffortValues)
+
+let raichu = Pokemon(nickname: "Aslam",
+                       hitpoints: 62, size: 5, weight: 750, experience: 0, level: 1,
+                       nature: Nature.rash, species: raichuSpecie, moves: [thunderShockAttack: 5],
+                       individual_values: raichuIndividualValues, effort_values: raichuEffortValues)
+
+let pikachu = Pokemon(nickname: "Amir",
+                       hitpoints: 36, size: 2, weight: 100, experience: 0, level: 1,
+                       nature: Nature.docile, species: pikachuSpecie, moves: [thunderShockAttack: 3],
+                       individual_values: pikachuIndividualValues, effort_values: pikachuEffortValues)
+
+// ####################################### //
+
 let todaysEnvironnement = Environment(weather: Weather.harsh_sunlight(extremely: true), terrain: Terrain.grassy)
 
-var Bob = Trainer(name: "Bob", pokemons:[charizard_1])
-var Alice = Trainer(name: "Alice", pokemons: [charizard_2])
+var Bob = Trainer(name: "Bob", pokemons:[charizard_1, squirtle, pikachu])
+var Alice = Trainer(name: "Alice", pokemons: [charizard_2, raichu])
 
 var trainers=[Bob, Alice];
 
@@ -479,8 +575,7 @@ var userInput: String! = "";
 
 // ############### BATTLE ############### //
 
-let randInt1 = randomNumber(min: 0, max: Bob.pokemons.count) //So that we can randomly take a pokemon in the trainer's set
-let randInt2 = randomNumber(min: 0, max: Alice.pokemons.count)
+let randInt1 = randomNumber(min: 0, max: Alice.pokemons.count) //So that we can randomly take a pokemon in the trainer's set
 
 let randInt3 = randomNumber(min:0, max: allAttacks.count) //So that we can randomly determine which attack is going to be perfomed
 let randInt4 = randomNumber(min:0, max: allAttacks.count)
@@ -501,11 +596,58 @@ func firstPok(pokemonAttack: Pokemon, pokemonDefense: Pokemon, currentState: Sta
     }
 }
 
-var pokemonAttack = Bob.pokemons[0];
-var pokemonDefense = Alice.pokemons[0];
+var pokemonAttack = Bob.pokemons[0] //Default pokemon used for attack if player doesn't change it
+var pokemonDefense = Alice.pokemons[randInt1]; //Random pokemon for Alice
+
+// In our implementation, we play the roll of Bob. Alice's pokemon and moves are randomly selected
 
 func go() -> (){
-    firstPok(pokemonAttack: pokemonAttack, pokemonDefense: pokemonDefense,   currentState: currentState)
+    
+    print("##### MAIN BATTLE SCREEN\n");
+    print("Please select an option");
+    print("1. Fight         2. Bag         3. Pokemon         4. Run\n")
+    
+    let choice: String!
+    choice = readLine()
+    
+    if (choice == "4"){
+        print("Player ran away !\n")
+        abort()
+    }
+    
+    else if (choice == "2"){
+        print("Nothing to display. Back to main menu")
+        go()
+    }
+    
+    else if (choice == "3"){
+        print("Please select the Pokemon which you want to battle with :\n")
+        for i in 0...(Bob.pokemons.count - 1){
+            let currentPokemon = Bob.pokemons[i]
+            print("\(i+1) name: \(currentPokemon.nickname) | specie: \(currentPokemon.species.name)")
+        }
+        
+        if let typed = readLine() {
+            if let num = Int(typed) {
+                pokemonAttack = Bob.pokemons[num-1] //Selecting appropriate Pokemon
+            }
+        }
+        
+        print("Pokemon successfully selected. Back to main menu. Enter 1 to fight.\n")
+        
+        go()
+    }
+    
+    else if (choice == "1"){
+        firstPok(pokemonAttack: pokemonAttack, pokemonDefense: pokemonDefense,   currentState: currentState)
+        battle(trainers: &trainers)
+    }
+    
+    else {
+        print("Specified option does not exist. Please pay attention !\n")
+        go()
+    }
+    
 }
 
 func battle(trainers: inout [Trainer]) -> (){
