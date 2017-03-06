@@ -261,17 +261,6 @@ func typeModifier(attacking: Type, defending : Type) -> Double {
     return chart[attacking.rawValue][defending.rawValue]
 }
 
-enum Action {
-    case attack
-    case change_pokemon
-    case use_item
-    case run
-}
-
-func trainer_choose_action(trainer: Trainer) -> Action {
-    return .attack
-}
-
 // http://bulbapedia.bulbagarden.net/wiki/Damage
 func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pokemon) -> Int {
     let pkmType = pokemon.species.type;
@@ -306,6 +295,17 @@ struct State {
     let active_trainer: Int // 0 if first player, 1 if second
     let finished: Bool
     let winner: Winner
+}
+
+enum Action {
+    case attack
+    case change_pokemon
+    case use_item
+    case run
+}
+
+func choose_action(trainer: Trainer) -> Action {
+    return .attack
 }
 
 func select_pokemon(trainer: Trainer) -> Int? {
@@ -352,5 +352,47 @@ func battle_init(trainers: [Trainer]) -> State {
 // var state: State = battle_init(trainers)
 // state = battle(state)
 func battle(state: State) -> State {
-    return state
+    if(state.finished) {
+        return state
+    }
+
+    let environment: Environment = state.environment;
+
+    let active_trainer_indice: Int = state.active_trainer;
+    let other_trainer_indice: Int = (active_trainer_indice+1)%2;
+
+    let active_trainer: Trainer = state.trainers[active_trainer_indice];
+    let other_trainer: Trainer = state.trainers[other_trainer_indice];
+
+    var active_pkm_indice: Int = state.pokemon_fighting[active_trainer_indice];
+    var other_pkm_indice: Int = state.pokemon_fighting[other_trainer_indice];
+
+    var active_pkm: Pokemon = active_trainer.pokemons[active_pkm_indice];
+    var other_pkm: Pokemon = other_trainer.pokemons[other_pkm_indice];
+
+    var winner: Winner = state.winner;
+    var finished: Bool = false;
+
+    switch choose_action(trainer: active_trainer) {
+    case .attack:
+      print("lol");
+    case .run:
+      print("lol");
+    case .change_pokemon:
+      let new_indice = select_pokemon(trainer: active_trainer);
+      if(new_indice == nil) {
+          winner = (active_trainer_indice == 0) ? .p2 : .p1;
+          finished = true
+      }
+      else {
+          active_pkm_indice = new_indice!;
+          active_pkm = active_trainer.pokemons[active_pkm_indice];
+      }
+    case .use_item:
+      print("lol");
+    }
+
+    return battle(state: State( environment: environment, trainers: [active_trainer, other_trainer],
+                                pokemon_fighting: [active_pkm_indice, other_pkm_indice],
+                                active_trainer: other_trainer_indice, finished: finished, winner: winner))
 }
