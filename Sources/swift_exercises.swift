@@ -620,6 +620,8 @@ func firstPok(pokemonAttack: Pokemon, pokemonDefense: Pokemon, currentState: Sta
 
 // In our implementation, we play the roll of Bob. Alice's pokemon and moves are randomly selected
 
+var currentPokemon: Int! //Just so we know which pokemon in Bob's array we're updating later
+
 func go() -> (){
     print("\n##### MAIN BATTLE SCREEN #####\n");
     print("Please select an option");
@@ -655,7 +657,8 @@ func go() -> (){
                     print("Specified option does not exist. Please pay attention !\n")
                     go()
                 }else{
-                currentState.pokemonAttack = Bob.pokemons[num-1] //Selecting appropriate Pokemon
+                    currentPokemon = num - 1
+                    currentState.pokemonAttack = Bob.pokemons[num-1] //Selecting appropriate Pokemon
                 }
             }else{
                 print("Specified option does not exist. Please pay attention !\n")
@@ -698,7 +701,7 @@ func battle(trainers: inout [Trainer]) -> (){
         print("----------------------------------- YOUR INPUT: ", terminator: "")
         if let typed = readLine() {
             if let num = Int(typed) {
-                if (num > Bob.pokemons.count){
+                if (num > Bob.pokemons.count + 2){
                     print("Specified option does not exist. Please pay attention !\n")
                     go()
                 }else{
@@ -712,12 +715,12 @@ func battle(trainers: inout [Trainer]) -> (){
                     currentState.pokemonMoveAttack = currentState.pokemonAttack.moves[num-1] //Selecting appropriate move
                    
                     currentState.pokemonMoveAttack.powerpoints -= 1 //Decreasing PP
-                    Bob.pokemons[num - 1].moves[num - 1].powerpoints -= 1
+                    Bob.pokemons[currentPokemon].moves[num - 1].powerpoints -= 1
                     
                     if (currentState.pokemonMoveAttack.powerpoints == 0){
                         print("\n### No PP remaining for the move \(currentState.pokemonMoveAttack.name). Move deleted from available moves.")
                         currentState.pokemonAttack.moves.remove(at: num - 1) //Removing move
-                        Bob.pokemons[num - 1].moves.remove(at: num - 1)//Updating bob's pokemon
+                        Bob.pokemons[currentPokemon].moves.remove(at: num - 1)//Updating bob's pokemon
                     }else{
                     
                     currentState.pokemonAttack.moves[num-1] = currentState.pokemonMoveAttack //Updating global attacks list
@@ -733,7 +736,7 @@ func battle(trainers: inout [Trainer]) -> (){
             }
         }
         
-        damages = damage(environment: todaysEnvironnement, pokemon: currentState.pokemonAttack, move: currentState.pokemonMoveAttack, target: currentState.pokemonDefense)
+        damages = damage(environment: currentState.pokemonEnvironment, pokemon: currentState.pokemonAttack, move: currentState.pokemonMoveAttack, target: currentState.pokemonDefense)
         currentState.pokemonDefense.hitpoints = currentState.pokemonDefense.hitpoints - damages; //Remaining hitpoints
         
         //Is the pokemon dead yet?
@@ -746,8 +749,8 @@ func battle(trainers: inout [Trainer]) -> (){
         
         //Same but for Alice
         
-        print("Alice's turn!\n")
-        damages = damage(environment: todaysEnvironnement, pokemon: currentState.pokemonDefense, move: currentState.pokemonMoveDefense, target: currentState.pokemonAttack)
+        print("### Alice's turn!\n")
+        damages = damage(environment: currentState.pokemonEnvironment, pokemon: currentState.pokemonDefense, move: currentState.pokemonMoveDefense, target: currentState.pokemonAttack)
         currentState.pokemonAttack.hitpoints = currentState.pokemonAttack.hitpoints - damages;
         if currentState.pokemonAttack.hitpoints <= 0 {
             print("### Your adversary's Pokemon was killed by the last move \(currentState.pokemonMoveDefense.name) ! \(currentState.pokemonDefense.nickname) wins , \(currentState.pokemonAttack.nickname) defeated !\n")
@@ -779,11 +782,13 @@ func battle(trainers: inout [Trainer]) -> (){
     if turn == 1{
         print("The targeted pokemon suffered several damages. Current hitpoints remaining before dying: \(currentState.pokemonDefense.nickname) : \(currentState.pokemonDefense.hitpoints)");
         print("Hitpoints of attacking pokemon remaining: \(currentState.pokemonAttack.nickname) : \(currentState.pokemonAttack.hitpoints) \n");
+        print("Press Enter for next round, or any other key followed by Enter to exit: \n")
     }else{
         print("The targeted pokemon suffered several damages. Current hitpoints remaining before dying: \(currentState.pokemonAttack.nickname) : \(currentState.pokemonAttack.hitpoints)");
         print("Hitpoints of attacking pokemon remaining: \(currentState.pokemonDefense.nickname) : \(currentState.pokemonDefense.hitpoints) \n");
     }
-    print("Press Enter for next round, or any other key followed by Enter to exit: ")
+    
+    
 
     
     if turn == -1 {
@@ -794,10 +799,16 @@ func battle(trainers: inout [Trainer]) -> (){
     }
     
     while userInput == ""{
-        print("----------------------------------- YOUR INPUT: ", terminator: "")
-        userInput = readLine(); //Read user's entry
-        turn = turn*(-1); //Changing player
-        battle(trainers: &trainers); //Next round
+        if turn == 1 {
+            turn = turn*(-1); //Changing player
+            battle(trainers: &trainers); //Next round
+            print("----------------------------------- YOUR INPUT: ", terminator: "")
+            userInput = readLine(); //Read user's entry
+        }else{
+            turn = turn*(-1); //Changing player
+            battle(trainers: &trainers); //Next round
         }
+        
+    }
 }
 
