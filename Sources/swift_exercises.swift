@@ -371,25 +371,26 @@ func battle(state: State) -> State {
     var other_pkm: Pokemon = other_trainer.pokemons[other_pkm_indice];
 
     var winner: Winner = state.winner;
-    var finished: Bool = false;
+    var finished: Bool = state.finished;
 
     switch choose_action(trainer: active_trainer) {
-    case .attack:
-      print("lol");
-    case .run:
-      print("lol");
-    case .change_pokemon:
-      let new_indice = select_pokemon(trainer: active_trainer);
-      if(new_indice == nil) {
-          winner = (active_trainer_indice == 0) ? .p2 : .p1;
-          finished = true
-      }
-      else {
-          active_pkm_indice = new_indice!;
-          active_pkm = active_trainer.pokemons[active_pkm_indice];
-      }
-    case .use_item:
-      print("lol");
+        case .attack:
+          print("lol");
+        case .run:
+            winner = (active_trainer_indice == 0) ? .p2 : .p1;
+            finished = true;
+        case .change_pokemon:
+            let new_indice = select_pokemon(trainer: active_trainer);
+            if(new_indice == nil) {
+                winner = (active_trainer_indice == 0) ? .p2 : .p1;
+                finished = true
+            }
+            else {
+                active_pkm_indice = new_indice!;
+                active_pkm = active_trainer.pokemons[active_pkm_indice];
+            }
+        case .use_item:
+          print("lol");
     }
 
     return battle(state: State( environment: environment, trainers: [active_trainer, other_trainer],
