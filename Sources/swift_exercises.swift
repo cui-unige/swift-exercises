@@ -334,6 +334,31 @@ let pikachuSpecie = Species(id: 025,
 
 let allAttacksPikachu = [thunderShockAttack]
 
+// ########## other pokemon - given by kilian ############# //
+
+let FireBlast  = Move(id: 1, name: "Fire Blast",  description: "A fiery blast that scorches all. May cause a burn.",      category: Category.special,  type: Type.fire,   power: 110, accuracy: 85,  powerpoints: 5,  priority: 0)
+let SolarBeam  = Move(id: 2, name: "Solar Beam",  description: "Absorbs light in one turn, then attacks next turn.",      category: Category.special,  type: Type.grass,  power: 120, accuracy: 100, powerpoints: 10, priority: 0)
+let SunnyDay   = Move(id: 3, name: "Sunny Day",   description: "Boosts the power of FIRE- type moves for 5 turns.",       category: Category.status,   type: Type.fire,   power: 0,   accuracy: 0,   powerpoints: 5,  priority: 0)
+let ReturnRest = Move(id: 4, name: "Return/Rest", description: "Power increases with happiness, up to a maximum of 102.", category: Category.physical, type: Type.normal, power: 0,   accuracy: 100, powerpoints: 20, priority: 0)
+
+let enteiBaseValues = Stats(hitpoints: 115, attack: 115, defense: 85, special_attack: 90, special_defense: 75, speed: 100)
+
+let enteiIndividualValues = Stats(hitpoints: 115, attack: 115, defense: 85, special_attack: 90, special_defense: 75, speed: 100)
+
+let enteiEffortValues = Stats(
+    hitpoints: 1,
+    attack: 2,
+    defense: 0,
+    special_attack: 0,
+    special_defense: 0,
+    speed: 0
+)
+
+
+let enteiSpecie = Species(id: 244, name: "Entei", evolutions: [], attacks: allAttacksEntei, type: (.fire, nil), base_values: enteiBaseValues)
+
+let allAttacksEntei = [FireBlast, SolarBeam, SunnyDay, ReturnRest]
+
 // ############### COMPUTING EFFECTIVE STATS ############### //
 
 func setEffectiveStat(lvl: Int, base: Int, individual: Int, effort: Int, nature_mode: Double) -> Int {
@@ -352,7 +377,7 @@ struct Pokemon {
     let level             : Int
     let nature            : Nature
     let species           : Species
-    let moves             : [Move] // Move
+    var moves             : [Move] // Move
     let individual_values : Stats
     let effort_values     : Stats
     var effective_stats   : Stats { //Computed property
@@ -370,11 +395,11 @@ struct Pokemon {
 
 struct Trainer {
     let name : String
-    let pokemons : [Pokemon]
+    var pokemons : [Pokemon]
 }
 
 struct Environment {
-    let weather : Weather
+    var weather : Weather
     let terrain : Terrain
 }
 
@@ -559,11 +584,13 @@ let pikachu = Pokemon(nickname: "Amir",
                        nature: Nature.docile, species: pikachuSpecie, moves: allAttacksPikachu,
                        individual_values: pikachuIndividualValues, effort_values: pikachuEffortValues)
 
+let entei = Pokemon(nickname: "Kiki", hitpoints: 120, size: 5, weight: 230, experience: 0, level: 1, nature: Nature.naughty, species: enteiSpecie, moves: allAttacksEntei, individual_values: enteiIndividualValues, effort_values: enteiEffortValues)
+
 // ####################################### //
 
 let todaysEnvironnement = Environment(weather: Weather.sandstorm, terrain: Terrain.grassy)
 
-var Bob = Trainer(name: "Bob", pokemons:[raichu, charizard, pikachu])
+var Bob = Trainer(name: "Bob", pokemons:[entei, raichu, charizard, pikachu])
 var Alice = Trainer(name: "Alice", pokemons: [squirtle])
 
 var trainers=[Bob, Alice];
@@ -594,12 +621,12 @@ func firstPok(pokemonAttack: Pokemon, pokemonDefense: Pokemon, currentState: Sta
 // In our implementation, we play the roll of Bob. Alice's pokemon and moves are randomly selected
 
 func go() -> (){
-    
     print("\n##### MAIN BATTLE SCREEN #####\n");
     print("Please select an option");
     print("1. Fight         2. Bag         3. Pokemon         4. Run\n")
     
     let choice: String!
+    print("----------------------------------- YOUR INPUT: ", terminator: "")
     choice = readLine()
     
     if (choice == "4"){
@@ -618,13 +645,21 @@ func go() -> (){
         //Getting user's entry to select pokemon
         
         for i in 0...(Bob.pokemons.count - 1){
-            let currentPokemon = Bob.pokemons[i]
-            print("\(i+1) name: \(currentPokemon.nickname) | specie: \(currentPokemon.species.name)")
+            print("\(i+1) name: \(Bob.pokemons[i].nickname) | specie: \(Bob.pokemons[i].species.name)")
         }
         
+        print("----------------------------------- YOUR INPUT: ", terminator: "")
         if let typed = readLine() {
             if let num = Int(typed) {
+                if (num > Bob.pokemons.count){
+                    print("Specified option does not exist. Please pay attention !\n")
+                    go()
+                }else{
                 currentState.pokemonAttack = Bob.pokemons[num-1] //Selecting appropriate Pokemon
+                }
+            }else{
+                print("Specified option does not exist. Please pay attention !\n")
+                go()
             }
         }
         
@@ -638,7 +673,7 @@ func go() -> (){
         battle(trainers: &trainers)
     }
     
-    else {
+    else { //If user types a string instead of numbers
         print("Specified option does not exist. Please pay attention !\n")
         go()
     }
@@ -654,24 +689,47 @@ func battle(trainers: inout [Trainer]) -> (){
     //Getting user's entry to select move
     
     if turn == 1 {
-        print("Your turn! The following moves are available for your Pokemon. Please pick one.\n")
+        print("### Your turn! The following moves are available for your Pokemon. Please pick one.\n")
         for i in 0...(currentState.pokemonAttack.moves.count - 1){
-            let currentMove = currentState.pokemonAttack.moves[i]
-            print("\(i+1) \(currentMove.name) | Remaining powerpoints for this attack: \(currentMove.powerpoints)")
+            print("\(i+1) \(currentState.pokemonAttack.moves[i].name) | Remaining powerpoints for this attack: \(currentState.pokemonAttack.moves[i].powerpoints)")
         }
         print("\n\(currentState.pokemonAttack.moves.count + 1). Run away!")
         print("\(currentState.pokemonAttack.moves.count + 2). Change Pokemon")
+        print("----------------------------------- YOUR INPUT: ", terminator: "")
         if let typed = readLine() {
             if let num = Int(typed) {
+                if (num > Bob.pokemons.count){
+                    print("Specified option does not exist. Please pay attention !\n")
+                    go()
+                }else{
+
                 if num == currentState.pokemonAttack.moves.count + 1{ //Running away
                     print("You are a damn coward. Loser!")
                     abort()
                 }else if num == currentState.pokemonAttack.moves.count + 2{ //Changing pokemon...
                     go()
                 }else{
-                currentState.pokemonMoveAttack = currentState.pokemonAttack.moves[num-1] //Selecting appropriate move
-                currentState.pokemonMoveAttack.powerpoints -= 1
+                    currentState.pokemonMoveAttack = currentState.pokemonAttack.moves[num-1] //Selecting appropriate move
+                   
+                    currentState.pokemonMoveAttack.powerpoints -= 1 //Decreasing PP
+                    Bob.pokemons[num - 1].moves[num - 1].powerpoints -= 1
+                    
+                    if (currentState.pokemonMoveAttack.powerpoints == 0){
+                        print("\n### No PP remaining for the move \(currentState.pokemonMoveAttack.name). Move deleted from available moves.")
+                        currentState.pokemonAttack.moves.remove(at: num - 1) //Removing move
+                        Bob.pokemons[num - 1].moves.remove(at: num - 1)//Updating bob's pokemon
+                    }else{
+                    
+                    currentState.pokemonAttack.moves[num-1] = currentState.pokemonMoveAttack //Updating global attacks list
+                    }
+                    if ((currentState.pokemonAttack.nickname == "Kiki") && (num == 3)){
+                        currentState.pokemonEnvironment.weather = Weather.clear_skies //Updating conditions
+                        }
+                    }
                 }
+            }else{ //If user types a string instead of an int
+                print("Specified option does not exist. Please pay attention !\n")
+                go()
             }
         }
         
@@ -681,7 +739,7 @@ func battle(trainers: inout [Trainer]) -> (){
         //Is the pokemon dead yet?
         
         if currentState.pokemonDefense.hitpoints <= 0 {
-            print("Your adversary's Pokemon was killed by the last move \(currentState.pokemonMoveAttack.name) ! \(currentState.pokemonAttack.nickname) wins, \(currentState.pokemonDefense.nickname) defeated !\n");
+            print("### Your adversary's Pokemon was killed by the last move \(currentState.pokemonMoveAttack.name) ! \(currentState.pokemonAttack.nickname) wins, \(currentState.pokemonDefense.nickname) defeated !\n");
             abort(); //Exciting game
         }
     } else{
@@ -692,7 +750,7 @@ func battle(trainers: inout [Trainer]) -> (){
         damages = damage(environment: todaysEnvironnement, pokemon: currentState.pokemonDefense, move: currentState.pokemonMoveDefense, target: currentState.pokemonAttack)
         currentState.pokemonAttack.hitpoints = currentState.pokemonAttack.hitpoints - damages;
         if currentState.pokemonAttack.hitpoints <= 0 {
-            print("Your adversary's Pokemon was killed by the last move \(currentState.pokemonMoveDefense.name) ! \(currentState.pokemonDefense.nickname) wins , \(currentState.pokemonAttack.nickname) defeated !\n")
+            print("### Your adversary's Pokemon was killed by the last move \(currentState.pokemonMoveDefense.name) ! \(currentState.pokemonDefense.nickname) wins , \(currentState.pokemonAttack.nickname) defeated !\n")
             abort();
         }
     }
@@ -710,7 +768,7 @@ func battle(trainers: inout [Trainer]) -> (){
         print("Pokemon Selected for Defense: \(currentState.pokemonAttack.nickname) | Specie: \(currentState.pokemonAttack.species.name) \n");
     }
     
-    print("Round started! Weather of the day: \(todaysEnvironnement.weather) \n");
+    print("Round started! Weather of the day: \(currentState.pokemonEnvironment.weather) \n");
     if turn == 1{
         print("Selected move: \(currentState.pokemonMoveAttack.name). Damages done: \(damages) \n");
     } else{
@@ -736,6 +794,7 @@ func battle(trainers: inout [Trainer]) -> (){
     }
     
     while userInput == ""{
+        print("----------------------------------- YOUR INPUT: ", terminator: "")
         userInput = readLine(); //Read user's entry
         turn = turn*(-1); //Changing player
         battle(trainers: &trainers); //Next round
