@@ -847,9 +847,36 @@ func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pok
 
   }
 
+/* structure d'une attaque */
+struct attacks{
+  let trainer: Trainer;
+  let pokemon: Pokemon;
+  let attack: Move;
+
+}
+
+/* Cette structure permet de savoir l'état d'un match */
 
 struct State{
+   // TODO: describe a battle
+   // joueur 1
+   let trainer1: Trainer;
+   let pokemon1: Pokemon; // il s'agit du pokemon actuellement selectionné
+   let pokemon1_dispo: [Pokemon]; // les pokemons restants pour le joueur 1
+   let pokemon1_HS: [Pokemon]; // pokemon
 
+   // joueur 2
+   let trainer2: Trainer;
+   let pokemon2: Pokemon;
+   let pokemon2_dispo: [Pokemon]; // les pokemons restants pour le joueur 2
+   let pokemon2_HS: [Pokemon]; // pokemon
+
+   // milieu de jeu
+   let environement: Environment;
+   let terrain: Terrain;
+
+   // tout les attaques utilisés selon l'ordre
+   var all_attacks: [attacks];
 }
 
 
