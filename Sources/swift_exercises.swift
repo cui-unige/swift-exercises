@@ -1,6 +1,10 @@
 // For the 'floor' function
 import Foundation
 
+
+/******************************************************************************/
+/************************ Basic types and information *************************/
+/******************************************************************************/
 // http://bulbapedia.bulbagarden.net/wiki/Type
 enum Type {
     case bug
@@ -59,6 +63,12 @@ enum Nature {
     case quirky
 }
 
+enum Gender {
+   case male
+   case female
+   case genderless // We're open-minded
+}
+
 struct Item {
    let id: Int
    let name: String
@@ -103,6 +113,17 @@ struct Move : Hashable {
 }
 func ==(lhs: Move, rhs: Move) -> Bool {
     return lhs.id == rhs.id
+}
+
+enum StatusEffect {
+   case burn
+   case freeze
+   case paralysis
+   case poison
+   case sleep
+   case confusion
+   case curse
+   case attract
 }
 
 // http://bulbapedia.bulbagarden.net/wiki/Statistic
@@ -168,6 +189,10 @@ func ==(lhs: Species, rhs: Species) -> Bool {
     return lhs.id == rhs.id
 }
 
+
+/******************************************************************************/
+/******************** Example inputs of moves and species *********************/
+/******************************************************************************/
 // http://bulbapedia.bulbagarden.net/wiki/List_of_Pokémon_by_National_Pokédex_number
 let move_struggle = Move(
    id: 000,
@@ -253,6 +278,10 @@ let species_bulbasaur = Species(
    )
 )
 
+
+/******************************************************************************/
+/************************ Stats model and computation *************************/
+/******************************************************************************/
 // Algorithm for effective stat computation
 func effective_stat_set(lvl L: Int, base B: Int, individual I: Int, effort E: Int, nat_mod N: Double) -> Int {
    let temp1 = Double((2 * B + I + E) * L)
@@ -270,11 +299,13 @@ struct Pokemon {
     var hitpoints         : Int // remaining hitpoints
     let size              : Int
     let weight            : Int
+    let gender            : Gender
     var experience        : Int
     var level             : Int
     let nature            : Nature
     let species           : Species
     var moves             : [Move: Int] // Move -> remaining powerpoints
+    var effects           : [StatusEffect]
     let individual_values : Stats
     var effort_values     : Stats
     var temp_modifiers    : Stats
@@ -342,6 +373,35 @@ func typeModifier(attacking: Type, defending : Type) -> Double {
     return (type_modifiers[attacking]?[defending])!
 }
 
+
+/******************************************************************************/
+/********************** Functions for additional effects **********************/
+/******************************************************************************/
+func heal(trainer: inout Trainer, pokeIndex: Int, healStrength: Int){
+   if Array(trainer.pokemons)[pokeIndex].hitpoints + healStrength > Array(trainer.pokemons)[pokeIndex].effective_stats.hitpoints {
+      trainer.pokemons[pokeIndex].hitpoints = trainer.pokemons[pokeIndex].effective_stats.hitpoints
+   } else {
+      trainer.pokemons[pokeIndex].hitpoints += healStrength
+   }
+}
+
+func full_heal(trainer: inout Trainer, pokeIndex: Int, healStrength: Int) {
+   trainer.pokemons[pokeIndex].hitpoints += healStrength
+}
+
+func heal_burn(trainer: inout Trainer, pokeIndex: Int) {
+   if trainer.pokemons[pokeIndex].effects.contains(.burn) {
+       trainer.pokemons[pokeIndex].effective_stats.attack *= 2
+       trainer.pokemons[pokeIndex].effects = trainer.pokemons[pokeIndex].effects.filter{$0 != .burn}
+   } else {
+      // Display removal failure (no effect to remove)
+      return
+   }
+}
+
+/******************************************************************************/
+/***************** Functions and structs for battle handling ******************/
+/******************************************************************************/
 // http://bulbapedia.bulbagarden.net/wiki/Damage
 func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pokemon) -> Int {
    let att = Double(move.category == .physical ? pokemon.effective_stats.attack : pokemon.effective_stats.special_attack)
@@ -436,7 +496,7 @@ struct State {
          }
       }
    }
-   var remaining_pokemons: [[Int]]
+   var remaining_pokemons: [[Int]] // Who hasn't fainted yet (get PETA out of here)
    var escape_attempts: (Int, Int)
 }
 
@@ -511,6 +571,10 @@ func has_fainted(state: inout State, trainers: [Trainer], trainerNum: Int) -> Bo
 /**************************** Main Battle Function ****************************/
 /******************************************************************************/
 func battle(trainers: inout [Trainer], behavior: (State, Int) -> Move) -> () {
+   // Initial check for available pokemons
+   let whosUp = [[Int](0 ..< trainers[0].pokemons.count).filter{trainers[0].pokemons[$0].hitpoints != 0},
+               [Int](0 ..< trainers[1].pokemons.count).filter{trainers[1].pokemons[$0].hitpoints != 0}]
+
    // Initial state
    var battle_state = State(
       environment: Environment(
@@ -518,13 +582,15 @@ func battle(trainers: inout [Trainer], behavior: (State, Int) -> Move) -> () {
          terrain: .normal
       ),
       activePokemons: [ // First pokemons by default
-         PokemonInFight(pokemon: Array(trainers)[0].pokemons[0], index: 0),
-         PokemonInFight(pokemon: Array(trainers)[1].pokemons[0], index: 0)
+         PokemonInFight(pokemon: Array(trainers)[0].pokemons[whosUp[0][0]], index: whosUp[0][0]),
+         PokemonInFight(pokemon: Array(trainers)[1].pokemons[whosUp[1][0]], index: whosUp[1][0])
       ],
-      remaining_pokemons: [[Int](0 ..< trainers[0].pokemons.count), [Int](0 ..< trainers[1].pokemons.count)], // All pokemons available (no animal abuse yet...)
+      remaining_pokemons: whosUp,
       escape_attempts: (0, 0)
    )
-   FIGHT: while true { // Loop until fight ends
+
+   // Loop until fight ends
+   FIGHT: while true {
       // Choose action
       let action1 = select_action(trainer: trainers[0])
       let action2 = select_action(trainer: trainers[1])
