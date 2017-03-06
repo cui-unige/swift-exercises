@@ -155,8 +155,6 @@ let hooh: Pokemon = Pokemon(
   effort_values: Stats(hitpoints: 66, attack: 100, defense: 60, special_attack: 30, special_defense: 75, speed: 90)
 )
 
-
-
 struct Pokemon {
     let nickname          : String?
     let size              : Double
@@ -167,7 +165,7 @@ struct Pokemon {
     }
     let nature            : Nature
     let species           : Species
-    let moves             : [Move: Int] // Move -> remaining powerpoints
+    let moves             : [Move: Int] // Move -> remaining powerpoints ------> c'est un dictionnaire, `moves[earthquake]` = <le nombre de pp restant>
     let individual_values : Stats
     let effort_values     : Stats
 
@@ -292,8 +290,6 @@ struct State {
     let environment: Environment
     let trainers: [Trainer]
     let pokemon_fighting: [Int] // Indice of the fighting pokemon for the two players
-    let active_trainer: Int // 0 if first player, 1 if second
-    let finished: Bool
     let winner: Winner
 }
 
@@ -301,7 +297,7 @@ enum Action {
     case attack
     case change_pokemon
     case use_item
-    case run
+    //case run
 }
 
 func choose_action(trainer: Trainer) -> Action {
@@ -327,9 +323,7 @@ func battle_init(trainers: [Trainer]) -> State {
     let environment: Environment = Environment(weather: .clear_skies, terrain: .normal);
     let pkm1: Int? = select_pokemon(trainer: trainers[0]);
     let pkm2: Int? = select_pokemon(trainer: trainers[1]);
-    var active_trainer: Int = 0;
     var winner: Winner = .none;
-    var finished: Bool = true;
 
     if(pkm1 == nil && pkm2 != nil) {
         winner = .p2;
@@ -339,61 +333,84 @@ func battle_init(trainers: [Trainer]) -> State {
         winner = .p1;
     }
 
-    else if(pkm1 != nil && pkm2 != nil) {
-        if(trainers[0].pokemons[pkm2!].effective_stats.speed < trainers[1].pokemons[pkm2!].effective_stats.speed) {
-            active_trainer = 1;
-        }
-        finished = false;
-    }
+    return State(environment: environment, trainers: trainers, pokemon_fighting: [pkm1!, pkm2!], winner: winner)
+}
 
-    return State(environment: environment, trainers: trainers, pokemon_fighting: [pkm1!, pkm2!], active_trainer: active_trainer, finished: finished, winner: winner)
+func choose_move(pokemon: Pokemon) -> Move {
+    let available_moves: [Move] = Array(pokemon.moves.keys).filter{pokemon.moves[$0]! > 0}; // we filter our dict to get an array of moves with PP > 0
+    return available_moves[random() % available_moves.count]
 }
 
 // var state: State = battle_init(trainers)
 // state = battle(state)
 func battle(state: State) -> State {
-    if(state.finished) {
+    if(state.winner != .none) {
         return state
     }
 
     let environment: Environment = state.environment;
 
-    let active_trainer_indice: Int = state.active_trainer;
-    let other_trainer_indice: Int = (active_trainer_indice+1)%2;
+    let p1: Trainer = state.trainers[0];
+    let p2: Trainer = state.trainers[1];
 
-    let active_trainer: Trainer = state.trainers[active_trainer_indice];
-    let other_trainer: Trainer = state.trainers[other_trainer_indice];
+    var pkm1_ind: Int = state.pokemon_fighting[0];
+    var pkm2_ind: Int = state.pokemon_fighting[1];
 
-    var active_pkm_indice: Int = state.pokemon_fighting[active_trainer_indice];
-    var other_pkm_indice: Int = state.pokemon_fighting[other_trainer_indice];
-
-    var active_pkm: Pokemon = active_trainer.pokemons[active_pkm_indice];
-    var other_pkm: Pokemon = other_trainer.pokemons[other_pkm_indice];
+    var pkm1: Pokemon = p1.pokemons[pkm1_ind];
+    var pkm2: Pokemon = p2.pokemons[pkm2_ind];
 
     var winner: Winner = state.winner;
-    var finished: Bool = state.finished;
 
-    switch choose_action(trainer: active_trainer) {
+    var move1: Move = earthquake;
+    var move2: Move = earthquake;
+
+    switch choose_action(trainer: p1) {
         case .attack:
-          print("lol");
-        case .run:
-            winner = (active_trainer_indice == 0) ? .p2 : .p1;
-            finished = true;
+            move1 = choose_move(pokemon: pkm1);
         case .change_pokemon:
-            let new_indice = select_pokemon(trainer: active_trainer);
-            if(new_indice == nil) {
-                winner = (active_trainer_indice == 0) ? .p2 : .p1;
-                finished = true
-            }
-            else {
-                active_pkm_indice = new_indice!;
-                active_pkm = active_trainer.pokemons[active_pkm_indice];
-            }
+            let new_indice = select_pokemon(trainer: p1);
+            pkm1_ind = new_indice!;
+            pkm1 = p1.pokemons[pkm1_ind];
         case .use_item:
           print("lol");
     }
 
-    return battle(state: State( environment: environment, trainers: [active_trainer, other_trainer],
-                                pokemon_fighting: [active_pkm_indice, other_pkm_indice],
-                                active_trainer: other_trainer_indice, finished: finished, winner: winner))
+    switch choose_action(trainer: p2) {
+        case .attack:
+            move2 = choose_move(pokemon: pkm2);
+        case .change_pokemon:
+            let new_indice = select_pokemon(trainer: p2);
+            pkm2_ind = new_indice!;
+            pkm2 = p2.pokemons[pkm2_ind];
+        case .use_item:
+          print("lol");
+    }
+
+    let first_to_attack: Int;
+
+    if(pkm1.moves[move1]! > pkm1.moves[move2]!) {
+        first_to_attack = 0;
+    }
+
+    else if(pkm1.moves[move1]! < pkm1.moves[move2]!) {
+        first_to_attack = 1;
+    }
+
+    else {
+        if(pkm1.effective_stats.speed > pkm2.effective_stats.speed) {
+            first_to_attack = 0;
+        }
+        else if(pkm1.effective_stats.speed < pkm2.effective_stats.speed) {
+            first_to_attack = 1;
+        }
+        else {
+            first_to_attack = random() % 2;
+        }
+    }
+
+
+
+    // new turn
+    return battle(state: State( environment: environment, trainers: [p1, p2],
+                                pokemon_fighting: [pkm1_ind, pkm2_ind], winner: winner))
 }
