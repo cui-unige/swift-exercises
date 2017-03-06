@@ -114,7 +114,7 @@ func ==(lhs: Move, rhs: Move) -> Bool {
 
 // http://bulbapedia.bulbagarden.net/wiki/Statistic
 struct Stats {
-    let hitpoints       : Int
+    var hitpoints       : Int
     let attack          : Int
     let defense         : Int
     let special_attack  : Int
@@ -165,7 +165,7 @@ struct Pokemon {
     }
     let nature            : Nature
     let species           : Species
-    let moves             : [Move: Int] // Move -> remaining powerpoints ------> c'est un dictionnaire, `moves[earthquake]` = <le nombre de pp restant>
+    var moves             : [Move: Int] // Move -> remaining powerpoints ------> c'est un dictionnaire, `moves[earthquake]` = <le nombre de pp restant>
     let individual_values : Stats
     let effort_values     : Stats
 
@@ -341,6 +341,46 @@ func choose_move(pokemon: Pokemon) -> Move {
     return available_moves[random() % available_moves.count]
 }
 
+func choose_first(pkm1: Pokemon, pkm2: Pokemon, move1: Move?, move2: Move?) -> [Int] {
+    var order: [Int];
+
+    if(move1 == nil) {
+        order = [1];
+    }
+
+    else if(move2 == nil) {
+        order = [0];
+    }
+
+    else if (move1 == nil && move2 == nil)
+    {
+        order = [];
+    }
+
+    else if (pkm1.moves[move1!]! > pkm1.moves[move2!]!) {
+        order = [0,1];
+    }
+
+    else if(pkm1.moves[move1!]! < pkm1.moves[move2!]!) {
+        order = [1,0];
+    }
+
+    else {
+        if(pkm1.effective_stats.speed > pkm2.effective_stats.speed) {
+            order = [0,1];
+        }
+        else if(pkm1.effective_stats.speed < pkm2.effective_stats.speed) {
+            order = [1,0];
+        }
+        else {
+            let tmp = random() % 2;
+            order = [tmp, (tmp+1)%2];
+        }
+    }
+
+    return order
+}
+
 // var state: State = battle_init(trainers)
 // state = battle(state)
 func battle(state: State) -> State {
@@ -350,67 +390,47 @@ func battle(state: State) -> State {
 
     let environment: Environment = state.environment;
 
-    let p1: Trainer = state.trainers[0];
-    let p2: Trainer = state.trainers[1];
-
-    var pkm1_ind: Int = state.pokemon_fighting[0];
-    var pkm2_ind: Int = state.pokemon_fighting[1];
-
-    var pkm1: Pokemon = p1.pokemons[pkm1_ind];
-    var pkm2: Pokemon = p2.pokemons[pkm2_ind];
-
+    let p: [Trainer] = state.trainers;
+    var pkm_ind: [Int] = state.pokemon_fighting;
+    var pkm: [Pokemon] = [p[0].pokemons[pkm_ind[0]], p[1].pokemons[pkm_ind[1]]];
     var winner: Winner = state.winner;
 
-    var move1: Move = earthquake;
-    var move2: Move = earthquake;
+    var move: [Move?] = [nil];
 
-    switch choose_action(trainer: p1) {
+    switch choose_action(trainer: p[0]) {
         case .attack:
-            move1 = choose_move(pokemon: pkm1);
+            move[0] = choose_move(pokemon: pkm[0]);
         case .change_pokemon:
-            let new_indice = select_pokemon(trainer: p1);
-            pkm1_ind = new_indice!;
-            pkm1 = p1.pokemons[pkm1_ind];
+            let new_indice = select_pokemon(trainer: p[0]);
+            pkm_ind[0] = new_indice!;
+            pkm[0] = p[0].pokemons[pkm_ind[0]];
         case .use_item:
           print("lol");
     }
 
-    switch choose_action(trainer: p2) {
+    switch choose_action(trainer: p[1]) {
         case .attack:
-            move2 = choose_move(pokemon: pkm2);
+            move[1] = choose_move(pokemon: pkm[1]);
         case .change_pokemon:
-            let new_indice = select_pokemon(trainer: p2);
-            pkm2_ind = new_indice!;
-            pkm2 = p2.pokemons[pkm2_ind];
+            let new_indice = select_pokemon(trainer: p[1]);
+            pkm_ind[1] = new_indice!;
+            pkm[1] = p[1].pokemons[pkm_ind[1]];
         case .use_item:
           print("lol");
     }
 
-    let first_to_attack: Int;
+    let order: [Int] = choose_first(pkm1: pkm[0], pkm2: pkm[1], move1: move[0], move2: move[1]);
 
-    if(pkm1.moves[move1]! > pkm1.moves[move2]!) {
-        first_to_attack = 0;
-    }
-
-    else if(pkm1.moves[move1]! < pkm1.moves[move2]!) {
-        first_to_attack = 1;
-    }
-
-    else {
-        if(pkm1.effective_stats.speed > pkm2.effective_stats.speed) {
-            first_to_attack = 0;
-        }
-        else if(pkm1.effective_stats.speed < pkm2.effective_stats.speed) {
-            first_to_attack = 1;
-        }
-        else {
-            first_to_attack = random() % 2;
+    for ind in order {
+        pkm[ind].moves[move[ind]!] = 1;
+        if(random()%100 < move[ind]!.accuracy) {
+            let dmg = damage(environment: environment, pokemon: pkm[ind], move: move[ind]!, target: pkm[(ind+1)%2]);
+            //pkm[(ind+1)%2].effective_stats.hitpoints = dmg;
         }
     }
-
 
 
     // new turn
-    return battle(state: State( environment: environment, trainers: [p1, p2],
-                                pokemon_fighting: [pkm1_ind, pkm2_ind], winner: winner))
+    return battle(state: State( environment: environment, trainers: p,
+    pokemon_fighting: pkm_ind, winner: winner))
 }
