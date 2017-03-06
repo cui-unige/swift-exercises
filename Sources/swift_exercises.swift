@@ -96,74 +96,6 @@ struct Move : Hashable {
 }
 
 
-/* Some moves/attacks definition */
-let bubble = Move(
-    id: 1,
-    name: "Bubble",
-    description: "A spray of countless bubbles is jetted at the opposing Pokémon. This may also lower their Speed stat.",
-    category: Category.special,
-    type: Type.water,
-    power: 40,
-    accuracy: 100,
-    powerpoints: 30,
-    priority: 1
-)
-
-let water_gun = Move(
-    id: 2,
-    name: "Water Gun",
-    description: "The target is blasted with a forceful shot of water.",
-    category: Category.special,
-    type: Type.water,
-    power: 40,
-    accuracy: 100,
-    powerpoints: 25,
-    priority: 1
-)
-
-let hydro_pump = Move(
-    id: 3,
-    name: "Hydro Pump Motherfuckaaa",
-    description: "The target is blasted by a huge volume of water launched under great pressure, therefore crying his momma.",
-    category: Category.special,
-    type: Type.water,
-    power: 110,
-    accuracy: 80,
-    powerpoints: 5,
-    priority: 9999
-)
-
-let aqua_tail = Move(
-    id: 4,
-    name: "Aqua tail",
-    description: "User's pokemon attacks by swinging its tail as if it were a vicious wave in a raging storm.",
-    category: Category.physical,
-    type: Type.water,
-    power: 90,
-    accuracy: 90,
-    powerpoints: 10,
-    priority: 1
-)
-
-// Credits: Killian Ruchti
-let fire_blast  = Move(id: 1, name: "Fire Blast",  description: "A fiery blast that scorches all. May cause a burn.",      category: Category.special,  type: Type.fire,   power: 110, accuracy: 85,  powerpoints: 5,  priority: 0)
-
-let solar_beam  = Move(id: 2, name: "Solar Beam",  description: "Absorbs light in one turn, then attacks next turn.",      category: Category.special,  type: Type.grass,  power: 120, accuracy: 100, powerpoints: 10, priority: 0)
-
-let sunny_day   = Move(id: 3, name: "Sunny Day",   description: "Boosts the power of FIRE- type moves for 5 turns.",       category: Category.status,   type: Type.fire,   power: 0,   accuracy: 0,   powerpoints: 5,  priority: 0)
-
-let return_rest = Move(id: 4, name: "Return/Rest", description: "Power increases with happiness, up to a maximum of 102.", category: Category.physical, type: Type.normal, power: 0,   accuracy: 100, powerpoints: 20, priority: 0)
-
-
-// Credits: Amirhossein
-let warp = Move(id: 01,name : "Warp",description: "traps the target over two or three turns",category : Category.physical,type: Type.normal,power: 15,accuracy: 90,
-                powerpoints: 20,priority: 0)
-
-let acid = Move(id: 02,name: "Acid",description: "has one  in three chance to lower targer defense", category: Category.special,type: Type.poison,power: 40,accuracy: 100,
-                powerpoints: 30,priority: 1)
-
-
-
 
 func ==(lhs: Move, rhs: Move) -> Bool {
     return lhs.id == rhs.id
@@ -211,80 +143,6 @@ struct Species : Hashable {
 func ==(lhs: Species, rhs: Species) -> Bool {
     return lhs.id == rhs.id
 }
-
-// : create some species
-// Do you use an enum, a map or constants/variables?
-// http://bulbapedia.bulbagarden.net/wiki/List_of_Pokémon_by_National_Pokédex_number
-
-/* Blastoise definition (third evolution of Squirtle) */
-
-let blastoise_stat = Stats(
-    hitpoints: 79,
-    attack: 83,
-    defense: 100,
-    special_attack: 85,
-    special_defense: 105,
-    speed: 78
-)
-
-let blastoise = Species(
-    id: 009,
-    name: "Blastoise",
-    evolutions: [],
-    attacks: [bubble, water_gun, hydro_pump, aqua_tail],
-    type: (Type.water, nil),
-    base_values: blastoise_stat
-)
-
-/* Wartortle definition (second evolution of Squirtle) */
-
-let wartortle_stat = Stats(
-    hitpoints: 59,
-    attack: 63,
-    defense: 80,
-    special_attack: 65,
-    special_defense: 80,
-    speed: 58
-)
-
-let  wartortle = Species(
-    id: 008,
-    name: "Wartortle",
-    evolutions: [blastoise],
-    attacks: [water_gun, aqua_tail, bubble],
-    type: (Type.water, nil),
-    base_values: wartortle_stat
-)
-
-/* Squirtle definition */
-let squirtle_stat = Stats(
-    hitpoints: 44,
-    attack: 48,
-    defense: 65,
-    special_attack: 50,
-    special_defense: 64,
-    speed: 43
-)
-
-let squirtle = Species(
-    id: 007,
-    name: "Squirtle",
-    evolutions: [wartortle, blastoise],
-    attacks: [water_gun, bubble],
-    type: (Type.water, nil),
-    base_values: squirtle_stat
-)
-
-//Credits: Killian Ruchti
-let entei_stats = Stats(hitpoints: 115, attack: 115, defense: 85, special_attack: 90, special_defense: 75, speed: 100)
-let entei = Species(id: 244, name: "Entei", evolutions: [], attacks: [fire_blast, solar_beam, sunny_day, return_rest], type: (Type.fire, nil), base_values: entei_stats)
-
-
-//Credits: Amirhossein
-let ekans_stat = Stats(
-    hitpoints: 35,attack: 60,defense: 44,special_attack: 40,special_defense: 54,speed: 55)
-let ekans = Species(id: 023 ,name: "Ekans", evolutions: [],attacks: [warp,acid], type: (Type.poison,Type.dark), base_values: ekans_stat)
-
 
 
 func computeHp (_ pokemon: Pokemon) -> Int {
@@ -379,7 +237,7 @@ struct Pokemon {
     let level             : Int = 1
     let nature            : Nature
     let species           : Species
-    let moves             : [Move: Int]// Move -> remaining powerpoints
+    var moves             : [Move: Int]// Move -> remaining powerpoints
     let individual_values : Stats
     let effort_values     : Stats
     var effective_stats: Stats {
@@ -474,7 +332,7 @@ func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pok
      */
     let critical_multiplier = arc4random_uniform(16) + 1 == 8 ? 2 : 1
     if critical_multiplier == 2 {
-        print("It's a critical attack !")
+        print("It's a critical hit !")
     }
 
     /*
@@ -599,6 +457,7 @@ func getAction(_ state: State, is_user: Bool) -> Action {
                 displayState(state)
             }
             chosen_action = actions.first(where: { $0.name == action_name })
+            
         } while chosen_action == nil
 
         return chosen_action!
@@ -655,38 +514,44 @@ func getAction(_ state: State, is_user: Bool) -> Action {
 
 
 // Ask which attack the player wants (or take it randomly if it's computer's turn)
-func getAttack(is_user: Bool, attacker: Pokemon) -> Move {
+func getAttack(is_user: Bool, attacker: Pokemon, pokemon_moves: inout [Move : Int]) -> Move {
 
     if is_user {
         // Ask user for an attack
         var chosen_attack: Move? = nil
-
+        
+        
         repeat {
             print("\n Select one of the following attack (by writing its full name). \n")
             for (move, powerpoints) in attacker.moves {
                 // Player can only choose a move that has more than 0 pp
                 if (powerpoints > 0) {
-                    print("- "+move.name+" ("+String(move.powerpoints)+" pp)")
+                    print("- "+move.name+" ("+String(describing: pokemon_moves[move]!)+" pp)")
                 }
             }
 
             let attack_name = readLine()
 
+            
             for (move, _) in attacker.moves {
-                if (move.name == attack_name) && (move.powerpoints > 0) {
+                if (move.name == attack_name) && (pokemon_moves[move]! > 0) {
                     chosen_attack = move
                     break
                 }
             }
         } while chosen_attack == nil
 
+        pokemon_moves[chosen_attack!]! -= 1 // decreases powerpoints of user's move by 1
         return chosen_attack!
 
     } else {
         // Take a random attack
         let intIndex: Int = Int(arc4random_uniform(UInt32(attacker.moves.count)))
-        return Array(attacker.moves.keys)[intIndex]
+        let chosen_attack: Move = Array(attacker.moves.keys)[intIndex]
+        pokemon_moves[chosen_attack]! -= 1 //decreases powerpoints of computer's move by 1
+        return chosen_attack
     }
+    
 }
 
 // Returns an off pokemon to switch with the current active pokemon
@@ -729,7 +594,7 @@ func playerTurn(state: inout State) -> () {
     // Handle cases
     switch user_action.name {
     case "att":
-        let user_attack: Move = getAttack(is_user: true, attacker: state.pokemon_player_in, state: &state)
+        let user_attack: Move = getAttack(is_user: true, attacker: state.pokemon_player_in, pokemon_moves: &state.pokemon_player_in.moves)
         state.user_action = user_attack
     case "item":
         //TODO: manage items for user
@@ -741,8 +606,10 @@ func playerTurn(state: inout State) -> () {
         } else {
             print("Your pokemon is not fast enough to escape. The battle goes on.\n")
         }
-    case "pokemon":
-        state.user_action = getPokemonOff(state, is_user: true)
+    case "switch":
+        switchPokemon(off_pokemon: &state.pokemons_player_out[getPokemonChoice(state: state, is_user: true)], in_pokemon: &state.pokemon_player_in)
+        let end_text: String = " comes in to fight by your side"
+        state.pokemon_player_in.nickname == nil ? print(state.pokemon_player_in.nickname!+end_text) : print(state.pokemon_player_in.species.name+end_text)
     default:
         print("Error with user's action.")
     }
@@ -757,7 +624,7 @@ func computerTurn(state: inout State) -> () {
     // Handle cases
     switch computer_action.name {
     case "att":
-        let computer_attack: Move = getAttack(is_user: false, attacker: state.pokemon_computer_in, pokemon_pp: &state.pokemon_computer_in.powerpoints)
+        let computer_attack: Move = getAttack(is_user: false, attacker: state.pokemon_computer_in, pokemon_moves: &state.pokemon_computer_in.moves)
         state.computer_action = computer_attack
     case "item":
         //TODO: manage items for computer
@@ -769,8 +636,11 @@ func computerTurn(state: inout State) -> () {
         } else {
             print("The opponent tries to run away but you slap him in the face and force him to keep fighting you.")
         }
-    case "pokemon":
-        state.computer_action = getPokemonOff(state, is_user: false)
+    case "switch":
+        switchPokemon(off_pokemon: &state.pokemons_computer_out[getPokemonChoice(state: state, is_user: false)], in_pokemon: &state.pokemon_computer_in)
+        let sub1: String = "Computer sends "
+        let sub2: String = " in"
+        state.pokemon_computer_in.nickname == nil ? print(sub1+state.pokemon_computer_in.nickname!+sub2) : print(sub1+state.pokemon_computer_in.species.name+sub2)
     default:
         print("Error with computer's action")
     }
@@ -811,8 +681,15 @@ func resolveActions(state: inout State) -> () {
     let user_action = state.user_action
     let computer_action = state.computer_action
 
-    // TODO: resolve actions by order of priorities, yet only attack and attack done
-
+    // TODO: resolve moves
+    
+    /*
+     IMPORTANT NOTE:
+     only Moves are not already resolved at this points, so the only cases to handle are:
+     Move && Move
+     Move && something else (
+    */
+    
     // If there are only moves, we can resolve action by speed
     if (user_action is Move) && (computer_action is Move) {
         // We know we're dealing with moves so we create new move constants
@@ -833,6 +710,7 @@ func resolveActions(state: inout State) -> () {
         }
         return
     }
+    
 
 
 }
@@ -1096,9 +974,184 @@ struct Trainer {
 
 
 func initialize() {
+    
+    
+    
+    /**  
+     
+     Some moves/attacks definition 
+     
+     **/
+    let bubble = Move(
+        id: 1,
+        name: "Bubble",
+        description: "A spray of countless bubbles is jetted at the opposing Pokémon. This may also lower their Speed stat.",
+        category: Category.special,
+        type: Type.water,
+        power: 40,
+        accuracy: 100,
+        powerpoints: 30,
+        priority: 1
+    )
+    
+    let water_gun = Move(
+        id: 2,
+        name: "Water Gun",
+        description: "The target is blasted with a forceful shot of water.",
+        category: Category.special,
+        type: Type.water,
+        power: 40,
+        accuracy: 100,
+        powerpoints: 25,
+        priority: 1
+    )
+    
+    let hydro_pump = Move(
+        id: 3,
+        name: "Hydro Pump Motherfuckaaa",
+        description: "The target is blasted by a huge volume of water launched under great pressure, therefore crying his momma.",
+        category: Category.special,
+        type: Type.water,
+        power: 110,
+        accuracy: 80,
+        powerpoints: 5,
+        priority: 9999
+    )
+    
+    let aqua_tail = Move(
+        id: 4,
+        name: "Aqua tail",
+        description: "User's pokemon attacks by swinging its tail as if it were a vicious wave in a raging storm.",
+        category: Category.physical,
+        type: Type.water,
+        power: 90,
+        accuracy: 90,
+        powerpoints: 10,
+        priority: 1
+    )
+    
+    // Credits: Killian Ruchti
+    let fire_blast  = Move(id: 1, name: "Fire Blast",  description: "A fiery blast that scorches all. May cause a burn.",      category: Category.special,  type: Type.fire,   power: 110, accuracy: 85,  powerpoints: 5,  priority: 0)
+    
+    let solar_beam  = Move(id: 2, name: "Solar Beam",  description: "Absorbs light in one turn, then attacks next turn.",      category: Category.special,  type: Type.grass,  power: 120, accuracy: 100, powerpoints: 10, priority: 0)
+    
+    let sunny_day   = Move(id: 3, name: "Sunny Day",   description: "Boosts the power of FIRE- type moves for 5 turns.",       category: Category.status,   type: Type.fire,   power: 0,   accuracy: 0,   powerpoints: 5,  priority: 0)
+    
+    let return_rest = Move(id: 4, name: "Return/Rest", description: "Power increases with happiness, up to a maximum of 102.", category: Category.physical, type: Type.normal, power: 0,   accuracy: 100, powerpoints: 20, priority: 0)
+    
+    
+    // Credits: Amirhossein
+    let warp = Move(id: 01,name : "Warp",description: "traps the target over two or three turns",category : Category.physical,type: Type.normal,power: 15,accuracy: 90,
+                    powerpoints: 20,priority: 0)
+    
+    let acid = Move(id: 02,name: "Acid",description: "has one  in three chance to lower targer defense", category: Category.special,type: Type.poison,power: 40,accuracy: 100,
+                    powerpoints: 30,priority: 1)
+    
+    /**
+    
+        end moves creation
+ 
+    **/
 
+    
+    
+    
+    
+    /**
+ 
+        Species definitions
+    
+    **/
+    
+    /* Blastoise definition (third evolution of Squirtle) */
+    
+    let blastoise_stat = Stats(
+        hitpoints: 79,
+        attack: 83,
+        defense: 100,
+        special_attack: 85,
+        special_defense: 105,
+        speed: 78
+    )
+    
+    let blastoise = Species(
+        id: 009,
+        name: "Blastoise",
+        evolutions: [],
+        attacks: [bubble, water_gun, hydro_pump, aqua_tail],
+        type: (Type.water, nil),
+        base_values: blastoise_stat
+    )
+    
+    /* Wartortle definition (second evolution of Squirtle) */
+    
+    let wartortle_stat = Stats(
+        hitpoints: 59,
+        attack: 63,
+        defense: 80,
+        special_attack: 65,
+        special_defense: 80,
+        speed: 58
+    )
+    
+    let  wartortle = Species(
+        id: 008,
+        name: "Wartortle",
+        evolutions: [blastoise],
+        attacks: [water_gun, aqua_tail, bubble],
+        type: (Type.water, nil),
+        base_values: wartortle_stat
+    )
+    
+    /* Squirtle definition */
+    let squirtle_stat = Stats(
+        hitpoints: 44,
+        attack: 48,
+        defense: 65,
+        special_attack: 50,
+        special_defense: 64,
+        speed: 43
+    )
+    
+    let squirtle = Species(
+        id: 007,
+        name: "Squirtle",
+        evolutions: [wartortle, blastoise],
+        attacks: [water_gun, bubble],
+        type: (Type.water, nil),
+        base_values: squirtle_stat
+    )
+    
+
+    
+
+    
+    //Credits: Killian Ruchti
+    let entei_stats = Stats(hitpoints: 115, attack: 115, defense: 85, special_attack: 90, special_defense: 75, speed: 100)
+    let entei = Species(id: 244, name: "Entei", evolutions: [], attacks: [fire_blast, solar_beam, sunny_day, return_rest], type: (Type.fire, nil), base_values: entei_stats)
+    
+    
+    //Credits: Amirhossein
+    let ekans_stat = Stats(
+        hitpoints: 35,attack: 60,defense: 44,special_attack: 40,special_defense: 54,speed: 55)
+    let ekans = Species(id: 023 ,name: "Ekans", evolutions: [],attacks: [warp,acid], type: (Type.poison,Type.dark), base_values: ekans_stat)
+    
+    
+    /**
+     
+     Species definition ending
+     
+     **/
+    
+    
+    
+    /**
+ 
+     Pokemon creations
+ 
+    **/
     // Few pokemons creation (User)
-    var squirtle1 = Pokemon(
+    let squirtle1 = Pokemon(
         nickname: "Tiny squirtle",
         hitpoints: nil,
         size: 1,
@@ -1112,7 +1165,7 @@ func initialize() {
     )
 
 
-    var wartortle1 = Pokemon(
+    let wartortle1 = Pokemon(
         nickname: "The Machiiine",
         hitpoints: nil,
         size: 3,
@@ -1126,7 +1179,7 @@ func initialize() {
     )
 
 
-    var blastoise1 = Pokemon(
+    let blastoise1 = Pokemon(
         nickname: "Blastoise junior junior",
         hitpoints: nil,
         size: 6,
@@ -1143,7 +1196,7 @@ func initialize() {
 
 
     // Few pokemons creation (Computer)
-    var entei1 = Pokemon(
+    let entei1 = Pokemon(
         nickname: "Kilian",
         hitpoints: nil,
         size:5,
@@ -1156,7 +1209,7 @@ func initialize() {
         effort_values: getEv(pokemon_species: entei)
     )
 
-    var ekans1 = Pokemon(
+    let ekans1 = Pokemon(
         nickname: "Amir",
         hitpoints: nil,
         size: 2,
@@ -1168,7 +1221,15 @@ func initialize() {
         individual_values: getIv(pokemon_species: ekans),
         effort_values: getEv(pokemon_species: ekans)
     )
+    
+    /**
+ 
+     End pokemon creations
+ 
+    **/
 
+    
+    
     // Assign pokemons to trainers
     var player = Trainer(pokemons: [wartortle1, entei1, blastoise1])
     var computer = Trainer(pokemons: [squirtle1, ekans1])
@@ -1197,7 +1258,7 @@ func initialize() {
         user_action: nil,
         computer_action: nil
     )
-
+    print("Welcome in Pokemon battle !\n")
     print("#### Battle starts ####\n")
     print("There is "+String(describing: initialState.weather)) //TODO: more understandable weather "announcement"
     print("The terrain is "+String(describing: initialState.terrain))
