@@ -263,7 +263,7 @@ struct Environment {
     let terrain : Terrain
 }
 
-//
+//zedhzedh
 func typeModifier(attacking: Type, defending : Type) -> Float {
     /*
      2d array with order normal, fighting, flying, poison, ground, rock, bug, ghost, steel, fire,
@@ -975,7 +975,7 @@ struct Trainer {
 
 func initialize() {
     
-    
+    print("Welcome in Pokemon battle !\n")
     
     /**  
      
@@ -1046,6 +1046,29 @@ func initialize() {
     
     let acid = Move(id: 02,name: "Acid",description: "has one  in three chance to lower targer defense", category: Category.special,type: Type.poison,power: 40,accuracy: 100,
                     powerpoints: 30,priority: 1)
+    
+    // Credits: Aslam
+    let thunderShockAttack = Move(id: 84,
+                                  name: "Thunder Shock",
+                                  description: "paralyze target",
+                                  category: .special,
+                                  type: .electric,
+                                  power:40,
+                                  accuracy:100,
+                                  powerpoints:30,
+                                  priority:0
+    )
+    
+    let quickattack = Move(            id: 98,
+                                       name: "Quick attack",
+                                       description: "offensive quick attack",
+                                       category: .physical,
+                                       type: .normal,
+                                       power:40,
+                                       accuracy:100,
+                                       powerpoints:30,
+                                       priority:1
+    )
     
     /**
     
@@ -1122,10 +1145,6 @@ func initialize() {
         base_values: squirtle_stat
     )
     
-
-    
-
-    
     //Credits: Killian Ruchti
     let entei_stats = Stats(hitpoints: 115, attack: 115, defense: 85, special_attack: 90, special_defense: 75, speed: 100)
     let entei = Species(id: 244, name: "Entei", evolutions: [], attacks: [fire_blast, solar_beam, sunny_day, return_rest], type: (Type.fire, nil), base_values: entei_stats)
@@ -1137,6 +1156,27 @@ func initialize() {
     let ekans = Species(id: 023 ,name: "Ekans", evolutions: [],attacks: [warp,acid], type: (Type.poison,Type.dark), base_values: ekans_stat)
     
     
+    //Credits: Aslam
+    let raichuStats = Stats(hitpoints: 60, attack: 90, defense: 55, special_attack: 90,special_defense: 80, speed: 110)
+    let raichu = Species(id: 026,
+                         name: "Raichu",
+                         evolutions: [],
+                         attacks: [thunderShockAttack],
+                         type: (.electric, nil),
+                         base_values: raichuStats
+    )
+    
+    let pikachuStats = Stats(hitpoints: 35, attack: 55, defense: 30, special_attack: 50,special_defense: 40, speed: 90)
+    let pikachu = Species(id: 025,
+                          name: "Pikachu",
+                          evolutions: [raichu],
+                          attacks: [thunderShockAttack, quickattack],
+                          type: (.electric, nil),
+                          base_values: pikachuStats
+    )
+    
+    let species: [Species] = [blastoise, wartortle, squirtle, entei, ekans, raichu, pikachu]
+    
     /**
      
      Species definition ending
@@ -1147,80 +1187,106 @@ func initialize() {
     
     /**
  
-     Pokemon creations
+     Pokemons creation
  
     **/
-    // Few pokemons creation (User)
-    let squirtle1 = Pokemon(
-        nickname: "Tiny squirtle",
-        hitpoints: nil,
-        size: 1,
-        weight: 10,
-        experience: 0,
-        nature: Nature.lonely,
-        species: squirtle,
-        moves: getMovesWithPowerPoints(pokemon_species: squirtle),
-        individual_values: getIv(pokemon_species: squirtle),
-        effort_values: getEv(pokemon_species: squirtle)
-    )
-
-
-    let wartortle1 = Pokemon(
-        nickname: "The Machiiine",
-        hitpoints: nil,
-        size: 3,
-        weight: 50,
-        experience: 0,
-        nature: Nature.rash,
-        species: wartortle,
-        moves: getMovesWithPowerPoints(pokemon_species: wartortle),
-        individual_values: getIv(pokemon_species: wartortle),
-        effort_values: getEv(pokemon_species: wartortle)
-    )
-
-
-    let blastoise1 = Pokemon(
-        nickname: "Blastoise junior junior",
-        hitpoints: nil,
-        size: 6,
-        weight: 200,
-        experience: 0,
-        nature: Nature.naughty,
-        species: blastoise,
-        moves: getMovesWithPowerPoints(pokemon_species: blastoise),
-        individual_values: getIv(pokemon_species: blastoise),
-        effort_values: getEv(pokemon_species: blastoise)
-    )
-
-
-
-
-    // Few pokemons creation (Computer)
-    let entei1 = Pokemon(
-        nickname: "Kilian",
-        hitpoints: nil,
-        size:5,
-        weight: 200,
-        experience: 0,
-        nature: Nature.hardy,
-        species: entei,
-        moves: getMovesWithPowerPoints(pokemon_species: entei),
-        individual_values: getIv(pokemon_species: entei),
-        effort_values: getEv(pokemon_species: entei)
-    )
-
-    let ekans1 = Pokemon(
-        nickname: "Amir",
-        hitpoints: nil,
-        size: 2,
-        weight: 67,
-        experience: 0,
-        nature: Nature.docile,
-        species: ekans,
-        moves: getMovesWithPowerPoints(pokemon_species: ekans),
-        individual_values: getIv(pokemon_species: ekans),
-        effort_values: getEv(pokemon_species: ekans)
-    )
+    
+    
+    // We create trainers to store the pokemons
+    var player = Trainer(pokemons: [])
+    var computer = Trainer(pokemons: [])
+    
+    // let players create pokemons (based on available species) and add them to his team
+    var user_done: Bool = false // true when user is done chosing pokemons
+    repeat {
+        
+        print("Select a pokemon by typing its number:")
+        var i: Int = 0
+        for unique_species in species {
+            i += 1
+            print(String(describing:i)+". "+unique_species.name)
+            print("Base stats: Attack: "+String(describing: unique_species.base_values.attack)+" Defense: "+String(describing: unique_species.base_values.defense)+" Hitpoints: "+String(describing: unique_species.base_values.hitpoints)+" Speed: "+String(describing: unique_species.base_values.speed)+" Special attack: "+String(describing: unique_species.base_values.special_attack)+" Special defense: "+String(describing: unique_species.base_values.special_defense))
+            
+        }
+        
+        var choice: String? = nil
+        while (choice == nil) {
+            choice = readLine()
+            if choice != nil {
+                if Int(choice!) != nil {
+                    if (Int(choice!)! > 0) && (Int(choice!)! <= i) {
+                        break //if we managed to get an integer value from the user's input that is between 1 and i, the program goes on on his execution
+                    }
+                }
+            }
+            choice = nil
+        }
+        var chosen_species: Species = species[Int(choice!)!-1]
+        
+        // Get infos on the pokemon
+        print("We need some informations about your pokemon.")
+        print("Nickname?")
+        let nickname: String = readLine()!
+        
+        // For size and weight, we user unsigned integers to strictly accept positive values
+        print("Size in meters? (1 by default)")
+        var size: UInt32? = UInt32(readLine()!)
+        if size == nil {
+            size = 1
+        }
+        print("Weight in kilos? (10 by default)")
+        var weight: UInt32? = UInt32(readLine()!)
+        if weight == nil {
+            weight = 10
+        }
+        
+        // Add up pokemon to the player's pokemons list
+        player.pokemons.append(Pokemon(
+            nickname: nickname,
+            hitpoints: nil,
+            size: Int(size!),
+            weight: Int(weight!),
+            experience: 0,
+            nature: Nature.lonely, //TODO: ask user for nature or generate random one
+            species: chosen_species,
+            moves: getMovesWithPowerPoints(pokemon_species: chosen_species),
+            individual_values: getIv(pokemon_species: chosen_species),
+            effort_values: getEv(pokemon_species: chosen_species)
+        ))
+        
+        // chosen_species for computer
+        chosen_species = species[Int(arc4random_uniform(UInt32(i)))]
+        // Add up a random pokemon to the computer's pokemons list
+        computer.pokemons.append(Pokemon(
+            nickname: nil, // TODO: add random nickname
+            hitpoints: nil,
+            size: Int(arc4random_uniform(8)),
+            weight: Int(arc4random_uniform(300)),
+            experience: 0,
+            nature: Nature.brave, //TODO: generate random nature
+            species: chosen_species,
+            moves: getMovesWithPowerPoints(pokemon_species: chosen_species),
+            individual_values: getIv(pokemon_species: chosen_species),
+            effort_values: getEv(pokemon_species: chosen_species)
+        ))
+        
+        print("\nDo you want to add one more pokemon to your team? (y/n)")
+        choice = nil
+        while (choice == nil) {
+            choice = readLine()
+            if (choice != "y") && (choice != "n") {
+                choice = nil
+            }
+        }
+        
+        if choice == "n" {
+            user_done = true
+        }
+        
+        
+    } while !user_done
+    
+    
     
     /**
  
@@ -1230,9 +1296,6 @@ func initialize() {
 
     
     
-    // Assign pokemons to trainers
-    var player = Trainer(pokemons: [wartortle1, entei1, blastoise1])
-    var computer = Trainer(pokemons: [squirtle1, ekans1])
 
 
     // Init hitpoints
@@ -1243,7 +1306,7 @@ func initialize() {
     for i in 0...computer.pokemons.count-1 {
         computer.pokemons[i].hitpoints = computer.pokemons[i].effective_stats.hitpoints
     }
-
+    // Returns the first element and remove this latter from the pokemons lists
     let pokemon_player_in: Pokemon = player.pokemons.remove(at: 0)
     let pokemon_computer_in: Pokemon = computer.pokemons.remove(at: 0)
     // Last requirement: the initial state
@@ -1258,7 +1321,7 @@ func initialize() {
         user_action: nil,
         computer_action: nil
     )
-    print("Welcome in Pokemon battle !\n")
+    
     print("#### Battle starts ####\n")
     print("There is "+String(describing: initialState.weather)) //TODO: more understandable weather "announcement"
     print("The terrain is "+String(describing: initialState.terrain))
