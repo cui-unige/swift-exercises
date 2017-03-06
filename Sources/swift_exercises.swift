@@ -622,6 +622,7 @@ func make_attack(move: Move, trainers: inout [Trainer], trainerNum: Int, state: 
    }
 }
 
+// Verifies if pokemon has fainted (if so removes it from 'availables')
 func has_fainted(state: inout State, trainers: [Trainer], trainerNum: Int) -> Bool {
    let pokeIndex = state.activePokemons[trainerNum].index
    if trainers[trainerNum].pokemons[pokeIndex].hitpoints == 0 { // if dead
@@ -629,6 +630,51 @@ func has_fainted(state: inout State, trainers: [Trainer], trainerNum: Int) -> Bo
       return true
    } else {
       return false
+   }
+}
+
+// Calls has fainted and tries to change pokemon (true if not possible)
+func check_death(state: inout State, trainers: [Trainer], trainerNum: Int) -> Bool {
+   if has_fainted(state: &state, trainers: trainers, trainerNum: trainerNum) {
+      if state.remaining_pokemons[trainerNum].isEmpty {
+         return true
+      } else {
+         change_pokemon(state: &state, trainers: trainers, trainerNum: trainerNum)
+         return false
+      }
+   }
+   return false
+}
+
+func status_dmg(trainers: inout [Trainer], state: inout State, trainerNum: Int) {
+   // Burn damage
+   if trainers[trainerNum].pokemons[state.activePokemons[trainerNum].index].effects.contains(.burn) {
+      let damage = Int(0.125 * Double(trainers[trainerNum].pokemons[state.activePokemons[trainerNum].index].effective_stats.hitpoints))
+      if trainers[trainerNum].pokemons[state.activePokemons[trainerNum].index].hitpoints > damage {
+         trainers[trainerNum].pokemons[state.activePokemons[trainerNum].index].hitpoints -= damage
+      } else {
+         trainers[trainerNum].pokemons[state.activePokemons[trainerNum].index].hitpoints = 0
+         return
+      }
+   }
+   // Poison damage
+   if trainers[trainerNum].pokemons[state.activePokemons[trainerNum].index].effects.contains(.poison) {
+      let damage = Int(0.125 * Double(trainers[trainerNum].pokemons[state.activePokemons[trainerNum].index].effective_stats.hitpoints))
+      if trainers[trainerNum].pokemons[state.activePokemons[trainerNum].index].hitpoints > damage {
+         trainers[trainerNum].pokemons[state.activePokemons[trainerNum].index].hitpoints -= damage
+      } else {
+         trainers[trainerNum].pokemons[state.activePokemons[trainerNum].index].hitpoints = 0
+         return
+      }
+   }
+   // Curse damage
+   if trainers[trainerNum].pokemons[state.activePokemons[trainerNum].index].effects.contains(.curse) {
+      let damage = Int(0.125 * Double(trainers[trainerNum].pokemons[state.activePokemons[trainerNum].index].effective_stats.hitpoints))
+      if trainers[trainerNum].pokemons[state.activePokemons[trainerNum].index].hitpoints > damage {
+         trainers[trainerNum].pokemons[state.activePokemons[trainerNum].index].hitpoints -= damage
+      } else {
+         trainers[trainerNum].pokemons[state.activePokemons[trainerNum].index].hitpoints = 0
+      }
    }
 }
 
@@ -700,7 +746,7 @@ func battle(trainers: inout [Trainer], behavior: (State, Int) -> Move) -> () {
          attMove[1] = nil
       }
 
-      // Apply continuous effects
+      // Apply continuous weather effects
       switch battle_state.environment.weather { // Weather effects (damage only)
       case .sandstorm:
          let types1 = battle_state.activePokemons[0].pokemon.species.type
@@ -732,52 +778,42 @@ func battle(trainers: inout [Trainer], behavior: (State, Int) -> Move) -> () {
       let order = battle_state.activePokemons[0].pokemon.effective_stats.speed >= battle_state.activePokemons[1].pokemon.effective_stats.speed ? (first: 0, last: 1) : (first: 1, last: 0)
 
       // Status effect damage on first
-      if trainers[order.first].pokemons[battle_state.activePokemons[order.first].index].effects.contains(.burn) { // Burn damage
-         let damage = Int(0.125 * Double(trainers[order.first].pokemons[battle_state.activePokemons[order.first].index].effective_stats.hitpoints))
-         if trainers[order.first].pokemons[battle_state.activePokemons[order.first].index].hitpoints > damage {
-            trainers[order.first].pokemons[battle_state.activePokemons[order.first].index].hitpoints -= damage
-         } else {
-            trainers[order.first].pokemons[battle_state.activePokemons[order.first].index].hitpoints = 0
-            attMove[order.first] = nil
-         }
+      status_dmg(trainers: &trainers, state: &battle_state, trainerNum: order.first)
+      if check_death(state: &battle_state, trainers: trainers, trainerNum: order.first) {
+         break FIGHT
+      } else {
+         attMove[order.first] = nil
       }
-      /* poison damage */
-      /* curse damage */
       // First attack
       if let attack = attMove[order.first] {
          make_attack(move: attack, trainers: &trainers, trainerNum: order.first, state: battle_state)
-         if has_fainted(state: &battle_state, trainers: trainers, trainerNum: order.last) {
-            if battle_state.remaining_pokemons[order.last].isEmpty {
-               break FIGHT
-            } else {
-               change_pokemon(state: &battle_state, trainers: trainers, trainerNum: order.last)
-            }
+         if check_death(state: &battle_state, trainers: trainers, trainerNum: order.last) {
+            break FIGHT
+         } else {
+            attMove[order.last] = nil
          }
-         if has_fainted(state: &battle_state, trainers: trainers, trainerNum: order.first) {
-            if battle_state.remaining_pokemons[order.first].isEmpty {
-               break FIGHT
-            } else {
-               change_pokemon(state: &battle_state, trainers: trainers, trainerNum: order.first)
-            }
+         if check_death(state: &battle_state, trainers: trainers, trainerNum: order.first) {
+            break FIGHT
          }
+      }
+
+      // Status effect damage on second
+      status_dmg(trainers: &trainers, state: &battle_state, trainerNum: order.last)
+      if check_death(state: &battle_state, trainers: trainers, trainerNum: order.last) {
+         break FIGHT
+      } else {
+         attMove[order.last] = nil
       }
       // Second attack
       if let attack = attMove[order.last] {
          make_attack(move: attack, trainers: &trainers, trainerNum: order.last, state: battle_state)
-         if has_fainted(state: &battle_state, trainers: trainers, trainerNum: order.last) {
-            if battle_state.remaining_pokemons[order.last].isEmpty {
-               break FIGHT
-            } else {
-               change_pokemon(state: &battle_state, trainers: trainers, trainerNum: order.last)
-            }
+         if check_death(state: &battle_state, trainers: trainers, trainerNum: order.first) {
+            break FIGHT
          }
-         if has_fainted(state: &battle_state, trainers: trainers, trainerNum: order.first) {
-            if battle_state.remaining_pokemons[order.first].isEmpty {
-               break FIGHT
-            } else {
-               change_pokemon(state: &battle_state, trainers: trainers, trainerNum: order.first)
-            }
+         if check_death(state: &battle_state, trainers: trainers, trainerNum: order.last) {
+            break FIGHT
          }
       }
+
    } // FIGHT loop
 }
