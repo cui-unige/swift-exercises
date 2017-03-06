@@ -399,6 +399,71 @@ func heal_burn(trainer: inout Trainer, pokeIndex: Int) {
    }
 }
 
+func heal_freeze(trainer: inout Trainer, pokeIndex: Int) {
+   if trainer.pokemons[pokeIndex].effects.contains(.freeze) {
+       trainer.pokemons[pokeIndex].effects = trainer.pokemons[pokeIndex].effects.filter{$0 != .freeze}
+   } else {
+      // Display removal failure (no effect to remove)
+      return
+   }
+}
+
+func heal_paralysis(trainer: inout Trainer, pokeIndex: Int) {
+   if trainer.pokemons[pokeIndex].effects.contains(.paralysis) {
+       trainer.pokemons[pokeIndex].effective_stats.speed += Int(0.25 * Double(trainer.pokemons[pokeIndex].effective_stats.speed - trainer.pokemons[pokeIndex].temp_modifiers.speed))
+       trainer.pokemons[pokeIndex].effects = trainer.pokemons[pokeIndex].effects.filter{$0 != .paralysis}
+   } else {
+      // Display removal failure (no effect to remove)
+      return
+   }
+}
+
+func heal_poison(trainer: inout Trainer, pokeIndex: Int) {
+   if trainer.pokemons[pokeIndex].effects.contains(.poison) {
+       trainer.pokemons[pokeIndex].effects = trainer.pokemons[pokeIndex].effects.filter{$0 != .poison}
+   } else {
+      // Display removal failure (no effect to remove)
+      return
+   }
+}
+
+func heal_sleep(trainer: inout Trainer, pokeIndex: Int) {
+   if trainer.pokemons[pokeIndex].effects.contains(.sleep) {
+       trainer.pokemons[pokeIndex].effects = trainer.pokemons[pokeIndex].effects.filter{$0 != .sleep}
+   } else {
+      // Display removal failure (no effect to remove)
+      return
+   }
+}
+
+func heal_attract(trainer: inout Trainer, pokeIndex: Int) {
+   if trainer.pokemons[pokeIndex].effects.contains(.attract) {
+       trainer.pokemons[pokeIndex].effects = trainer.pokemons[pokeIndex].effects.filter{$0 != .attract}
+   } else {
+      // Display removal failure (no effect to remove)
+      return
+   }
+}
+
+func heal_confusion(trainer: inout Trainer, pokeIndex: Int) {
+   if trainer.pokemons[pokeIndex].effects.contains(.confusion) {
+       trainer.pokemons[pokeIndex].effects = trainer.pokemons[pokeIndex].effects.filter{$0 != .confusion}
+   } else {
+      // Display removal failure (no effect to remove)
+      return
+   }
+}
+
+func heal_curse(trainer: inout Trainer, pokeIndex: Int) {
+   if trainer.pokemons[pokeIndex].effects.contains(.curse) {
+       trainer.pokemons[pokeIndex].effects = trainer.pokemons[pokeIndex].effects.filter{$0 != .curse}
+   } else {
+      // Display removal failure (no effect to remove)
+      return
+   }
+}
+
+
 /******************************************************************************/
 /***************** Functions and structs for battle handling ******************/
 /******************************************************************************/
@@ -662,10 +727,23 @@ func battle(trainers: inout [Trainer], behavior: (State, Int) -> Move) -> () {
       default:
          break
       }
-      /* Status effects (like poison) not implemented yet */
 
-      // Take action
+      // Determine order
       let order = battle_state.activePokemons[0].pokemon.effective_stats.speed >= battle_state.activePokemons[1].pokemon.effective_stats.speed ? (first: 0, last: 1) : (first: 1, last: 0)
+
+      // Status effect damage on first
+      if trainers[order.first].pokemons[battle_state.activePokemons[order.first].index].effects.contains(.burn) { // Burn damage
+         let damage = Int(0.125 * Double(trainers[order.first].pokemons[battle_state.activePokemons[order.first].index].effective_stats.hitpoints))
+         if trainers[order.first].pokemons[battle_state.activePokemons[order.first].index].hitpoints > damage {
+            trainers[order.first].pokemons[battle_state.activePokemons[order.first].index].hitpoints -= damage
+         } else {
+            trainers[order.first].pokemons[battle_state.activePokemons[order.first].index].hitpoints = 0
+            attMove[order.first] = nil
+         }
+      }
+      /* poison damage */
+      /* curse damage */
+      // First attack
       if let attack = attMove[order.first] {
          make_attack(move: attack, trainers: &trainers, trainerNum: order.first, state: battle_state)
          if has_fainted(state: &battle_state, trainers: trainers, trainerNum: order.last) {
@@ -683,6 +761,7 @@ func battle(trainers: inout [Trainer], behavior: (State, Int) -> Move) -> () {
             }
          }
       }
+      // Second attack
       if let attack = attMove[order.last] {
          make_attack(move: attack, trainers: &trainers, trainerNum: order.last, state: battle_state)
          if has_fainted(state: &battle_state, trainers: trainers, trainerNum: order.last) {
