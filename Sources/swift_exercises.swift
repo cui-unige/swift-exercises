@@ -628,7 +628,7 @@ func computerTurn(state: inout State) -> () {
         state.computer_action = computer_attack
     case "item":
         //TODO: manage items for computer
-        print("The opponent tries to reach an item in his bag, but his bag turns out to be empty.")
+        print("The opponent tries to reach an item in his bag, but it turns out to be empty.")
     case "run":
         if canRun(active_pokemon: state.pokemon_computer_in, opposing_pokemon: state.pokemon_player_in, is_user: false) {
             print("The opponent runs away as you yell names at him.")
@@ -709,7 +709,21 @@ func resolveActions(state: inout State) -> () {
             userMove(move: user_move, state: &state)
         }
         return
+    } else {
+        // If there is only one move, we resolve it
+        if user_action is Move {
+            let user_move: Move = user_action as! Move
+            userMove(move: user_move, state: &state)
+        }
+        
+        if computer_action is Move {
+            let computer_move: Move = computer_action as! Move
+            computerMove(move: computer_move, state: &state)
+        }
     }
+    
+    
+    
     
 
 
@@ -847,7 +861,7 @@ func resolvePokemons(state: inout State) -> () {
             }
             print(pokemon_name!+" comes in to fight by your side.")
         } else {
-            print("\n All your pokemons are dazed. You lose the battle.")
+            print("\nAll your pokemons are dazed. You lose the battle.")
             exit(0)
         }
     }
