@@ -229,6 +229,7 @@ struct Pokemon {
 
 struct Trainer {
     let pokemons : [Pokemon]
+    let human: Bool
 }
 
 struct Environment {
@@ -260,6 +261,17 @@ func typeModifier(attacking: Type, defending : Type) -> Double {
     return chart[attacking.rawValue][defending.rawValue]
 }
 
+enum Action {
+    case attack
+    case change_pokemon
+    case use_item
+    case run
+}
+
+func trainer_choose_action(trainer: Trainer) -> Action {
+    return .attack
+}
+
 // http://bulbapedia.bulbagarden.net/wiki/Damage
 func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pokemon) -> Int {
     let pkmType = pokemon.species.type;
@@ -281,7 +293,30 @@ func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pok
 }
 
 struct State {
+    let environment: Environment
+    let pokemon_fighting: [Pokemon]
+    let active_trainer: Int // 0 if first player, 1 if second
+    let on_going: Bool // do we need to initialize everything, or is it already done and pokemon are fighting
+}
 
+func select_pokemon(trainer: Trainer) -> Pokemon? {
+    var selected: Pokemon? = nil;
+
+    for pkm in trainer.pokemons {
+        if pkm.effective_stats.hitpoints > 0 {
+            selected = pkm;
+            break;
+        }
+    }
+
+    return selected
+}
+
+func battle_init(trainers: [Trainer]) -> State {
+    let environment: Environment = Environment(weather: .clear_skies, terrain: .normal);
+    let pkm: [Pokemon] = [select_pokemon(trainer: trainers[0])!, select_pokemon(trainer: trainers[1])!];
+
+    return State(environment: environment, pokemon_fighting: pkm, active_trainer: 0, on_going: true)
 }
 
 func battle(trainers: inout [Trainer], behavior: (State, Trainer) -> Move) -> () {
