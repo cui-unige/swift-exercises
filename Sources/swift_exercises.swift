@@ -292,21 +292,32 @@ func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pok
     return 0
 }
 
-struct State {
-    let environment: Environment
-    let pokemon_fighting: [Pokemon]
-    let active_trainer: Int // 0 if first player, 1 if second
-    let on_going: Bool // do we need to initialize everything, or is it already done and pokemon are fighting
+enum Winner {
+    case p1
+    case p2
+    case none
 }
 
-func select_pokemon(trainer: Trainer) -> Pokemon? {
-    var selected: Pokemon? = nil;
+// has to be initialized before calling battle
+struct State {
+    let environment: Environment
+    let trainers: [Trainer]
+    let pokemon_fighting: [Int] // Indice of the fighting pokemon for the two players
+    let active_trainer: Int // 0 if first player, 1 if second
+    let finished: Bool
+    let winner: Winner
+}
+
+func select_pokemon(trainer: Trainer) -> Int? {
+    var selected: Int? = nil;
+    var indice: Int = 0
 
     for pkm in trainer.pokemons {
         if pkm.effective_stats.hitpoints > 0 {
-            selected = pkm;
+            selected = indice;
             break;
         }
+        indice += 1;
     }
 
     return selected
@@ -314,11 +325,32 @@ func select_pokemon(trainer: Trainer) -> Pokemon? {
 
 func battle_init(trainers: [Trainer]) -> State {
     let environment: Environment = Environment(weather: .clear_skies, terrain: .normal);
-    let pkm: [Pokemon] = [select_pokemon(trainer: trainers[0])!, select_pokemon(trainer: trainers[1])!];
+    let pkm1: Int? = select_pokemon(trainer: trainers[0]);
+    let pkm2: Int? = select_pokemon(trainer: trainers[1]);
+    var active_trainer: Int = 0;
+    var winner: Winner = .none;
+    var finished: Bool = true;
 
-    return State(environment: environment, pokemon_fighting: pkm, active_trainer: 0, on_going: true)
+    if(pkm1 == nil && pkm2 != nil) {
+        winner = .p2;
+    }
+
+    else if(pkm1 != nil && pkm2 == nil) {
+        winner = .p1;
+    }
+
+    else if(pkm1 != nil && pkm2 != nil) {
+        if(trainers[0].pokemons[pkm2!].effective_stats.speed < trainers[1].pokemons[pkm2!].effective_stats.speed) {
+            active_trainer = 1;
+        }
+        finished = false;
+    }
+
+    return State(environment: environment, trainers: trainers, pokemon_fighting: [pkm1!, pkm2!], active_trainer: active_trainer, finished: finished, winner: winner)
 }
 
-func battle(trainers: inout [Trainer], behavior: (State, Trainer) -> Move) -> () {
-    // TODO: simulate battle
+// var state: State = battle_init(trainers)
+// state = battle(state)
+func battle(state: State) -> State {
+    return state
 }
