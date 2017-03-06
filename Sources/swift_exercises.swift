@@ -87,7 +87,7 @@ struct Move : Hashable {
     let type        : Type
     let power       : Int
     let accuracy    : Int
-    let powerpoints : Int
+    var powerpoints : Int //We will decrease by 1 the powerpoints of the move once used
     let priority    : Int
 
     var hashValue   : Int {
@@ -352,7 +352,7 @@ struct Pokemon {
     let level             : Int
     let nature            : Nature
     let species           : Species
-    let moves             : [Move: Int] // Move -> remaining powerpoints
+    let moves             : [Move] // Move
     let individual_values : Stats
     let effort_values     : Stats
     var effective_stats   : Stats { //Computed property
@@ -531,7 +531,7 @@ struct State {
     var pokemonDefense: Pokemon
     var pokemonMoveAttack: Move
     var pokemonMoveDefense: Move
-    let pokemonEnvironment: Environment
+    var pokemonEnvironment: Environment
 }
 
 // ############### INITIALIZATION ############### //
@@ -540,31 +540,31 @@ struct State {
 
 let charizard = Pokemon(nickname: "Jack",
                         hitpoints: 82, size: 12, weight: 3000, experience: 0, level: 1,
-                        nature: Nature.sassy, species: charizardSpecie, moves: [moveGrowl: 2, moveAirSlash: 4, moveHeatWave: 3, moveEmber: 3, moveDragonClaw:  3, moveFlareBlitz: 3],
+                        nature: Nature.sassy, species: charizardSpecie, moves: allAttacksCharizard,
                         individual_values: charizardIndividualValues, effort_values: charizardEffortValues)
 
 
 let squirtle = Pokemon(nickname: "Arthur",
                           hitpoints: 47, size: 3, weight: 300, experience: 0, level: 1,
-                          nature: Nature.calm, species: squirtleSpecie, moves: [bubble: 4],
+                          nature: Nature.calm, species: squirtleSpecie, moves: allAttacksSquirtle,
                           individual_values: squirtleIndividualValues, effort_values: squirtleEffortValues)
 
 let raichu = Pokemon(nickname: "Aslam",
                        hitpoints: 62, size: 5, weight: 750, experience: 0, level: 1,
-                       nature: Nature.rash, species: raichuSpecie, moves: [thunderShockAttack: 5],
+                       nature: Nature.rash, species: raichuSpecie, moves: allAttacksPikachu,
                        individual_values: raichuIndividualValues, effort_values: raichuEffortValues)
 
 let pikachu = Pokemon(nickname: "Amir",
                        hitpoints: 36, size: 2, weight: 100, experience: 0, level: 1,
-                       nature: Nature.docile, species: pikachuSpecie, moves: [thunderShockAttack: 3],
+                       nature: Nature.docile, species: pikachuSpecie, moves: allAttacksPikachu,
                        individual_values: pikachuIndividualValues, effort_values: pikachuEffortValues)
 
 // ####################################### //
 
 let todaysEnvironnement = Environment(weather: Weather.sandstorm, terrain: Terrain.grassy)
 
-var Bob = Trainer(name: "Bob", pokemons:[raichu, squirtle, pikachu])
-var Alice = Trainer(name: "Alice", pokemons: [charizard])
+var Bob = Trainer(name: "Bob", pokemons:[raichu, charizard, pikachu])
+var Alice = Trainer(name: "Alice", pokemons: [squirtle])
 
 var trainers=[Bob, Alice];
 
@@ -575,11 +575,11 @@ var userInput: String! = "";
 // ############### BATTLE ############### //
 
 
-let randInt = randomNumber(min:0, max: allAttacksCharizard.count) //So that we can randomly determine which attack is going to be perfomed
+let randInt = randomNumber(min:0, max: allAttacksSquirtle.count - 1) //So that we can randomly determine which attack is going to be perfomed
 
 var currentState = State(player1: Bob, player2: Alice, pokemonAttack: Bob.pokemons[0], //Default pokemon selected for Bob : first one
-                         pokemonDefense: Alice.pokemons[0], pokemonMoveAttack: allAttacksCharizard[randInt],
-                         pokemonMoveDefense: allAttacksCharizard[randInt], pokemonEnvironment: todaysEnvironnement)
+                         pokemonDefense: Alice.pokemons[0], pokemonMoveAttack: allAttacksPikachu[randInt],
+                         pokemonMoveDefense: allAttacksSquirtle[randInt], pokemonEnvironment: todaysEnvironnement)
 
 var turn: Int = 1 //turn = 1 means player1 is attacking, otherwise player2
 
@@ -603,7 +603,7 @@ func go() -> (){
     choice = readLine()
     
     if (choice == "4"){
-        print("Player ran away !\n")
+        print("Player ran away (such a coward...) !\n")
         abort()
     }
     
@@ -614,6 +614,9 @@ func go() -> (){
     
     else if (choice == "3"){
         print("Please select the Pokemon which you want to battle with :\n")
+        
+        //Getting user's entry to select pokemon
+        
         for i in 0...(Bob.pokemons.count - 1){
             let currentPokemon = Bob.pokemons[i]
             print("\(i+1) name: \(currentPokemon.nickname) | specie: \(currentPokemon.species.name)")
@@ -644,18 +647,48 @@ func go() -> (){
 
 func battle(trainers: inout [Trainer]) -> (){
     
-    let randInt = randomNumber(min:0, max: allAttacksCharizard.count) //So that we can randomly determine which attack is going to be perfomed
+    let randInt = randomNumber(min:0, max: allAttacksSquirtle.count - 1) //So that we can randomly determine which attack is going to be perfomed
     
     round += 1
     
+    //Getting user's entry to select move
+    
     if turn == 1 {
+        print("Your turn! The following moves are available for your Pokemon. Please pick one.\n")
+        for i in 0...(currentState.pokemonAttack.moves.count - 1){
+            let currentMove = currentState.pokemonAttack.moves[i]
+            print("\(i+1) \(currentMove.name) | Remaining powerpoints for this attack: \(currentMove.powerpoints)")
+        }
+        print("\n\(currentState.pokemonAttack.moves.count + 1). Run away!")
+        print("\(currentState.pokemonAttack.moves.count + 2). Change Pokemon")
+        if let typed = readLine() {
+            if let num = Int(typed) {
+                if num == currentState.pokemonAttack.moves.count + 1{ //Running away
+                    print("You are a damn coward. Loser!")
+                    abort()
+                }else if num == currentState.pokemonAttack.moves.count + 2{ //Changing pokemon...
+                    go()
+                }else{
+                currentState.pokemonMoveAttack = currentState.pokemonAttack.moves[num-1] //Selecting appropriate move
+                currentState.pokemonMoveAttack.powerpoints -= 1
+                }
+            }
+        }
+        
         damages = damage(environment: todaysEnvironnement, pokemon: currentState.pokemonAttack, move: currentState.pokemonMoveAttack, target: currentState.pokemonDefense)
         currentState.pokemonDefense.hitpoints = currentState.pokemonDefense.hitpoints - damages; //Remaining hitpoints
+        
+        //Is the pokemon dead yet?
+        
         if currentState.pokemonDefense.hitpoints <= 0 {
             print("Your adversary's Pokemon was killed by the last move \(currentState.pokemonMoveAttack.name) ! \(currentState.pokemonAttack.nickname) wins, \(currentState.pokemonDefense.nickname) defeated !\n");
             abort(); //Exciting game
         }
     } else{
+        
+        //Same but for Alice
+        
+        print("Alice's turn!\n")
         damages = damage(environment: todaysEnvironnement, pokemon: currentState.pokemonDefense, move: currentState.pokemonMoveDefense, target: currentState.pokemonAttack)
         currentState.pokemonAttack.hitpoints = currentState.pokemonAttack.hitpoints - damages;
         if currentState.pokemonAttack.hitpoints <= 0 {
@@ -695,15 +728,15 @@ func battle(trainers: inout [Trainer]) -> (){
     print("Press Enter for next round, or any other key followed by Enter to exit: ")
 
     
-    if turn == 1 {
-        currentState.pokemonMoveAttack = allAttacksCharizard[randInt]; //Changing the moves
-    }
-    else{
-        currentState.pokemonMoveDefense = allAttacksCharizard[randInt]; //Changing the moves randomly for Alice
+    if turn == -1 {
+        
+        //Updating Alice's next move
+        
+        currentState.pokemonMoveDefense = allAttacksSquirtle[randInt];
     }
     
     while userInput == ""{
-        userInput = readLine();
+        userInput = readLine(); //Read user's entry
         turn = turn*(-1); //Changing player
         battle(trainers: &trainers); //Next round
         }
