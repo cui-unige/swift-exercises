@@ -330,9 +330,9 @@ func select_pokemon(trainer: Trainer) -> Int? {
 }
 
 func battle_init(trainers: [Trainer]) -> State {
-    let environment: Environment = Environment(weather: .clear_skies, terrain: .normal);
-    let pkm1: Int? = select_pokemon(trainer: trainers[0]);
-    let pkm2: Int? = select_pokemon(trainer: trainers[1]);
+    let environment = Environment(weather: .clear_skies, terrain: .normal);
+    let pkm1 = select_pokemon(trainer: trainers[0]);
+    let pkm2 = select_pokemon(trainer: trainers[1]);
     var winner: Int? = nil;
 
     if(pkm1 == nil && pkm2 != nil) {
@@ -347,7 +347,7 @@ func battle_init(trainers: [Trainer]) -> State {
 }
 
 func choose_move(pokemon: Pokemon) -> Move {
-    let available_moves: [Move] = Array(pokemon.moves.keys).filter{pokemon.moves[$0]! > 0}; // we filter our dict to get an array of moves with PP > 0
+    let available_moves = Array(pokemon.moves.keys).filter{pokemon.moves[$0]! > 0}; // we filter our dict to get an array of moves with PP > 0
     return available_moves[random() % available_moves.count]
 }
 
@@ -398,12 +398,12 @@ func battle(state: State) -> State {
         return state
     }
 
-    let environment: Environment = state.environment;
+    let environment = state.environment;
 
-    let p: [Trainer] = state.trainers;
-    var pkm_ind: [Int] = state.pokemon_fighting;
-    var pkm: [Pokemon] = [p[0].pokemons[pkm_ind[0]], p[1].pokemons[pkm_ind[1]]];
-    var winner: Int? = state.winner;
+    let p = state.trainers;
+    var pkm_ind = state.pokemon_fighting;
+    var pkm = [p[0].pokemons[pkm_ind[0]], p[1].pokemons[pkm_ind[1]]];
+    var winner = state.winner;
 
     var move: [Move?] = [nil];
 
@@ -420,7 +420,7 @@ func battle(state: State) -> State {
         }
     }
 
-    let order: [Int] = choose_first(pkm1: pkm[0], pkm2: pkm[1], move1: move[0], move2: move[1]);
+    let order = choose_first(pkm1: pkm[0], pkm2: pkm[1], move1: move[0], move2: move[1]);
 
     for ind in order {
         // Damage
