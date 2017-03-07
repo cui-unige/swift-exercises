@@ -72,7 +72,7 @@ enum Gender {
 struct Item {
    let id: Int
    let name: String
-   let effect: String // String type is a placeholder, this would ultimately need to link to a function, or something to determine the effects in regard to the program
+   let effect: (_: inout Trainer, _: Int) -> ()
 }
 
 // http://bulbapedia.bulbagarden.net/wiki/Weather
@@ -278,6 +278,13 @@ let species_bulbasaur = Species(
    )
 )
 
+// Exemple d'objet
+let potion = Item(
+   id: 23,
+   name: "Potion",
+   effect: heal_20
+)
+
 
 /******************************************************************************/
 /************************ Stats model and computation *************************/
@@ -377,6 +384,8 @@ func typeModifier(attacking: Type, defending : Type) -> Double {
 /******************************************************************************/
 /********************** Functions for additional effects **********************/
 /******************************************************************************/
+/* Note: Functions here are a bit redundant, but the goal is to use them as the
+'action' to take when an item is used. */
 func heal(trainer: inout Trainer, pokeIndex: Int, healStrength: Int){
    if Array(trainer.pokemons)[pokeIndex].hitpoints + healStrength > Array(trainer.pokemons)[pokeIndex].effective_stats.hitpoints {
       trainer.pokemons[pokeIndex].hitpoints = trainer.pokemons[pokeIndex].effective_stats.hitpoints
@@ -385,8 +394,28 @@ func heal(trainer: inout Trainer, pokeIndex: Int, healStrength: Int){
    }
 }
 
-func full_heal(trainer: inout Trainer, pokeIndex: Int, healStrength: Int) {
-   trainer.pokemons[pokeIndex].hitpoints += healStrength
+func heal_20(trainer: inout Trainer, pokeIndex: Int) {
+   if trainer.pokemons[pokeIndex].hitpoints > 0 {
+      heal(trainer: &trainer, pokeIndex: pokeIndex, healStrength: 20)
+   }
+}
+
+func full_heal(trainer: inout Trainer, pokeIndex: Int) {
+   if trainer.pokemons[pokeIndex].hitpoints > 0 {
+      trainer.pokemons[pokeIndex].hitpoints = Array(trainer.pokemons)[pokeIndex].effective_stats.hitpoints
+   }
+}
+
+func revive(trainer: inout Trainer, pokeIndex: Int) {
+   if trainer.pokemons[pokeIndex].hitpoints == 0 {
+      trainer.pokemons[pokeIndex].hitpoints = Int(Double(Array(trainer.pokemons)[pokeIndex].effective_stats.hitpoints) / 2.0)
+   }
+}
+
+func full_revive(trainer: inout Trainer, pokeIndex: Int) {
+   if trainer.pokemons[pokeIndex].hitpoints == 0 {
+      full_heal(trainer: &trainer, pokeIndex: pokeIndex)
+   }
 }
 
 func heal_burn(trainer: inout Trainer, pokeIndex: Int) {
@@ -463,10 +492,40 @@ func heal_curse(trainer: inout Trainer, pokeIndex: Int) {
    }
 }
 
+func rmv_all_effects(trainer: inout Trainer, pokeIndex: Int) {
+   heal_burn(trainer: &trainer, pokeIndex: pokeIndex)
+   heal_freeze(trainer: &trainer, pokeIndex: pokeIndex)
+   heal_paralysis(trainer: &trainer, pokeIndex: pokeIndex)
+   heal_poison(trainer: &trainer, pokeIndex: pokeIndex)
+   heal_sleep(trainer: &trainer, pokeIndex: pokeIndex)
+   heal_attract(trainer: &trainer, pokeIndex: pokeIndex)
+   heal_confusion(trainer: &trainer, pokeIndex: pokeIndex)
+   heal_curse(trainer: &trainer, pokeIndex: pokeIndex)
+}
+
 
 /******************************************************************************/
 /***************** Functions and structs for battle handling ******************/
 /******************************************************************************/
+func use_item(trainer: inout Trainer) {
+   // Choose item (random here)
+   #if os(Linux)
+      let diceRoll1 = Int(random() % trainer.backpack.count)
+   #else
+      let diceRoll1 = Int(arc4random_uniform(trainer.backpack.count))
+   #endif
+
+   // Choose target (random here)
+   #if os(Linux)
+      let diceRoll2 = Int(random() % trainer.pokemons.count)
+   #else
+      let diceRoll2 = Int(arc4random_uniform(trainer.pokemons.count))
+   #endif
+
+   // Apply item's effects
+   trainer.backpack[diceRoll1].effect(&trainer, diceRoll2)
+}
+
 // http://bulbapedia.bulbagarden.net/wiki/Damage
 func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pokemon) -> Int {
    let att = Double(move.category == .physical ? pokemon.effective_stats.attack : pokemon.effective_stats.special_attack)
@@ -634,8 +693,9 @@ func has_fainted(state: inout State, trainers: [Trainer], trainerNum: Int) -> Bo
 }
 
 // Calls has fainted and tries to change pokemon (true if not possible)
-func check_death(state: inout State, trainers: [Trainer], trainerNum: Int) -> Bool {
+func check_death(state: inout State, nextMove: inout [Move?], trainers: [Trainer], trainerNum: Int) -> Bool {
    if has_fainted(state: &state, trainers: trainers, trainerNum: trainerNum) {
+      nextMove[trainerNum] = nil
       if state.remaining_pokemons[trainerNum].isEmpty {
          return true
       } else {
@@ -684,7 +744,7 @@ func status_dmg(trainers: inout [Trainer], state: inout State, trainerNum: Int) 
 func battle(trainers: inout [Trainer], behavior: (State, Int) -> Move) -> () {
    // Initial check for available pokemons
    let whosUp = [[Int](0 ..< trainers[0].pokemons.count).filter{trainers[0].pokemons[$0].hitpoints != 0},
-               [Int](0 ..< trainers[1].pokemons.count).filter{trainers[1].pokemons[$0].hitpoints != 0}]
+                 [Int](0 ..< trainers[1].pokemons.count).filter{trainers[1].pokemons[$0].hitpoints != 0}]
 
    // Initial state
    var battle_state = State(
@@ -710,7 +770,7 @@ func battle(trainers: inout [Trainer], behavior: (State, Int) -> Move) -> () {
       // Assess first trainer's action and exec if not an attack
       switch action1 {
       case "Use item":
-         // Call item function
+         use_item(trainer: &(trainers[0]))
          attMove[0] = nil
       case "Change pokemon":
          change_pokemon(state: &battle_state, trainers: trainers,trainerNum: 0)
@@ -729,7 +789,7 @@ func battle(trainers: inout [Trainer], behavior: (State, Int) -> Move) -> () {
       // Assess second trainer's action and exec if not an attack
       switch action2 {
       case "Use item":
-         // Call item function
+         use_item(trainer: &(trainers[1]))
          attMove[1] = nil
       case "Change pokemon":
          change_pokemon(state: &battle_state, trainers: trainers,trainerNum: 1)
@@ -779,38 +839,32 @@ func battle(trainers: inout [Trainer], behavior: (State, Int) -> Move) -> () {
 
       // Status effect damage on first
       status_dmg(trainers: &trainers, state: &battle_state, trainerNum: order.first)
-      if check_death(state: &battle_state, trainers: trainers, trainerNum: order.first) {
+      if check_death(state: &battle_state, nextMove: &attMove, trainers: trainers, trainerNum: order.first) {
          break FIGHT
-      } else {
-         attMove[order.first] = nil
       }
       // First attack
       if let attack = attMove[order.first] {
          make_attack(move: attack, trainers: &trainers, trainerNum: order.first, state: battle_state)
-         if check_death(state: &battle_state, trainers: trainers, trainerNum: order.last) {
+         if check_death(state: &battle_state, nextMove: &attMove, trainers: trainers, trainerNum: order.last) {
             break FIGHT
-         } else {
-            attMove[order.last] = nil
          }
-         if check_death(state: &battle_state, trainers: trainers, trainerNum: order.first) {
+         if check_death(state: &battle_state, nextMove: &attMove, trainers: trainers, trainerNum: order.first) {
             break FIGHT
          }
       }
 
       // Status effect damage on second
       status_dmg(trainers: &trainers, state: &battle_state, trainerNum: order.last)
-      if check_death(state: &battle_state, trainers: trainers, trainerNum: order.last) {
+      if check_death(state: &battle_state, nextMove: &attMove, trainers: trainers, trainerNum: order.last) {
          break FIGHT
-      } else {
-         attMove[order.last] = nil
       }
       // Second attack
       if let attack = attMove[order.last] {
          make_attack(move: attack, trainers: &trainers, trainerNum: order.last, state: battle_state)
-         if check_death(state: &battle_state, trainers: trainers, trainerNum: order.first) {
+         if check_death(state: &battle_state, nextMove: &attMove, trainers: trainers, trainerNum: order.first) {
             break FIGHT
          }
-         if check_death(state: &battle_state, trainers: trainers, trainerNum: order.last) {
+         if check_death(state: &battle_state, nextMove: &attMove, trainers: trainers, trainerNum: order.last) {
             break FIGHT
          }
       }
