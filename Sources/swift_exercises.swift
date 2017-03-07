@@ -628,7 +628,6 @@ func firstPok(pokemonAttack: Pokemon, pokemonDefense: Pokemon, currentState: Sta
 var currentPokemon = 0 //Just so we know which pokemon in Bob's array we're updating later
 
 func go() -> (){
-    print(randInt1)
     print("\n##### MAIN BATTLE SCREEN #####\n");
     print("Please select an option");
     print("1. Fight         2. Bag         3. Pokemon         4. Run\n")
@@ -731,7 +730,7 @@ func battle(trainers: inout [Trainer]) -> (){
                             
                             currentState.pokemonAttack.moves[num-1] = currentState.pokemonMoveAttack //Updating global attacks list
                         }
-                        if ((currentState.pokemonAttack.nickname == "Kiki") && (num == 3)){
+                        if ((currentState.pokemonAttack.nickname == "Kiki") && (currentState.pokemonMoveAttack.id == 3)){
                             currentState.pokemonEnvironment.weather = Weather.clear_skies //Updating conditions
                         }
                     }
@@ -758,6 +757,14 @@ func battle(trainers: inout [Trainer]) -> (){
         print("### Alice's turn!\n")
         damages = damage(environment: currentState.pokemonEnvironment, pokemon: currentState.pokemonDefense, move: currentState.pokemonMoveDefense, target: currentState.pokemonAttack)
         currentState.pokemonAttack.hitpoints = currentState.pokemonAttack.hitpoints - damages;
+        
+        currentState.pokemonMoveDefense.powerpoints -= 1 //Decreasing PP
+        
+        if (currentState.pokemonMoveDefense.powerpoints == 0){
+            print("\n### No PP remaining for the move \(currentState.pokemonMoveDefense.name). Move deleted from available moves.")
+            currentState.pokemonDefense.moves.remove(at:  0) //Removing move
+        }
+       
         if currentState.pokemonAttack.hitpoints <= 0 {
             print("### Your adversary's Pokemon was killed by the last move \(currentState.pokemonMoveDefense.name) ! \(currentState.pokemonDefense.nickname) wins , \(currentState.pokemonAttack.nickname) defeated !\n")
             abort();
