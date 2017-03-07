@@ -1,6 +1,5 @@
 import Foundation	// floor, random, etc
 
-// http://bulbapedia.bulbagarden.net/wiki/Type
 enum Type {
     case bug
     case dark
@@ -22,14 +21,12 @@ enum Type {
     case water
 }
 
-// http://bulbapedia.bulbagarden.net/wiki/Damage_category
 enum Category {
     case physical
     case special
     case status
 }
 
-// http://bulbapedia.bulbagarden.net/wiki/Nature
 enum Nature {
     case hardy
     case lonely
@@ -94,6 +91,7 @@ struct Move : Hashable {
       return self.id
     }
 }
+
 func ==(lhs: Move, rhs: Move) -> Bool {
     return lhs.id == rhs.id
 }
@@ -119,10 +117,10 @@ struct Species : Hashable {
       return self.id
     }
 }
+
 func ==(lhs: Species, rhs: Species) -> Bool {
     return lhs.id == rhs.id
 }
-
 
 // create kangaskhan species
 let species_kangaskhan: Species = Species(
@@ -141,10 +139,7 @@ let species_kangaskhan: Species = Species(
 	)
 )
 
-// fancy movesets are irrelevant, pick some other moves that aren't just plain damage
-
-func computeReversalPower(currentHitpoints: Double, maxHitpoints: Double) -> Int
-{
+func computeReversalPower(currentHitpoints: Double, maxHitpoints: Double) -> Int {
 	// returns damage dealt by the 'reversal' move
 	// see http://bulbapedia.bulbagarden.net/wiki/Reversal_(move)
 	let HPRatio: Double = currentHitpoints / maxHitpoints
@@ -205,7 +200,6 @@ let move_suckerPunch: Move = Move(
 	priority: 1
 )
 
-
 struct Pokemon {
 	let nickname          : String?
 	let size              : Float
@@ -228,8 +222,6 @@ struct Pokemon {
 	}
 	var current_stats	: Stats
 }
-
-
 
 func computeStats(base_values: Stats, individual_values: Stats, effort_values: Stats, level: Double) -> Stats {
 	//expressions broken up because they're too long for the compiler
@@ -273,7 +265,6 @@ func computeStats(base_values: Stats, individual_values: Stats, effort_values: S
 		speed: speed)
 }
 
-
 var kangaskhan = Pokemon(
 	nickname: "KANGS",
 	size: 2.2,
@@ -281,14 +272,13 @@ var kangaskhan = Pokemon(
 	experience: 1000000, // kangaskhan is a medium-fast leveler, MFXP = lvl^3
 	level: 100, // DA VERY BESS
 	type : species_kangaskhan.type,
-	nature: .rash,
+	nature: .hardy,
 	species: species_kangaskhan,
 	moves: [move_reversal: 15,
 			move_earthquake: 10,
 			move_iceBeam: 10,
 			move_suckerPunch: 5],
 	base_values: species_kangaskhan.base_values,
-	//IVs and EVs tryharded to hell and back because why not
 	individual_values: Stats(
 		hitpoints: 31,
 		attack: 31,
@@ -319,16 +309,77 @@ var kangaskhan = Pokemon(
 		speed: 0)
 )
 
+var kangaskhan2 = Pokemon(
+	nickname: "KANGS2",
+	size: 2.2,
+	weight: 80,
+	experience: 1000000, // kangaskhan is a medium-fast leveler, MFXP = lvl^3
+	level: 100, // DA VERY BESS
+	type : species_kangaskhan.type,
+	nature: .hardy,
+	species: species_kangaskhan,
+	moves: [move_reversal: 15,
+			move_earthquake: 10,
+			move_iceBeam: 10,
+			move_suckerPunch: 5],
+	base_values: species_kangaskhan.base_values,
+	individual_values: Stats(
+		hitpoints: 31,
+		attack: 31,
+		defense: 31,
+		special_attack: 31,
+		special_defense: 31,
+		speed: 31),
+	effort_values: Stats(
+		hitpoints: 200,
+		attack: 200,
+		defense: 30,
+		special_attack: 20,
+		special_defense: 30,
+		speed: 30),
+	effort_values_yield: Stats(	// are we even supposed to account for EV yield?
+		hitpoints: 2,
+		attack: 0,
+		defense: 0,
+		special_attack: 0,
+		special_defense: 0,
+		speed: 0),
+	current_stats: Stats(
+		hitpoints: 2,
+		attack: 0,
+		defense: 0,
+		special_attack: 0,
+		special_defense: 0,
+		speed: 0)
+)
 
-// http://bulbapedia.bulbagarden.net/wiki/Nature
-// let natureMultiplier: [Nature: Stats](
-//
-//)
-
+struct Item {
+	let id: Int
+	let name: String
+	let description: String
+	var amount: Int
+	let price: Int
+}
 
 struct Trainer {
-    let party : [Pokemon]
+	let name: String
+    var party : [Pokemon]
+	var bag: [Item]
 }
+
+let trainerA: Trainer = Trainer(
+	name: "Trainer A",
+	party: [kangaskhan],
+	bag: []
+)
+
+let trainerB : Trainer = Trainer(	// maybe add some other pokemon
+	name: "Trainer B",
+	party: [kangaskhan2],
+	bag: []
+)
+
+let trainers: [Trainer] = [trainerA, trainerB]
 
 struct Environment {
     var weather : Weather
@@ -356,15 +407,11 @@ func typeToInt(type: Type) -> Int {
 		case .dragon: return 15
 		case .dark: return 16
 		case .fairy: return 17
-		// case nil: return -1	// ?????
-		// default: return -2 //
+		default: return -1 //
 	}
 }
 
-// http://bulbapedia.bulbagarden.net/wiki/Type/Type_chart
 func typeModifier(attacking: Type, defending : Type)-> Double {
-    // TODO: encode type/type chart
-
 	let attackingID: Int = typeToInt(type: attacking)
 	let defendingID: Int = typeToInt(type: defending)
 
@@ -390,9 +437,15 @@ func typeModifier(attacking: Type, defending : Type)-> Double {
 	]
 
 	return (multiplierMatrix[attackingID][defendingID])
-
-
 }
+
+// http://bulbapedia.bulbagarden.net/wiki/Nature
+// let natureMultiplier: [Nature: Stats](
+//
+//)
+
+
+
 
 // http://bulbapedia.bulbagarden.net/wiki/Damage
 func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pokemon) -> Double {
@@ -412,15 +465,18 @@ func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pok
 
 	let environmentBonus: Double = 1 // actually calculate this
 
-	// drand48() returns a random double between 0 and 1
-	// but randFactor should be uniformly distributed between 0.85 and 1
-	let randFactor: Double = ((drand48() * 0.15) + 0.85)
+	let randFactor: Double = ((drand48() * 0.15) + 0.85)	// uniformly distributed between 0.85 and 1
 
-	// assuming no items or abilities
 	let modifier : Double = STAB * typeBonus * critical * environmentBonus * randFactor
 
-	// TODO calculate actual damage
-	let damage : Double = Double(modifier)	// and other stuff ......
+	let tempDamage: Double = (2 * pokemon.level + 10) / 250
+
+	let attDef: Double
+	if (move.category == .physical) { attDef = pokemon.effective_stats.attack / target.effective_stats.defense }
+	else if (move.category == .special) { attDef = pokemon.effective_stats.special_attack / target.effective_stats.special_defense }
+	else { attDef = 0 }
+
+	let damage : Double = (tempDamage * attDef * Double(move.power) * 2) * modifier
     return damage
 }
 
@@ -428,25 +484,55 @@ struct State {
     // TODO: describe a battle state
 }
 
-
 func battle(trainers: inout [Trainer], behavior: (State, Trainer) -> Move) -> () {
 
-	// assume you can either fight or switch pokemon, but nothing more
-	// struggle?????
-	// no fancy effects and such, at least for now
-
     // TODO:
-	// introductory blah blah
-	// trainers send out the first respective pokemon
-	// while both trainers have at least 1 non-KO pokemon:
-		// display environment info if relevant
+	print("intro blah blah goes here")
+
+	var partyA: [Pokemon]? = trainers[0].party	// player
+	var partyB: [Pokemon]? = trainers[1].party	// pc
+	var KOPartyA: [Pokemon]? = []
+	var KOPartyB: [Pokemon]? = []
+
+	print("trainer a sent out", partyA![0], "trainer B sent out", partyB![0])
+
+	while (partyA != nil && partyB != nil) {
+
+		// get environment info
+		// print if non-default
+
+
+		print("what to do? [F]ight, [B]ag, [P]okemon")	//pick player move
+		var playerMove = readLine()
+
+		if ( playerMove == ("F") || playerMove == ("f") || playerMove == ("Fight") || playerMove == ("fight") ) {
+			// print list of index (1-4), move names, descriptions, power and accuracy
+			print()
+			var playerMove = readLine()
+
+
+		}
+		else if ( playerMove == ("B") || playerMove == ("b") || playerMove == ("Bag") || playerMove == ("bag") ) {
+			// print contents of bag with an index
+			// tell player to choose the index of the item
+
+		}
+		else if ( playerMove == ("P") || playerMove == ("p") || playerMove == ("Pokemon") || playerMove == ("pokemon") ) {
+			// print pokemon, their level, HP, and status condition
+			//check that pokemon isn't Ko before sending it out
+		}
+		else {
+			//...
+		}
+
+
 		// trainers pick a move, or switch pokemon, or use an object
 			// pokemon: check it's valid and non-KO, priority 6
 			// obj: check it's valid, priority 6
 			// move: check that it's a valid move, and that it has PP left
-		// csame priority?
+		// same priority?
 			// y:
-				// both are non-damaging: random order
+				// both are non-damaging: random order (or determined by speed??)
 				// one is damaging: non-damaging first
 				// both are damaging: speed determines order
 			// n: higher priority first
@@ -488,7 +574,7 @@ func battle(trainers: inout [Trainer], behavior: (State, Trainer) -> Move) -> ()
 								// y: second tries sending out another pokemon
 		// nonzero status conditions on either pokemon: apply effects
 			// KO? try sending out another pokemon
-
+	}
 }
 
 
