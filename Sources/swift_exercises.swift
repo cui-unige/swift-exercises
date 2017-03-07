@@ -56,7 +56,26 @@ enum Nature {
     case sassy
     case careful
     case quirky
+    static let allNatures: [Nature] = [hardy,lonely,brave,adamant,naughty,bold,docile,relaxed,impish,lax,timid,hasty,serious,jolly,naive,modest,mild,quiet,bashful,rash,calm,gentle,sassy,careful,quirky]
 }
+
+// Names for computer's pokemon
+struct Names {
+    static var available_names: [String] = ["Fatty", "Tehoe", "Kiki", "The godfather", "Rolim", "Zipzap", "Chef", "Redneck", "Coco l'asticot"]
+}
+
+func randomName() -> String? {
+    let val_index : Int = Int(arc4random_uniform(UInt32(Names.available_names.count)))
+    // Array might be empty if the computer has more pokemons than the total of the defined nicknames
+    if Names.available_names.isEmpty {
+        return nil // No nickname available
+    } else {
+        let return_name: String = Names.available_names[val_index]
+        Names.available_names.remove(at: val_index) //Ensures that we won't have 2 exact same nicknames
+        return return_name
+    }
+}
+
 
 // http://bulbapedia.bulbagarden.net/wiki/Weather
 enum Weather {
@@ -229,7 +248,7 @@ func computeStat(_ pokemon: Pokemon,stat_name stat: String) -> Int {
 
 
 struct Pokemon {
-    let nickname          : String?
+    let nickname          : String? //to avoid ambiguity whilst user switch between his pokemons, the nickname should be unique (and maybe forced to decide)
     var hitpoints         : Int? = nil// remaining hitpoints, nil at initialization
     let size              : Int
     let weight            : Int
@@ -281,7 +300,7 @@ func typeModifier(attacking: Type, defending : Type) -> Float {
     let first_ind: Int = types_array.index(where: {$0 == attacking})!
     let second_ind: Int = types_array.index(where: {$0 == defending})!
 
-    return type_type_chart[first_ind][second_ind] //TODO bug here
+    return type_type_chart[first_ind][second_ind]
 }
 
 // http://bulbapedia.bulbagarden.net/wiki/Damage
@@ -323,7 +342,7 @@ func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pok
     }
 
     /*
-     The probability of making a critical hit is based on the battle stage
+     The probability of making a critical hit is based upon the battle stage
      TODO: implement stages
      For now, we assume stage is 0, therefore P(critical hit) = 1/16
 
@@ -365,8 +384,8 @@ struct State {
     var pokemons_computer_out: [Pokemon]
     var weather: Weather
     let terrain: Terrain
-    var user_action: Any? // TODO: create a structure to store user's and computer's action
-    var computer_action: Any?
+    var user_action: Move? // An action is wether a Move or nil (f. ex. if run or use item)
+    var computer_action: Move?
 }
 
 // Number of attempts to running away from user
@@ -442,7 +461,7 @@ func getAction(_ state: State, is_user: Bool) -> Action {
 
 
 
-        // Get user's input
+        // Gets user's input
         var chosen_action: Action? = nil
         repeat {
             print("\n Select one of the following actions (by writing the text within the parenthesis): \n")
@@ -580,9 +599,8 @@ func getPokemonOff(_ state: State, is_user: Bool) -> Pokemon {
         return chosen_pokemon!
 
     } else {
-        // Computer switch with a random (? TODO  propose a heuristic) pokemon
-        let nbrPokemon: UInt32 = UInt32(state.pokemons_player_out.count)
-        return state.pokemons_player_out[Int(arc4random_uniform(nbrPokemon))]
+        // Computer choses the pokemon with the greatest hp
+        return state.pokemons_player_out.max(by: { $0.hitpoints! > $1.hitpoints! })!
     }
 }
 
@@ -681,20 +699,19 @@ func resolveActions(state: inout State) -> () {
     let user_action = state.user_action
     let computer_action = state.computer_action
 
-    // TODO: resolve moves
     
     /*
      IMPORTANT NOTE:
-     only Moves are not already resolved at this points, so the only cases to handle are:
+     only Moves are not already resolved at this point of the program execution, so the only cases to handle are:
      Move && Move
      Move && something else (
     */
     
     // If there are only moves, we can resolve action by speed
-    if (user_action is Move) && (computer_action is Move) {
+    if (user_action != nil) && (computer_action != nil) {
         // We know we're dealing with moves so we create new move constants
-        let user_move: Move = user_action as! Move
-        let computer_move: Move = computer_action as! Move
+        let user_move: Move = user_action!
+        let computer_move: Move = computer_action!
 
         // Resolve by order of speedness
         if  state.pokemon_computer_in.effective_stats.speed >= state.pokemon_computer_in.effective_stats.speed {
@@ -711,13 +728,13 @@ func resolveActions(state: inout State) -> () {
         return
     } else {
         // If there is only one move, we resolve it
-        if user_action is Move {
-            let user_move: Move = user_action as! Move
+        if user_action != nil {
+            let user_move: Move = user_action!
             userMove(move: user_move, state: &state)
         }
         
-        if computer_action is Move {
-            let computer_move: Move = computer_action as! Move
+        if computer_action != nil {
+            let computer_move: Move = computer_action!
             computerMove(move: computer_move, state: &state)
         }
     }
@@ -889,28 +906,16 @@ func resolvePokemons(state: inout State) -> () {
 
 
 func battle(state: inout State) -> () {
-    // TODO: simulate battle
     /*
      A battle has the following progress:
      1) Player selects an action (move, item, run, switch pokemon, etc)
      2) Computer selects an action (||)
-     3) By order of priorities, actions are resolved TODO
+     3) By order of priorities, actions are resolved
      4) If pokemons_player_in or pokemons_computer_in is empty, player or computer can
      respectively select a pokemon from pokemons_player_out and pokemons_computer_out
      If both pokemons_player_in and pokemons_player_out are empty, player loses
-     If both pokemons_computer_in and pokemons_computer_out are empty, computer loses TODO
-     5) If no one lost, back to 1) TODO
-
-     // Last requirement: the initial state
-     let initialState = State(
-     stage: 1,
-     pokemon_player_in: player.pokemons[0],
-     pokemons_player_out: [player.pokemons[1], player.pokemons[2]],
-     pokemon_computer_in: computer.pokemons[0],
-     pokemons_computer_out: [computer.pokemons[1]],
-     weather: randomWeather(),
-     terrain: randomTerrain()
-     )
+     If both pokemons_computer_in and pokemons_computer_out are empty, computer loses
+     5) If no one lost, back to 1)
      */
     var round: Int = 1
 
@@ -1240,7 +1245,10 @@ func initialize() {
         // Get infos on the pokemon
         print("We need some informations about your pokemon.")
         print("Nickname?")
-        let nickname: String = readLine()!
+        var nickname: String? = readLine()
+        if nickname == "" {
+            nickname = nil
+        }
         
         // For size and weight, we user unsigned integers to strictly accept positive values
         print("Size in meters? (1 by default)")
@@ -1261,7 +1269,7 @@ func initialize() {
             size: Int(size!),
             weight: Int(weight!),
             experience: 0,
-            nature: Nature.lonely, //TODO: ask user for nature or generate random one
+            nature: Nature.allNatures[Int(arc4random_uniform(UInt32(Nature.allNatures.count)))],
             species: chosen_species,
             moves: getMovesWithPowerPoints(pokemon_species: chosen_species),
             individual_values: getIv(pokemon_species: chosen_species),
@@ -1272,12 +1280,12 @@ func initialize() {
         chosen_species = species[Int(arc4random_uniform(UInt32(i)))]
         // Add up a random pokemon to the computer's pokemons list
         computer.pokemons.append(Pokemon(
-            nickname: nil, // TODO: add random nickname
+            nickname: randomName(),
             hitpoints: nil,
             size: Int(arc4random_uniform(8)),
             weight: Int(arc4random_uniform(300)),
             experience: 0,
-            nature: Nature.brave, //TODO: generate random nature
+            nature: Nature.allNatures[Int(arc4random_uniform(UInt32(Nature.allNatures.count)))],
             species: chosen_species,
             moves: getMovesWithPowerPoints(pokemon_species: chosen_species),
             individual_values: getIv(pokemon_species: chosen_species),
