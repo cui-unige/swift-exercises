@@ -142,7 +142,7 @@ func ==(lhs: Species, rhs: Species) -> Bool {
 // http://bulbapedia.bulbagarden.net/wiki/List_of_Pokémon_by_National_Pokédex_number
 
 let hooh: Pokemon = Pokemon(
-  nickname: "fuck pokemon",
+  nickname: "kyouko taiga",
   size: 3.8,
   weight: 199,
   level: 100,
@@ -295,25 +295,19 @@ func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pok
     return 0
 }
 
-enum Winner {
-    case p1
-    case p2
-    case none
-}
-
 // has to be initialized before calling battle
 struct State {
     let environment: Environment
     let trainers: [Trainer]
     let pokemon_fighting: [Int] // Indice of the fighting pokemon for the two players
-    let winner: Winner
+    let winner: Int? // 0 = first player, 1 = second, nil = none
 }
 
 enum Action {
     case attack
     case change_pokemon
     case use_item
-    //case run
+    // case run
 }
 
 func choose_action(trainer: Trainer) -> Action {
@@ -325,7 +319,7 @@ func select_pokemon(trainer: Trainer) -> Int? {
     var indice: Int = 0
 
     for pkm in trainer.pokemons {
-        if pkm.effective_stats.hitpoints > 0 {
+        if pkm.battle_stats.hitpoints > 0 {
             selected = indice;
             break;
         }
@@ -339,14 +333,14 @@ func battle_init(trainers: [Trainer]) -> State {
     let environment: Environment = Environment(weather: .clear_skies, terrain: .normal);
     let pkm1: Int? = select_pokemon(trainer: trainers[0]);
     let pkm2: Int? = select_pokemon(trainer: trainers[1]);
-    var winner: Winner = .none;
+    var winner: Int? = nil;
 
     if(pkm1 == nil && pkm2 != nil) {
-        winner = .p2;
+        winner = 1
     }
 
     else if(pkm1 != nil && pkm2 == nil) {
-        winner = .p1;
+        winner = 0
     }
 
     return State(environment: environment, trainers: trainers, pokemon_fighting: [pkm1!, pkm2!], winner: winner)
@@ -400,7 +394,7 @@ func choose_first(pkm1: Pokemon, pkm2: Pokemon, move1: Move?, move2: Move?) -> [
 // var state: State = battle_init(trainers)
 // state = battle(state)
 func battle(state: State) -> State {
-    if(state.winner != .none) {
+    if(state.winner != nil) {
         return state
     }
 
@@ -409,7 +403,7 @@ func battle(state: State) -> State {
     let p: [Trainer] = state.trainers;
     var pkm_ind: [Int] = state.pokemon_fighting;
     var pkm: [Pokemon] = [p[0].pokemons[pkm_ind[0]], p[1].pokemons[pkm_ind[1]]];
-    var winner: Winner = state.winner;
+    var winner: Int? = state.winner;
 
     var move: [Move?] = [nil];
 
@@ -429,20 +423,24 @@ func battle(state: State) -> State {
     let order: [Int] = choose_first(pkm1: pkm[0], pkm2: pkm[1], move1: move[0], move2: move[1]);
 
     for ind in order {
-        if(pkm[(ind+1)%2].battle_stats.hitpoints <= 0) {
+        // Damage
+        if(random() % 100 < move[ind]!.accuracy) {
+            let dmg = damage(environment: environment, pokemon: pkm[ind], move: move[ind]!, target: pkm[(ind+1)%2]);
+            pkm[(ind+1)%2].battle_stats.hitpoints -= dmg;
             pkm[ind].moves[move[ind]!]! -= 1;
         }
-        if(random()%100 < move[ind]!.accuracy) {
-            let dmg = damage(environment: environment, pokemon: pkm[ind], move: move[ind]!, target: pkm[(ind+1)%2]);
-            pkm[(ind+1)%2].battle_stats.hitpoints = dmg;
+
+        // Check if other pokemon is dead
+        if(pkm[(ind+1)%2].battle_stats.hitpoints <= 0) {
+            let new_indice = select_pokemon(trainer: p[ind]);
+            if(new_indice == nil) {
+                winner = (ind+1)%2;
+                break;
+            }
+            pkm_ind[ind] = new_indice!;
+            pkm[ind] = p[ind].pokemons[pkm_ind[ind]];
         }
     }
-
-    // on calcule une fois *effective* avec IV et effort ey baqse
-    // on fait une copie d'effective au début de la battle, et on travail avec ça (hitpoints attack speed etc)
-    // ------------------------------
-    // à la fin de la battle, les pkm ont leur effective stats qui ont changé etc... on est obligé de faire une copie ?
-    // on peut pas juste directement travailler avec ? changer les hp etc
 
     // new turn
     return battle(state: State( environment: environment, trainers: p,
