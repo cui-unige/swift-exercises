@@ -165,7 +165,7 @@ struct Pokemon {
     }
     let nature            : Nature
     let species           : Species
-    var moves             : [Move: Int] // Move -> remaining powerpoints ------> c'est un dictionnaire, `moves[earthquake]` = <le nombre de pp restant>
+    var moves             : [Move: Int] // Move -> remaining powerpoints (dict)
     let individual_values : Stats
     let effort_values     : Stats
 
@@ -174,30 +174,30 @@ struct Pokemon {
     var effective_stats   : Stats {
       get {
         // attack, defence, special attack, special defense, speed
-        let natureChart: [[Double]] = [[1.1, 0.9, 1, 1, 1],
-                                  [1.1, 1, 1, 1, 0.9],
-                                  [1.1, 1, 0.9, 1, 1],
-                                  [1.1, 1, 1, 0.9, 1],
-                                  [0.9, 1.1, 1, 1, 1],
-                                  [1, 1, 1, 1, 1],
-                                  [1, 1.1, 1, 1, 0.9],
-                                  [1, 1.1, 0.9, 1, 1],
-                                  [1, 1.1, 1, 0.9, 1],
-                                  [0.9, 1.1, 1, 1, 1.1],
-                                  [1, 0.9, 1, 1, 1.1],
-                                  [1, 1, 1, 1, 1],
-                                  [1, 1.1, 0.9, 1, 1.1],
-                                  [1, 1.1, 1, 0.9, 1.1],
-                                  [0.9, 1, 1.1, 1, 1],
-                                  [1, 0.9, 1.1, 1, 1],
-                                  [1, 1, 1.1, 1, 0.9],
-                                  [1, 1, 1, 1, 1],
-                                  [1, 1, 1.1, 0.9, 1],
-                                  [0.9, 1, 1, 1.1, 1],
-                                  [1, 0.9, 1, 1.1, 1],
-                                  [1, 1, 1, 1.1, 0.9],
-                                  [1, 1, 0.9, 1.1, 1],
-                                  [1, 1, 1, 1, 1]]
+        let natureChart: [[Double]] = [   [1.1, 0.9, 1, 1, 1],
+                                          [1.1, 1, 1, 1, 0.9],
+                                          [1.1, 1, 0.9, 1, 1],
+                                          [1.1, 1, 1, 0.9, 1],
+                                          [0.9, 1.1, 1, 1, 1],
+                                          [1, 1, 1, 1, 1],
+                                          [1, 1.1, 1, 1, 0.9],
+                                          [1, 1.1, 0.9, 1, 1],
+                                          [1, 1.1, 1, 0.9, 1],
+                                          [0.9, 1.1, 1, 1, 1.1],
+                                          [1, 0.9, 1, 1, 1.1],
+                                          [1, 1, 1, 1, 1],
+                                          [1, 1.1, 0.9, 1, 1.1],
+                                          [1, 1.1, 1, 0.9, 1.1],
+                                          [0.9, 1, 1.1, 1, 1],
+                                          [1, 0.9, 1.1, 1, 1],
+                                          [1, 1, 1.1, 1, 0.9],
+                                          [1, 1, 1, 1, 1],
+                                          [1, 1, 1.1, 0.9, 1],
+                                          [0.9, 1, 1, 1.1, 1],
+                                          [1, 0.9, 1, 1.1, 1],
+                                          [1, 1, 1, 1.1, 0.9],
+                                          [1, 1, 0.9, 1.1, 1],
+                                          [1, 1, 1, 1, 1]]
 
         // ****************************** ASK 4 HALP CUZ IDK HOW TO TEST THIS SHIT AND WHETHER I HAVE TO USE SELF.
 
@@ -223,6 +223,22 @@ struct Pokemon {
         return Stats(hitpoints: hp, attack: att, defense: def, special_attack: satt, special_defense: sdef, speed: spe)
       }
     }
+
+    var battle_stats      : Stats // Copy of effective stats, used during battle
+
+    init(nickname: String?, size: Double, weight: Double, level: Int, nature: Nature, species: Species, moves: [Move: Int], individual_values: Stats, effort_values: Stats) {
+        self.nickname = nickname;
+        self.size = size;
+        self.weight = weight;
+        self.level = level;
+        self.nature = nature;
+        self.species = species;
+        self.moves = moves;
+        self.individual_values = individual_values;
+        self.effort_values = effort_values;
+        self.battle_stats = self.effort_values;
+    }
+
 }
 
 struct Trainer {
@@ -397,38 +413,36 @@ func battle(state: State) -> State {
 
     var move: [Move?] = [nil];
 
-    switch choose_action(trainer: p[0]) {
-        case .attack:
-            move[0] = choose_move(pokemon: pkm[0]);
-        case .change_pokemon:
-            let new_indice = select_pokemon(trainer: p[0]);
-            pkm_ind[0] = new_indice!;
-            pkm[0] = p[0].pokemons[pkm_ind[0]];
-        case .use_item:
-          print("lol");
-    }
-
-    switch choose_action(trainer: p[1]) {
-        case .attack:
-            move[1] = choose_move(pokemon: pkm[1]);
-        case .change_pokemon:
-            let new_indice = select_pokemon(trainer: p[1]);
-            pkm_ind[1] = new_indice!;
-            pkm[1] = p[1].pokemons[pkm_ind[1]];
-        case .use_item:
-          print("lol");
+    for i in 0...1 {
+        switch choose_action(trainer: p[i]) {
+            case .attack:
+                move[i] = choose_move(pokemon: pkm[i]);
+            case .change_pokemon:
+                let new_indice = select_pokemon(trainer: p[i]);
+                pkm_ind[i] = new_indice!;
+                pkm[i] = p[i].pokemons[pkm_ind[i]];
+            case .use_item:
+              print("lol");
+        }
     }
 
     let order: [Int] = choose_first(pkm1: pkm[0], pkm2: pkm[1], move1: move[0], move2: move[1]);
 
     for ind in order {
-        pkm[ind].moves[move[ind]!] = 1;
+        if(pkm[(ind+1)%2].battle_stats.hitpoints <= 0) {
+            pkm[ind].moves[move[ind]!]! -= 1;
+        }
         if(random()%100 < move[ind]!.accuracy) {
             let dmg = damage(environment: environment, pokemon: pkm[ind], move: move[ind]!, target: pkm[(ind+1)%2]);
-            //pkm[(ind+1)%2].effective_stats.hitpoints = dmg;
+            pkm[(ind+1)%2].battle_stats.hitpoints = dmg;
         }
     }
 
+    // on calcule une fois *effective* avec IV et effort ey baqse
+    // on fait une copie d'effective au début de la battle, et on travail avec ça (hitpoints attack speed etc)
+    // ------------------------------
+    // à la fin de la battle, les pkm ont leur effective stats qui ont changé etc... on est obligé de faire une copie ?
+    // on peut pas juste directement travailler avec ? changer les hp etc
 
     // new turn
     return battle(state: State( environment: environment, trainers: p,
