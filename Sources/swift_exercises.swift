@@ -80,7 +80,7 @@ enum Terrain {
     case misty
 }
 
-let earthquake: Move = Move(
+let earthquake = Move(
     id: 89,
     name: "Earthquake",
     description: "Tough but useless vs. flying foes.",
@@ -150,7 +150,7 @@ let hooh: Pokemon = Pokemon(
   species: Species(
     id: 253, name: "Ho-Oh", evolutions: [], attacks: [], type: (.fire, .flying), base_values: Stats(hitpoints: 106, attack: 130, defense: 90, special_attack: 110, special_defense: 154, speed: 90)
   ),
-  moves: [:],
+  moves: [earthquake: earthquake.powerpoints],
   individual_values: Stats(hitpoints: 15, attack: 21, defense: 23, special_attack: 12, special_defense: 26, speed: 24),
   effort_values: Stats(hitpoints: 66, attack: 100, defense: 60, special_attack: 30, special_defense: 75, speed: 90)
 )
@@ -242,13 +242,13 @@ struct Pokemon {
 }
 
 struct Trainer {
-    let pokemons : [Pokemon]
+    var pokemons : [Pokemon]
     let human: Bool
 }
 
 struct Environment {
-    let weather : Weather
-    let terrain : Terrain
+    var weather : Weather
+    var terrain : Terrain
 }
 
 // http://bulbapedia.bulbagarden.net/wiki/Type/Type_chart
@@ -292,7 +292,7 @@ func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pok
 
     let modifier: Double = targets * weather * badge * critical * random_value * stab * type * burn * other
 
-    return 0
+    return 1
 }
 
 // has to be initialized before calling battle
@@ -319,6 +319,7 @@ func select_pokemon(trainer: Trainer) -> Int? {
     var indice: Int = 0
 
     for pkm in trainer.pokemons {
+        print("")
         if pkm.battle_stats.hitpoints > 0 {
             selected = indice;
             break;
@@ -347,8 +348,16 @@ func battle_init(trainers: [Trainer]) -> State {
 }
 
 func choose_move(pokemon: Pokemon) -> Move {
-    let available_moves = Array(pokemon.moves.keys).filter{pokemon.moves[$0]! > 0}; // we filter our dict to get an array of moves with PP > 0
-    return available_moves[random() % available_moves.count]
+    var filtered_moves = [Move]();
+
+    for (key, value) in pokemon.moves {
+        print(value)
+        if value > 0 {
+            filtered_moves.append(key)
+        }
+    }
+
+    return filtered_moves[random() % filtered_moves.count]
 }
 
 func choose_first(pkm1: Pokemon, pkm2: Pokemon, move1: Move?, move2: Move?) -> [Int] {
@@ -398,14 +407,14 @@ func battle(state: State) -> State {
         return state
     }
 
-    let environment = state.environment;
+    var environment = state.environment;
 
-    let p = state.trainers;
+    var p = state.trainers;
     var pkm_ind = state.pokemon_fighting;
     var pkm = [p[0].pokemons[pkm_ind[0]], p[1].pokemons[pkm_ind[1]]];
     var winner = state.winner;
 
-    var move: [Move?] = [nil];
+    var move: [Move?] = [nil, nil];
 
     for i in 0...1 {
         switch choose_action(trainer: p[i]) {
@@ -421,13 +430,16 @@ func battle(state: State) -> State {
     }
 
     let order = choose_first(pkm1: pkm[0], pkm2: pkm[1], move1: move[0], move2: move[1]);
-
+print(p[0].pokemons[0].battle_stats.hitpoints);
     for ind in order {
         // Damage
         if(random() % 100 < move[ind]!.accuracy) {
             let dmg = damage(environment: environment, pokemon: pkm[ind], move: move[ind]!, target: pkm[(ind+1)%2]);
             pkm[(ind+1)%2].battle_stats.hitpoints -= dmg;
             pkm[ind].moves[move[ind]!]! -= 1;
+            p[ind].pokemons[pkm_ind[(ind+1)%2]].battle_stats = pkm[(ind+1)%2].battle_stats;
+            print("Pokemon ", ind, " attacks pokemon ", (ind+1)%2, " with ",  dmg, " damage!");
+
         }
 
         // Check if other pokemon is dead
@@ -442,7 +454,11 @@ func battle(state: State) -> State {
         }
     }
 
+    print("HP pkm 0 : ", p[0].pokemons[0].battle_stats.hitpoints);
+    print("HP pkm 1 : ", p[1].pokemons[0].battle_stats.hitpoints);
+
     // new turn
+
     return battle(state: State( environment: environment, trainers: p,
-    pokemon_fighting: pkm_ind, winner: winner))
+                                pokemon_fighting: pkm_ind, winner: winner))
 }
