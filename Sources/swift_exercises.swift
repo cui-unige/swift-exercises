@@ -89,9 +89,9 @@ struct Move : Hashable {
     let accuracy    : Int
     var powerpoints : Int //We will decrease by 1 the powerpoints of the move once used
     let priority    : Int
-
+    
     var hashValue   : Int {
-      return self.id
+        return self.id
     }
 }
 func ==(lhs: Move, rhs: Move) -> Bool {
@@ -125,7 +125,7 @@ struct Species : Hashable {
     let type        : (Type, Type?)
     let base_values : Stats
     var hashValue   : Int {
-      return self.id
+        return self.id
     }
 }
 func ==(lhs: Species, rhs: Species) -> Bool {
@@ -257,38 +257,6 @@ let squirtleSpecie = Species(
 
 // ####### Other pokemons - given by Aslam ########## //
 
-
-// Raichu Stats
-let raichuBaseValues = Stats(hitpoints: 60, attack: 90, defense: 55, special_attack: 90,special_defense: 80, speed: 110)
-
-let raichuIndividualValues = Stats(
-    hitpoints: 58,
-    attack: 94,
-    defense: 53,
-    special_attack: 91,
-    special_defense: 80,
-    speed: 110
-)
-
-let raichuEffortValues = Stats(
-    hitpoints: 0,
-    attack: 0,
-    defense: 0,
-    special_attack: 0,
-    special_defense: 0,
-    speed: 3
-)
-
-
-// Raichu Species
-let raichuSpecie = Species(id: 026,
-                     name: "Raichu",
-                     evolutions: [],
-                     attacks: [thunderShockAttack],
-                     type: (.electric, nil),
-                     base_values: raichuBaseValues
-)
-
 // Pikachu Stats
 let pikachuBaseValues = Stats(hitpoints: 35, attack: 55, defense: 30, special_attack: 50,special_defense: 40, speed: 90)
 
@@ -323,14 +291,46 @@ let thunderShockAttack = Move(id: 84,
                               priority:0
 )
 
+// Raichu Stats
+let raichuBaseValues = Stats(hitpoints: 60, attack: 90, defense: 55, special_attack: 90,special_defense: 80, speed: 110)
+
+// Raichu Species
+let raichuSpecie = Species(id: 026,
+                           name: "Raichu",
+                           evolutions: [],
+                           attacks: [thunderShockAttack],
+                           type: (.electric, nil),
+                           base_values: raichuBaseValues
+)
+
+
 // Pikachu Species
 let pikachuSpecie = Species(id: 025,
-                      name: "Pikachu",
-                      evolutions: [raichuSpecie],
-                      attacks: [thunderShockAttack],
-                      type: (.electric, nil),
-                      base_values: pikachuBaseValues
+                            name: "Pikachu",
+                            evolutions: [raichuSpecie],
+                            attacks: [thunderShockAttack],
+                            type: (.electric, nil),
+                            base_values: pikachuBaseValues
 )
+
+let raichuIndividualValues = Stats(
+    hitpoints: 58,
+    attack: 94,
+    defense: 53,
+    special_attack: 91,
+    special_defense: 80,
+    speed: 110
+)
+
+let raichuEffortValues = Stats(
+    hitpoints: 0,
+    attack: 0,
+    defense: 0,
+    special_attack: 0,
+    special_defense: 0,
+    speed: 3
+)
+
 
 let allAttacksPikachu = [thunderShockAttack]
 
@@ -355,9 +355,9 @@ let enteiEffortValues = Stats(
 )
 
 
-let enteiSpecie = Species(id: 244, name: "Entei", evolutions: [], attacks: allAttacksEntei, type: (.fire, nil), base_values: enteiBaseValues)
-
 let allAttacksEntei = [FireBlast, SolarBeam, SunnyDay, ReturnRest]
+
+let enteiSpecie = Species(id: 244, name: "Entei", evolutions: [], attacks: allAttacksEntei, type: (.fire, nil), base_values: enteiBaseValues)
 
 // ############### COMPUTING EFFECTIVE STATS ############### //
 
@@ -435,7 +435,7 @@ func randomNumber(min: Int, max: Int) -> Int {
 
 
 func typeModifier(attacking: Type, defending : Type) -> Double {
-     return (type_mode[attacking]?[defending])!
+    return (type_mode[attacking]?[defending])!
 }
 
 // http://bulbapedia.bulbagarden.net/wiki/Damage
@@ -458,7 +458,7 @@ func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pok
     let random: Double = rand1/100 //is a random number from 0.85 to 1.00.
     let rand2 = Double(randomNumber(min: 2, max:4))
     let critical: Double = rand2/2 //Critical is 2 for a critical hit in Generations I-V, 1.5 for a critical hit from Generation VI onwards, and 1 otherwise.
-
+    
     
     if let secondType = target.species.type.1 { //If the target pokemon has 2 types, then we need to consider it
         type_effectiveness = typeModifier(attacking: move.type, defending: target.species.type.0) * typeModifier(attacking: move.type, defending: secondType)
@@ -476,67 +476,67 @@ func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pok
     //Now, we determine the value of the variable "other" with a switch concerning the environment
     
     switch environment.weather{
-        case .rain(let heavy):
-            if move.type == .fire {
-                if heavy {
-                    other = 0 //Fire-type moves cannot be executed
-                } else {
-                    base = base * 0.5 //Fire-type moves do 50% less damage.
-                }
+    case .rain(let heavy):
+        if move.type == .fire {
+            if heavy {
+                other = 0 //Fire-type moves cannot be executed
+            } else {
+                base = base * 0.5 //Fire-type moves do 50% less damage.
             }
-            if move.type == .water {
-                base = base * 1.5 //Water-type moves do 50% more damage
-            }
+        }
+        if move.type == .water {
+            base = base * 1.5 //Water-type moves do 50% more damage
+        }
         
-        case .harsh_sunlight(let extremely):
-            if move.type == .water {
-                if extremely {
-                    other = 0 //Water-type moves cannot be executed
-                }
-                else {
-                    base = base * 0.5 //Water-type moves do 50% less damage
-                }
-                if move.type == .fire {
-                    base = base * 1.5 //Fire-type moves do 50% more damage
-                }
-
+    case .harsh_sunlight(let extremely):
+        if move.type == .water {
+            if extremely {
+                other = 0 //Water-type moves cannot be executed
             }
-        case .mysterious_air_current: //A mysterious air current halves all super-effective damage done to Flying-type Pokémon
-            if ((target.species.type.0 == .flying || target.species.type.1 == .flying) && type_effectiveness == 2) {
-                other = other * 0.5
+            else {
+                base = base * 0.5 //Water-type moves do 50% less damage
             }
-        default:
-            break
+            if move.type == .fire {
+                base = base * 1.5 //Fire-type moves do 50% more damage
+            }
+            
+        }
+    case .mysterious_air_current: //A mysterious air current halves all super-effective damage done to Flying-type Pokémon
+        if ((target.species.type.0 == .flying || target.species.type.1 == .flying) && type_effectiveness == 2) {
+            other = other * 0.5
+        }
+    default:
+        break
     }
     
     switch environment.terrain{
-        case .electric:
-            if (move.type == .electric && (pokemon.species.type.0 != .flying || pokemon.species.type.1 != .flying)) {
-                other = other * 1.5 // Electric Terrain increases the power of Electric-type moves used by grounded Pokémon by 50%
-            }
-            if (target.species.type.0 == .electric || target.species.type.1 == .electric){
-                other = other * 0.5 // Decreases the damages on targeted pokemon if he's of type electric
-            }
-        case .grassy:
-            if (move.type == .grass && (pokemon.species.type.0 != .flying || pokemon.species.type.1 != .flying)) {
-                other = other * 1.5 // Grassy Terrain increases the power of grass-type moves used by grounded Pokémon by 50%
-            }
-            if (target.species.type.0 == .grass || target.species.type.1 == .grass){
-                other = other * 0.5 // Decreases the damages on targeted pokemon if he's of type grass
-            }
-        case .psychic:
-            if (move.type == .psychic && (pokemon.species.type.0 != .flying || pokemon.species.type.1 != .flying)) {
-                other = other * 1.5 // Psychic Terrain increases the power of psychic-type moves used by grounded Pokémon by 50%
-            }
-            if (target.species.type.0 == .psychic || target.species.type.1 == .psychic){
-                other = other * 0.5 // Decreases the damages on targeted pokemon if he's of type psychic
-            }
-        case .misty:
-            if (move.type == .dragon && (target.species.type.0 != .flying || target.species.type.1 != .flying)) {
-                other = other * 0.5 // Mistic Terrain decreases the power of dragon-type moves against grounded pokemons by 50%
-            }
-        default:
-            break
+    case .electric:
+        if (move.type == .electric && (pokemon.species.type.0 != .flying || pokemon.species.type.1 != .flying)) {
+            other = other * 1.5 // Electric Terrain increases the power of Electric-type moves used by grounded Pokémon by 50%
+        }
+        if (target.species.type.0 == .electric || target.species.type.1 == .electric){
+            other = other * 0.5 // Decreases the damages on targeted pokemon if he's of type electric
+        }
+    case .grassy:
+        if (move.type == .grass && (pokemon.species.type.0 != .flying || pokemon.species.type.1 != .flying)) {
+            other = other * 1.5 // Grassy Terrain increases the power of grass-type moves used by grounded Pokémon by 50%
+        }
+        if (target.species.type.0 == .grass || target.species.type.1 == .grass){
+            other = other * 0.5 // Decreases the damages on targeted pokemon if he's of type grass
+        }
+    case .psychic:
+        if (move.type == .psychic && (pokemon.species.type.0 != .flying || pokemon.species.type.1 != .flying)) {
+            other = other * 1.5 // Psychic Terrain increases the power of psychic-type moves used by grounded Pokémon by 50%
+        }
+        if (target.species.type.0 == .psychic || target.species.type.1 == .psychic){
+            other = other * 0.5 // Decreases the damages on targeted pokemon if he's of type psychic
+        }
+    case .misty:
+        if (move.type == .dragon && (target.species.type.0 != .flying || target.species.type.1 != .flying)) {
+            other = other * 0.5 // Mistic Terrain decreases the power of dragon-type moves against grounded pokemons by 50%
+        }
+    default:
+        break
     }
     
     //Now we can compute the final value of the damages done:
@@ -570,19 +570,19 @@ let charizard = Pokemon(nickname: "Jack",
 
 
 let squirtle = Pokemon(nickname: "Arthur",
-                          hitpoints: 47, size: 3, weight: 300, experience: 0, level: 1,
-                          nature: Nature.calm, species: squirtleSpecie, moves: allAttacksSquirtle,
-                          individual_values: squirtleIndividualValues, effort_values: squirtleEffortValues)
+                       hitpoints: 47, size: 3, weight: 300, experience: 0, level: 1,
+                       nature: Nature.calm, species: squirtleSpecie, moves: allAttacksSquirtle,
+                       individual_values: squirtleIndividualValues, effort_values: squirtleEffortValues)
 
 let raichu = Pokemon(nickname: "Aslam",
-                       hitpoints: 62, size: 5, weight: 750, experience: 0, level: 1,
-                       nature: Nature.rash, species: raichuSpecie, moves: allAttacksPikachu,
-                       individual_values: raichuIndividualValues, effort_values: raichuEffortValues)
+                     hitpoints: 62, size: 5, weight: 750, experience: 0, level: 1,
+                     nature: Nature.rash, species: raichuSpecie, moves: allAttacksPikachu,
+                     individual_values: raichuIndividualValues, effort_values: raichuEffortValues)
 
 let pikachu = Pokemon(nickname: "Amir",
-                       hitpoints: 36, size: 2, weight: 100, experience: 0, level: 1,
-                       nature: Nature.docile, species: pikachuSpecie, moves: allAttacksPikachu,
-                       individual_values: pikachuIndividualValues, effort_values: pikachuEffortValues)
+                      hitpoints: 36, size: 2, weight: 100, experience: 0, level: 1,
+                      nature: Nature.docile, species: pikachuSpecie, moves: allAttacksPikachu,
+                      individual_values: pikachuIndividualValues, effort_values: pikachuEffortValues)
 
 let entei = Pokemon(nickname: "Kiki", hitpoints: 120, size: 5, weight: 230, experience: 0, level: 1, nature: Nature.naughty, species: enteiSpecie, moves: allAttacksEntei, individual_values: enteiIndividualValues, effort_values: enteiEffortValues)
 
@@ -590,8 +590,8 @@ let entei = Pokemon(nickname: "Kiki", hitpoints: 120, size: 5, weight: 230, expe
 
 let todaysEnvironnement = Environment(weather: Weather.sandstorm, terrain: Terrain.grassy)
 
-var Bob = Trainer(name: "Bob", pokemons:[entei, raichu, charizard, pikachu])
-var Alice = Trainer(name: "Alice", pokemons: [squirtle])
+var Bob = Trainer(name: "Bob", pokemons:[entei, charizard])
+var Alice = Trainer(name: "Alice", pokemons: [raichu,squirtle, pikachu])
 
 var trainers=[Bob, Alice];
 
@@ -601,12 +601,17 @@ var userInput: String! = "";
 
 // ############### BATTLE ############### //
 
+let randInt1 = randomNumber(min: 0, max: Alice.pokemons.count - 1)
 
-let randInt = randomNumber(min:0, max: allAttacksSquirtle.count - 1) //So that we can randomly determine which attack is going to be perfomed
+let alicePokemon = Alice.pokemons[randInt1] //Randomly pick a pokemon for Alice
 
-var currentState = State(player1: Bob, player2: Alice, pokemonAttack: Bob.pokemons[0], //Default pokemon selected for Bob : first one
-                         pokemonDefense: Alice.pokemons[0], pokemonMoveAttack: allAttacksPikachu[randInt],
-                         pokemonMoveDefense: allAttacksSquirtle[randInt], pokemonEnvironment: todaysEnvironnement)
+let randInt = randomNumber(min:0, max: alicePokemon.moves.count - 1) //So that we can randomly determine which attack is going to be perfomed by alice
+
+//All moves for alice are randomly selected
+
+var currentState = State(player1: Bob, player2: Alice, pokemonAttack: Bob.pokemons[0], //Default pokemon selected for Bob : first one. Default move: first one
+    pokemonDefense: alicePokemon, pokemonMoveAttack: Bob.pokemons[0].moves[0],
+    pokemonMoveDefense: alicePokemon.moves[randInt], pokemonEnvironment: todaysEnvironnement)
 
 var turn: Int = 1 //turn = 1 means player1 is attacking, otherwise player2
 
@@ -620,9 +625,10 @@ func firstPok(pokemonAttack: Pokemon, pokemonDefense: Pokemon, currentState: Sta
 
 // In our implementation, we play the roll of Bob. Alice's pokemon and moves are randomly selected
 
-var currentPokemon: Int! //Just so we know which pokemon in Bob's array we're updating later
+var currentPokemon = 0 //Just so we know which pokemon in Bob's array we're updating later
 
 func go() -> (){
+    print(randInt1)
     print("\n##### MAIN BATTLE SCREEN #####\n");
     print("Please select an option");
     print("1. Fight         2. Bag         3. Pokemon         4. Run\n")
@@ -635,12 +641,12 @@ func go() -> (){
         print("Player ran away (such a coward...) !\n")
         abort()
     }
-    
+        
     else if (choice == "2"){
         print("Nothing to display. Back to main menu\n")
         go()
     }
-    
+        
     else if (choice == "3"){
         print("Please select the Pokemon which you want to battle with :\n")
         
@@ -670,12 +676,12 @@ func go() -> (){
         
         go()
     }
-    
+        
     else if (choice == "1"){
         firstPok(pokemonAttack: currentState.pokemonAttack, pokemonDefense: currentState.pokemonDefense,   currentState: currentState)
         battle(trainers: &trainers)
     }
-    
+        
     else { //If user types a string instead of numbers
         print("Specified option does not exist. Please pay attention !\n")
         go()
@@ -685,7 +691,7 @@ func go() -> (){
 
 func battle(trainers: inout [Trainer]) -> (){
     
-    let randInt = randomNumber(min:0, max: allAttacksSquirtle.count - 1) //So that we can randomly determine which attack is going to be perfomed
+    let randInt = randomNumber(min:0, max: currentState.pokemonDefense.moves.count - 1) //So that we can randomly determine which attack is going to be perfomed by Alice next turn
     
     round += 1
     
@@ -701,32 +707,32 @@ func battle(trainers: inout [Trainer]) -> (){
         print("----------------------------------- YOUR INPUT: ", terminator: "")
         if let typed = readLine() {
             if let num = Int(typed) {
-                if (num > Bob.pokemons.count + 2){
+                if (num > currentState.pokemonAttack.moves.count + 2){
                     print("Specified option does not exist. Please pay attention !\n")
                     go()
                 }else{
-
-                if num == currentState.pokemonAttack.moves.count + 1{ //Running away
-                    print("You are a damn coward. Loser!")
-                    abort()
-                }else if num == currentState.pokemonAttack.moves.count + 2{ //Changing pokemon...
-                    go()
-                }else{
-                    currentState.pokemonMoveAttack = currentState.pokemonAttack.moves[num-1] //Selecting appropriate move
-                   
-                    currentState.pokemonMoveAttack.powerpoints -= 1 //Decreasing PP
-                    Bob.pokemons[currentPokemon].moves[num - 1].powerpoints -= 1
                     
-                    if (currentState.pokemonMoveAttack.powerpoints == 0){
-                        print("\n### No PP remaining for the move \(currentState.pokemonMoveAttack.name). Move deleted from available moves.")
-                        currentState.pokemonAttack.moves.remove(at: num - 1) //Removing move
-                        Bob.pokemons[currentPokemon].moves.remove(at: num - 1)//Updating bob's pokemon
+                    if num == currentState.pokemonAttack.moves.count + 1{ //Running away
+                        print("You are a damn coward. Loser!")
+                        abort()
+                    }else if num == currentState.pokemonAttack.moves.count + 2{ //Changing pokemon...
+                        go()
                     }else{
-                    
-                    currentState.pokemonAttack.moves[num-1] = currentState.pokemonMoveAttack //Updating global attacks list
-                    }
-                    if ((currentState.pokemonAttack.nickname == "Kiki") && (num == 3)){
-                        currentState.pokemonEnvironment.weather = Weather.clear_skies //Updating conditions
+                        currentState.pokemonMoveAttack = currentState.pokemonAttack.moves[num-1] //Selecting appropriate move
+                        
+                        currentState.pokemonMoveAttack.powerpoints -= 1 //Decreasing PP
+                        Bob.pokemons[currentPokemon].moves[num - 1].powerpoints -= 1
+                        
+                        if (currentState.pokemonMoveAttack.powerpoints == 0){
+                            print("\n### No PP remaining for the move \(currentState.pokemonMoveAttack.name). Move deleted from available moves.")
+                            currentState.pokemonAttack.moves.remove(at: num - 1) //Removing move
+                            Bob.pokemons[currentPokemon].moves.remove(at: num - 1)//Updating bob's pokemon
+                        }else{
+                            
+                            currentState.pokemonAttack.moves[num-1] = currentState.pokemonMoveAttack //Updating global attacks list
+                        }
+                        if ((currentState.pokemonAttack.nickname == "Kiki") && (num == 3)){
+                            currentState.pokemonEnvironment.weather = Weather.clear_skies //Updating conditions
                         }
                     }
                 }
@@ -788,14 +794,11 @@ func battle(trainers: inout [Trainer]) -> (){
         print("Hitpoints of attacking pokemon remaining: \(currentState.pokemonDefense.nickname) : \(currentState.pokemonDefense.hitpoints) \n");
     }
     
-    
-
-    
     if turn == -1 {
         
         //Updating Alice's next move
         
-        currentState.pokemonMoveDefense = allAttacksSquirtle[randInt];
+        currentState.pokemonMoveDefense = currentState.pokemonDefense.moves[randInt];
     }
     
     while userInput == ""{
