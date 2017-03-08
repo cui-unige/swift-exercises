@@ -115,11 +115,11 @@ func ==(lhs: Move, rhs: Move) -> Bool {
 // http://bulbapedia.bulbagarden.net/wiki/Statistic
 struct Stats {
     var hitpoints       : Int
-    let attack          : Int
-    let defense         : Int
-    let special_attack  : Int
-    let special_defense : Int
-    let speed           : Int
+    var attack          : Int
+    var defense         : Int
+    var special_attack  : Int
+    var special_defense : Int
+    var speed           : Int
 }
 
 struct Species : Hashable {
@@ -156,7 +156,7 @@ let hooh: Pokemon = Pokemon(
 )
 
 struct Pokemon {
-    let nickname          : String?
+    var nickname          : String?
     let size              : Double
     let weight            : Double
     let level             : Int
@@ -292,7 +292,7 @@ func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pok
 
     let modifier: Double = targets * weather * badge * critical * random_value * stab * type * burn * other
 
-    return 1
+    return 1 + (random() % 10)//Int(Double(pokemon.battle_stats.attack) * modifier)
 }
 
 // has to be initialized before calling battle
@@ -319,7 +319,6 @@ func select_pokemon(trainer: Trainer) -> Int? {
     var indice: Int = 0
 
     for pkm in trainer.pokemons {
-        print("")
         if pkm.battle_stats.hitpoints > 0 {
             selected = indice;
             break;
@@ -347,11 +346,11 @@ func battle_init(trainers: [Trainer]) -> State {
     return State(environment: environment, trainers: trainers, pokemon_fighting: [pkm1!, pkm2!], winner: winner)
 }
 
+// DOESN'T SEEM TO TAKE POWERPOINTS INTO ACCOUNT
 func choose_move(pokemon: Pokemon) -> Move {
     var filtered_moves = [Move]();
 
     for (key, value) in pokemon.moves {
-        print(value)
         if value > 0 {
             filtered_moves.append(key)
         }
@@ -430,32 +429,33 @@ func battle(state: State) -> State {
     }
 
     let order = choose_first(pkm1: pkm[0], pkm2: pkm[1], move1: move[0], move2: move[1]);
-print(p[0].pokemons[0].battle_stats.hitpoints);
+
     for ind in order {
         // Damage
         if(random() % 100 < move[ind]!.accuracy) {
             let dmg = damage(environment: environment, pokemon: pkm[ind], move: move[ind]!, target: pkm[(ind+1)%2]);
             pkm[(ind+1)%2].battle_stats.hitpoints -= dmg;
             pkm[ind].moves[move[ind]!]! -= 1;
-            p[ind].pokemons[pkm_ind[(ind+1)%2]].battle_stats = pkm[(ind+1)%2].battle_stats;
+            p[(ind+1)%2].pokemons[pkm_ind[(ind+1)%2]].battle_stats = pkm[(ind+1)%2].battle_stats;
             print("Pokemon ", ind, " attacks pokemon ", (ind+1)%2, " with ",  dmg, " damage!");
 
         }
 
         // Check if other pokemon is dead
         if(pkm[(ind+1)%2].battle_stats.hitpoints <= 0) {
-            let new_indice = select_pokemon(trainer: p[ind]);
+            let new_indice = select_pokemon(trainer: p[(ind+1)%2]);
+            print("NEW INDICE: ", new_indice)
             if(new_indice == nil) {
                 winner = (ind+1)%2;
                 break;
             }
-            pkm_ind[ind] = new_indice!;
-            pkm[ind] = p[ind].pokemons[pkm_ind[ind]];
+            pkm_ind[(ind+1)%2] = new_indice!;
+            pkm[(ind+1)%2] = p[ind].pokemons[pkm_ind[(ind+1)%2]];
         }
     }
 
-    print("HP pkm 0 : ", p[0].pokemons[0].battle_stats.hitpoints);
-    print("HP pkm 1 : ", p[1].pokemons[0].battle_stats.hitpoints);
+    print("HP pkm 0 : ", p[0].pokemons[pkm_ind[0]].battle_stats.hitpoints);
+    print("HP pkm 1 : ", p[1].pokemons[pkm_ind[1]].battle_stats.hitpoints);
 
     // new turn
 
