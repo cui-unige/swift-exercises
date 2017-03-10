@@ -1,4 +1,5 @@
 // http://bulbapedia.bulbagarden.net/wiki/Type
+import Foundation
 enum Type {
     case bug
     case dark
@@ -133,7 +134,12 @@ let arcanine = Species(id: 59, name: "Jack", evolutions: [], attacks: attacks, t
 
 // Do you use an enum, a map or constants/variables?
 // http://bulbapedia.bulbagarden.net/wiki/List_of_Pokémon_by_National_Pokédex_number
-
+func frac(base: Int, IV: Int, EV: Int, Level: Int) -> Int {
+  let E = Int(floor(Double(EV/4)))
+  let num = 2*base + IV + E * Level
+  let fraction = Int(floor(Double(num/100)))
+  return fraction
+}
 struct Pokemon {
     let nickname          : String?
     let hitpoints         : Int // remaining hitpoints
@@ -150,21 +156,21 @@ struct Pokemon {
     // https://developer.apple.com/library/content/documentation/Swift/Conceptual/Swift_Programming_Language/Properties.html#//apple_ref/doc/uid/TP40014097-CH14-ID259
     var effective_stats   : Stats {
       get{
-<<<<<<< HEAD
-      let effective_HP = ( (2 * self.hitpoints + self.individual_values.hitpoints + floor(self.effort_values.hitpoints/4)) * level)/100)+level+10
-      let effective_attack = ( (2 * self.attack + self.individual_values.attack + floor(self.effort_values.attack/4)) * level)/100)+level+10
-      let effective_defense = ( (2 * self.defense + self.individual_values.defense + floor(self.effort_values.defense/4)) * level)/100) + level 10
-      let effective_special_attack = ( (2 * self.special_attack + self.individual_values.special_attack + floor(self.effort_values.special_attack/4)) * level)/100)+level+10
-      let effective_special_defense = ( (2 * self.special_defense + self.individual_values.special_defense + floor(self.effort_values.special_defense/4)) * level)/100)+level+10
-      let effective_speed = ( (2 * self.speed + self.individual_values.speed + floor(self.effort_values.speed/4)) * level)/100)+level+10
-=======
-      let effective_HP = ( (2 * self.hitpoints + self.individual_values.hitpoints + floor(self.effort_values.hitpoints/4)) * level)/100) + level + 10
-      let effective_attack = ( (2 * self.attack + self.individual_values.attack + floor(self.effort_values.attack/4)) * level)/100) + level + 10
-      let effective_defense = ( (2 * self.defense + self.individual_values.defense + floor(self.effort_values.defense/4)) * level)/100) + level + 10
-      let effective_special_attack = ( (2 * self.special_attack + self.individual_values.special_attack + floor(self.effort_values.special_attack/4)) * level)/100) + level + 10
-      let effective_special_defense = ( (2 * self.special_defense + self.individual_values.special_defense + floor(self.effort_values.special_defense/4)) * level)/100) + level + 10
-      let effective_speed = ( (2 * self.speed + self.individual_values.speed + floor(self.effort_values.speed/4)) * level)/100) + level + 10
->>>>>>> 1a622eac785fbdec95255251d051c68ec6a4bed8
+        //let ev: Int = effort_values.hitpoints/4
+        //let a: Int = (2*self.hitpoints+individual_values.hitpoints+floor(ev))
+        // RAJOUTER NATURE A CHACUNE DES OTHER STATS
+        let effective_HP: Int = frac(base: self.hitpoints,IV: individual_values.hitpoints,EV: effort_values.hitpoints,Level: self.level)+self.level+10
+        let effective_attack: Int = (frac(base: self.species.base_values.attack, IV: self.individual_values.attack, EV: self.effort_values.attack, Level: self.level)+5)
+        let effective_defense: Int = (frac(base: self.species.base_values.defense, IV: self.individual_values.defense, EV: self.effort_values.defense, Level: self.level)+5)
+        let effective_special_attack: Int = (frac(base: self.species.base_values.special_attack, IV: self.individual_values.special_attack, EV: self.effort_values.special_attack, Level: self.level)+5)
+        let effective_special_defense: Int = (frac(base: self.species.base_values.special_defense, IV: self.individual_values.special_defense, EV: self.effort_values.special_defense, Level: self.level)+5)
+        let effective_speed: Int = (frac(base: self.species.base_values.speed, IV: self.individual_values.speed, EV: self.effort_values.speed, Level: self.level)+5)
+
+      //let effective_attack = (( (2 * self.species.base_values.attack + self.individual_values.attack + floor(self.effort_values.attack/4)) * level)/100) + level + 10
+      //let effective_defense = (( (2 * self.defense + self.individual_values.defense + floor(self.effort_values.defense/4)) * level)/100) + level + 10
+      //let effective_special_attack = (( (2 * self.special_attack + self.individual_values.special_attack + floor(self.effort_values.special_attack/4)) * level)/100) + level + 10
+      //let effective_special_defense = (( (2 * self.special_defense + self.individual_values.special_defense + floor(self.effort_values.special_defense/4)) * level)/100) + level + 10
+      //let effective_speed = (( (2 * self.speed + self.individual_values.speed + floor(self.effort_values.speed/4)) * level)/100) + level + 10
             return Stats(hitpoints: effective_HP, attack: effective_attack, defense: effective_defense, special_attack: effective_special_attack, special_defense: effective_special_defense, speed: effective_speed)
       }
 
