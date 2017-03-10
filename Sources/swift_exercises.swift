@@ -1,6 +1,6 @@
 // http://bulbapedia.bulbagarden.net/wiki/Type
 enum Type {
-    case bug.
+    case bug
     case dark
     case dragon
     case electric
