@@ -1,6 +1,6 @@
 import Foundation
 
-/* TODO implémenter les moves, se pencher sur le combat en sois */
+/* TODO se pencher sur le combat en sois */
 
 // http://bulbapedia.bulbagarden.net/wiki/Type
 enum Type {
@@ -160,8 +160,6 @@ struct Species : Hashable {
 }
 
 
-  let TyranitarStats = Stats(hitpoints : 100, attack : 134, defense : 110, special_attack : 95, special_defense : 100, speed : 61)
-  let Tyranitar = Species (id : 248, name : "Tyranitar", evolutions : [], attacks : [] /* TODO Mettre des attaques !! */, type : (.rock, .dark), base_values : TyranitarStats)
 
 func ==(lhs: Species, rhs: Species) -> Bool {
     return lhs.id == rhs.id
@@ -204,12 +202,6 @@ struct Pokemon {
     // TODO: implement the effective stats as a computed property:
     // https://developer.apple.com/library/content/documentation/Swift/Conceptual/Swift_Programming_Language/Properties.html#//apple_ref/doc/uid/TP40014097-CH14-ID259
 
-    /*  Ici je definis mon Pokemon
-
-    let Tyranitar_IV = Stats()
-    let Tyranitar_EV = Stats(hitpoints : 0, attack : 0, defense : 0, special_attack : 0, special_defense : 0, speed : 0)
-    let TyranitarPokemon = Pokemon(nickname : nil, hitpoints : )
-    */
 }
 
 
@@ -627,7 +619,7 @@ func typeModifier(attacking: Type, defending : Type) -> Double {
 
 
 /******************************************************************************
-******************************** MON POKEMON **********************************
+************************** MON POKEMON : Tyranitar ****************************
 ******************************************************************************/
 
 
@@ -681,16 +673,48 @@ let move_fire_fang : Move {
 
 }
 
+/******************************* SPECIES TYRANITAR ****************************/
+/******************************************************************************/
+let species_TyranitarStats = Stats(
+  hitpoints : 100,
+  attack : 134,
+  defense : 110,
+  special_attack : 95,
+  special_defense : 100,
+  speed : 61)
+
+let species_Tyranitar = Species(
+  id : 248,
+  name : "Tyranitar",
+  evolutions : [],
+  attacks : [move_earthquake, move_bite, move_stone_edge, move_fire_fang],
+  type : (.rock, .dark),
+  base_values : species_TyranitarStats
+)
+/******************************************************************************/
+/******************************************************************************/
+
+let Tyranitar_IV = Stats(hitpoints : 5, attack : 6, defense : 5, special_attack : 5, special_defense : 5, speed : 5)
+let Tyranitar_EV = Stats(hitpoints : 0, attack : 0, defense : 0, special_attack : 0, special_defense : 0, speed : 0)
 
 
-
-
-
-
+let pokemon_Tyranitar = Pokemon(
+  nickname : nil,
+  hitpoints : effective_stats_HP(species_TyranitarStats.hitpoints, Tyranitar_IV.hitpoints, Tyranitar_EV.hitpoints, 50),
+  size : 2.0,
+  weight : 202,
+  experience : 1,
+  level : 50,
+  nature : .hardy,
+  species : species_Tyranitar,
+  moves : [move_earthquake, move_stone_edge, move_bite, move_fire_fang],
+  individual_values = Tyranitar_IV,
+  effort_values = Tyranitar_EV
+)
 
 
 /******************************************************************************
-******************************** MON POKEMON **********************************
+*******************************************************************************
 ******************************************************************************/
 
 // http://bulbapedia.bulbagarden.net/wiki/Damage
