@@ -1,5 +1,7 @@
 import Foundation
 
+/* TODO implémenter les moves, se pencher sur le combat en sois */
+
 // http://bulbapedia.bulbagarden.net/wiki/Type
 enum Type {
     case bug
@@ -156,6 +158,8 @@ struct Species : Hashable {
       return self.id
     }
 }
+
+
   let TyranitarStats = Stats(hitpoints : 100, attack : 134, defense : 110, special_attack : 95, special_defense : 100, speed : 61)
   let Tyranitar = Species (id : 248, name : "Tyranitar", evolutions : [], attacks : [] /* TODO Mettre des attaques !! */, type : (.rock, .dark), base_values : TyranitarStats)
 
@@ -430,196 +434,264 @@ func typeModifier(attacking: Type, defending : Type) -> Double {
 
   /* Attacking Type: fire */
 
-    case(.fire, .normal): return 1
-    case(.fire, .fighting): return 1
-    case(.fire, .flying): return 1
-    case(.fire, .poison): return 1
-    case(.fire, .ground): return 1
-    case(.fire, .rock): return 0.5
-    case(.fire, .bug): return 2
-    case(.fire, .ghost): return 1
-    case(.fire, .steel): return 2
-    case(.fire, .fire): return 0.5
-    case(.fire, .water): return 0.5
-    case(.fire, .grass): return 2
-    case(.fire, .electric): return 1
-    case(.fire, .psychic): return 1
-    case(.fire, .ice): return 2
-    case(.fire, .dragon): return 0.5
-    case(.fire, .dark): return 1
-    case(.fire, .fairy): return 1
+    case(.fire, .normal)   : return 1
+    case(.fire, .fighting) : return 1
+    case(.fire, .flying)   : return 1
+    case(.fire, .poison)   : return 1
+    case(.fire, .ground)   : return 1
+    case(.fire, .rock)     : return 0.5
+    case(.fire, .bug)      : return 2
+    case(.fire, .ghost)    : return 1
+    case(.fire, .steel)    : return 2
+    case(.fire, .fire)     : return 0.5
+    case(.fire, .water)    : return 0.5
+    case(.fire, .grass)    : return 2
+    case(.fire, .electric) : return 1
+    case(.fire, .psychic)  : return 1
+    case(.fire, .ice)      : return 2
+    case(.fire, .dragon)   : return 0.5
+    case(.fire, .dark)     : return 1
+    case(.fire, .fairy)    : return 1
 
   /* Attacking Type: water */
 
-    case(.water, .normal): return 1
-    case(.water, .fighting): return 1
-    case(.water, .flying): return 1
-    case(.water, .poison): return 1
-    case(.water, .ground): return 2
-    case(.water, .rock): return 2
-    case(.water, .bug): return 1
-    case(.water, .ghost): return 1
-    case(.water, .steel): return 1
-    case(.water, .fire): return 2
-    case(.water, .water): return 0.5
-    case(.water, .grass): return 0.5
-    case(.water, .electric): return 1
-    case(.water, .psychic): return 1
-    case(.water, .ice): return 1
-    case(.water, .dragon): return 0.5
-    case(.water, .dark): return 1
-    case(.water, .fairy): return 1
+    case(.water, .normal)   : return 1
+    case(.water, .fighting) : return 1
+    case(.water, .flying)   : return 1
+    case(.water, .poison)   : return 1
+    case(.water, .ground)   : return 2
+    case(.water, .rock)     : return 2
+    case(.water, .bug)      : return 1
+    case(.water, .ghost)    : return 1
+    case(.water, .steel)    : return 1
+    case(.water, .fire)     : return 2
+    case(.water, .water)    : return 0.5
+    case(.water, .grass)    : return 0.5
+    case(.water, .electric) : return 1
+    case(.water, .psychic)  : return 1
+    case(.water, .ice)      : return 1
+    case(.water, .dragon)   : return 0.5
+    case(.water, .dark)     : return 1
+    case(.water, .fairy)    : return 1
 
   /* Attacking Type: grass */
 
-    case(.grass, .normal): return 1
-    case(.grass, .fighting): return 1
-    case(.grass, .flying): return 0.5
-    case(.grass, .poison): return 0.5
-    case(.grass, .ground): return 2
-    case(.grass, .rock): return 2
-    case(.grass, .bug): return 0.5
-    case(.grass, .ghost): return 1
-    case(.grass, .steel): return 0.5
-    case(.grass, .fire): return 0.5
-    case(.grass, .water): return 2
-    case(.grass, .grass): return 0.5
-    case(.grass, .electric): return 1
-    case(.grass, .psychic): return 1
-    case(.grass, .ice): return 1
-    case(.grass, .dragon): return 0.5
-    case(.grass, .dark): return 1
-    case(.grass, .fairy): return 1
+    case(.grass, .normal)   : return 1
+    case(.grass, .fighting) : return 1
+    case(.grass, .flying)   : return 0.5
+    case(.grass, .poison)   : return 0.5
+    case(.grass, .ground)   : return 2
+    case(.grass, .rock)     : return 2
+    case(.grass, .bug)      : return 0.5
+    case(.grass, .ghost)    : return 1
+    case(.grass, .steel)    : return 0.5
+    case(.grass, .fire)     : return 0.5
+    case(.grass, .water)    : return 2
+    case(.grass, .grass)    : return 0.5
+    case(.grass, .electric) : return 1
+    case(.grass, .psychic)  : return 1
+    case(.grass, .ice)      : return 1
+    case(.grass, .dragon)   : return 0.5
+    case(.grass, .dark)     : return 1
+    case(.grass, .fairy)    : return 1
 
   /* Attacking Type: electric */
 
-    case(.electric, .normal): return 1
-    case(.electric, .fighting): return 1
-    case(.electric, .flying): return 2
-    case(.electric, .poison): return 1
-    case(.electric, .ground): return 0
-    case(.electric, .rock): return 1
-    case(.electric, .bug): return 1
-    case(.electric, .ghost): return 1
-    case(.electric, .steel): return 1
-    case(.electric, .fire): return 1
-    case(.electric, .water): return 2
-    case(.electric, .grass): return 0.5
-    case(.electric, .electric): return 0.5
-    case(.electric, .psychic): return 1
-    case(.electric, .ice): return 1
-    case(.electric, .dragon): return 0.5
-    case(.electric, .dark): return 1
-    case(.electric, .fairy): return 1
+    case(.electric, .normal)   : return 1
+    case(.electric, .fighting) : return 1
+    case(.electric, .flying)   : return 2
+    case(.electric, .poison)   : return 1
+    case(.electric, .ground)   : return 0
+    case(.electric, .rock)     : return 1
+    case(.electric, .bug)      : return 1
+    case(.electric, .ghost)    : return 1
+    case(.electric, .steel)    : return 1
+    case(.electric, .fire)     : return 1
+    case(.electric, .water)    : return 2
+    case(.electric, .grass)    : return 0.5
+    case(.electric, .electric) : return 0.5
+    case(.electric, .psychic)  : return 1
+    case(.electric, .ice)      : return 1
+    case(.electric, .dragon)   : return 0.5
+    case(.electric, .dark)     : return 1
+    case(.electric, .fairy)    : return 1
 
   /* Attacking Type: psychic */
 
-    case(.psychic, .normal): return 1
-    case(.psychic, .fighting): return 2
-    case(.psychic, .flying): return 1
-    case(.psychic, .poison): return 2
-    case(.psychic, .ground): return 1
-    case(.psychic, .rock): return 1
-    case(.psychic, .bug): return 1
-    case(.psychic, .ghost): return 1
-    case(.psychic, .steel): return 0.5
-    case(.psychic, .fire): return 1
-    case(.psychic, .water): return 1
-    case(.psychic, .grass): return 1
-    case(.psychic, .electric): return 1
-    case(.psychic, .psychic): return 0.5
-    case(.psychic, .ice): return 1
-    case(.psychic, .dragon): return 1
-    case(.psychic, .dark): return 0
-    case(.psychic, .fairy): return 1
+    case(.psychic, .normal)   : return 1
+    case(.psychic, .fighting) : return 2
+    case(.psychic, .flying)   : return 1
+    case(.psychic, .poison)   : return 2
+    case(.psychic, .ground)   : return 1
+    case(.psychic, .rock)     : return 1
+    case(.psychic, .bug)      : return 1
+    case(.psychic, .ghost)    : return 1
+    case(.psychic, .steel)    : return 0.5
+    case(.psychic, .fire)     : return 1
+    case(.psychic, .water)    : return 1
+    case(.psychic, .grass)    : return 1
+    case(.psychic, .electric) : return 1
+    case(.psychic, .psychic)  : return 0.5
+    case(.psychic, .ice)      : return 1
+    case(.psychic, .dragon)   : return 1
+    case(.psychic, .dark)     : return 0
+    case(.psychic, .fairy)    : return 1
 
   /* Attacking Type: ice */
 
-    case(.ice, .normal): return 1
-    case(.ice, .fighting): return 1
-    case(.ice, .flying): return 2
-    case(.ice, .poison): return 1
-    case(.ice, .ground): return 2
-    case(.ice, .rock): return 1
-    case(.ice, .bug): return 1
-    case(.ice, .ghost): return 1
-    case(.ice, .steel): return 0.5
-    case(.ice, .fire): return 0.5
-    case(.ice, .water): return 0.5
-    case(.ice, .grass): return 2
-    case(.ice, .electric): return 1
-    case(.ice, .psychic): return 1
-    case(.ice, .ice): return 0.5
-    case(.ice, .dragon): return 2
-    case(.ice, .dark): return 1
-    case(.ice, .fairy): return 1
+    case(.ice, .normal)   : return 1
+    case(.ice, .fighting) : return 1
+    case(.ice, .flying)   : return 2
+    case(.ice, .poison)   : return 1
+    case(.ice, .ground)   : return 2
+    case(.ice, .rock)     : return 1
+    case(.ice, .bug)      : return 1
+    case(.ice, .ghost)    : return 1
+    case(.ice, .steel)    : return 0.5
+    case(.ice, .fire)     : return 0.5
+    case(.ice, .water)    : return 0.5
+    case(.ice, .grass)    : return 2
+    case(.ice, .electric) : return 1
+    case(.ice, .psychic)  : return 1
+    case(.ice, .ice)      : return 0.5
+    case(.ice, .dragon)   : return 2
+    case(.ice, .dark)     : return 1
+    case(.ice, .fairy)    : return 1
 
   /* Attacking Type: dragon */
 
-    case(.dragon, .normal): return 1
-    case(.dragon, .fighting): return 1
-    case(.dragon, .flying): return 1
-    case(.dragon, .poison): return 1
-    case(.dragon, .ground): return 1
-    case(.dragon, .rock): return 1
-    case(.dragon, .bug): return 1
-    case(.dragon, .ghost): return 1
-    case(.dragon, .steel): return 0.5
-    case(.dragon, .fire): return 1
-    case(.dragon, .water): return 1
-    case(.dragon, .grass): return 1
-    case(.dragon, .electric): return 1
-    case(.dragon, .psychic): return 1
-    case(.dragon, .ice): return 1
-    case(.dragon, .dragon): return 2
-    case(.dragon, .dark): return 1
-    case(.dragon, .fairy): return 0
+    case(.dragon, .normal)   : return 1
+    case(.dragon, .fighting) : return 1
+    case(.dragon, .flying)   : return 1
+    case(.dragon, .poison)   : return 1
+    case(.dragon, .ground)   : return 1
+    case(.dragon, .rock)     : return 1
+    case(.dragon, .bug)      : return 1
+    case(.dragon, .ghost)    : return 1
+    case(.dragon, .steel)    : return 0.5
+    case(.dragon, .fire)     : return 1
+    case(.dragon, .water)    : return 1
+    case(.dragon, .grass)    : return 1
+    case(.dragon, .electric) : return 1
+    case(.dragon, .psychic)  : return 1
+    case(.dragon, .ice)      : return 1
+    case(.dragon, .dragon)   : return 2
+    case(.dragon, .dark)     : return 1
+    case(.dragon, .fairy)    : return 0
 
   /* Attacking Type: dark */
 
-    case(.dark, .normal): return 1
-    case(.dark, .fighting): return 0.5
-    case(.dark, .flying): return 1
-    case(.dark, .poison): return 1
-    case(.dark, .ground): return 1
-    case(.dark, .rock): return 1
-    case(.dark, .bug): return 1
-    case(.dark, .ghost): return 2
-    case(.dark, .steel): return 1
-    case(.dark, .fire): return 1
-    case(.dark, .water): return 1
-    case(.dark, .grass): return 1
-    case(.dark, .electric): return 1
-    case(.dark, .psychic): return 2
-    case(.dark, .ice): return 1
-    case(.dark, .dragon): return 1
-    case(.dark, .dark): return 0.5
-    case(.dark, .fairy): return 0.5
+    case(.dark, .normal)   : return 1
+    case(.dark, .fighting) : return 0.5
+    case(.dark, .flying)   : return 1
+    case(.dark, .poison)   : return 1
+    case(.dark, .ground)   : return 1
+    case(.dark, .rock)     : return 1
+    case(.dark, .bug)      : return 1
+    case(.dark, .ghost)    : return 2
+    case(.dark, .steel)    : return 1
+    case(.dark, .fire)     : return 1
+    case(.dark, .water)    : return 1
+    case(.dark, .grass)    : return 1
+    case(.dark, .electric) : return 1
+    case(.dark, .psychic)  : return 2
+    case(.dark, .ice)      : return 1
+    case(.dark, .dragon)   : return 1
+    case(.dark, .dark)     : return 0.5
+    case(.dark, .fairy)    : return 0.5
 
   /* Attacking Type: fairy */
 
-    case(.fairy, .normal): return 1
-    case(.fairy, .fighting): return 2
-    case(.fairy, .flying): return 1
-    case(.fairy, .poison): return 0.5
-    case(.fairy, .ground): return 1
-    case(.fairy, .rock): return 1
-    case(.fairy, .bug): return 1
-    case(.fairy, .ghost): return 1
-    case(.fairy, .steel): return 0.5
-    case(.fairy, .fire): return 0.5
-    case(.fairy, .water): return 1
-    case(.fairy, .grass): return 1
-    case(.fairy, .electric): return 1
-    case(.fairy, .psychic): return 1
-    case(.fairy, .ice): return 1
-    case(.fairy, .dragon): return 2
-    case(.fairy, .dark): return 2
-    case(.fairy, .fairy): return 1
+    case(.fairy, .normal)   : return 1
+    case(.fairy, .fighting) : return 2
+    case(.fairy, .flying)   : return 1
+    case(.fairy, .poison)   : return 0.5
+    case(.fairy, .ground)   : return 1
+    case(.fairy, .rock)     : return 1
+    case(.fairy, .bug)      : return 1
+    case(.fairy, .ghost)    : return 1
+    case(.fairy, .steel)    : return 0.5
+    case(.fairy, .fire)     : return 0.5
+    case(.fairy, .water)    : return 1
+    case(.fairy, .grass)    : return 1
+    case(.fairy, .electric) : return 1
+    case(.fairy, .psychic)  : return 1
+    case(.fairy, .ice)      : return 1
+    case(.fairy, .dragon)   : return 2
+    case(.fairy, .dark)     : return 2
+    case(.fairy, .fairy)    : return 1
 
     }
 
 }
+
+
+/******************************************************************************
+******************************** MON POKEMON **********************************
+******************************************************************************/
+
+
+let move_earthquake : Move{
+  id = 482,
+  name = "Earthquake",
+  description = "An attack that inflicts the damage by shaking the ground. It is useless against Flying type Pokémon.",
+  category = .physical,
+  type = .ground,
+  power = 100,
+  accuracy = 100,
+  powerpoints = 10,
+  priority = 0
+}
+
+let move_stone_edge : Move {
+  id = 168,
+  name = "Stone Edge",
+  decription = "The user stabs the foe with a sharpened stone. It has a high critical-hit ratio.",
+  category = .physical,
+  type = .rock,
+  power = 100,
+  accuracy = 80,
+  powerpoints = 5,
+  priority = 0,
+}
+
+let move_bite : Move {
+  id = 510,
+  name = "Bite",
+  description = "A bite made using sharp fangs. This may cause the opponent to flinch, and it might not attack.",
+  category  = .physical
+  type = .dark,
+  power = 60,
+  accuracy = 100,
+  powerpoints = 25,
+  priority = 0
+
+}
+
+let move_fire_fang : Move {
+  id = 742,
+  name = "Fire Fang",
+  description = "The user bites with flame-cloaked fangs. It may also make the foe flinch or sustain a burn.",
+  category = .physical,
+  type = .fire,
+  power = 65,
+  accuracy = 100,
+  powerpoints = 15,
+  priority = 0
+
+}
+
+
+
+
+
+
+
+
+
+/******************************************************************************
+******************************** MON POKEMON **********************************
+******************************************************************************/
 
 // http://bulbapedia.bulbagarden.net/wiki/Damage
 func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pokemon) -> Int {
