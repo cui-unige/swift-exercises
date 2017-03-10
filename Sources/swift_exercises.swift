@@ -122,6 +122,15 @@ func ==(lhs: Species, rhs: Species) -> Bool {
 }
 
 // TODO: create some species
+let FireBlast = Move(id: 1, name: "Fire BLast", description: "30% chance to burn the target.", category: Category.special, type: Type.fire, power: 120, accuracy: 85, powerpoints: 5, priority: 0)
+let BodySlam = Move(id: 2, name: "Roar", description: "30% chance to paralyze the target", category: Category.physical, type: Type.normal, power: 85, accuracy: 100, powerpoints: 15, priority: 0)
+let HyperBeam = Move(id: 3, name: "Hyper Beam", description: "User cannot move next turn, unless opponent or Substitute was KOed.", category: Category.physical, type: Type.normal, power: 150, accuracy: 90, powerpoints: 5, priority: 0)
+let Reflect = Move(id: 4, name: "Reflect", description: "Lowers the physical damage done to user.", category: Category.status, type: Type.psychic, power: 0, accuracy: 0, powerpoints: 20, priority: 0)
+let stats = Stats(hitpoints: 90, attack: 110, defense: 80, special_attack: 80, special_defense: 80, speed: 95)
+
+let attacks: Set = [FireBlast, BodySlam, HyperBeam, Reflect]
+let arcanine = Species(id: 59, name: "Jack", evolutions: [], attacks: attacks, type: (Type.fire, nil), base_values: stats)
+
 // Do you use an enum, a map or constants/variables?
 // http://bulbapedia.bulbagarden.net/wiki/List_of_Pokémon_by_National_Pokédex_number
 
@@ -139,8 +148,18 @@ struct Pokemon {
     let effort_values     : Stats
     // TODO: implement the effective stats as a computed property:
     // https://developer.apple.com/library/content/documentation/Swift/Conceptual/Swift_Programming_Language/Properties.html#//apple_ref/doc/uid/TP40014097-CH14-ID259
-    // var effective_stats   : Stats {
-    // }
+    var effective_stats   : Stats {
+      get{
+      let effective_HP = ( (2 * self.hitpoints + self.individual_values.hitpoints + floor(self.effort_values.hitpoints/4)) * level)/100)+level+10
+      let effective_attack = ( (2 * self.attack + self.individual_values.attack + floor(self.effort_values.attack/4)) * level)/100)+level+10
+      let effective_defense = ( (2 * self.defense + self.individual_values.defense + floor(self.effort_values.defense/4)) * level)/100) + level 10
+      let effective_special_attack = ( (2 * self.special_attack + self.individual_values.special_attack + floor(self.effort_values.special_attack/4)) * level)/100)+level+10
+      let effective_special_defense = ( (2 * self.special_defense + self.individual_values.special_defense + floor(self.effort_values.special_defense/4)) * level)/100)+level+10
+      let effective_speed = ( (2 * self.speed + self.individual_values.speed + floor(self.effort_values.speed/4)) * level)/100)+level+10
+            return Stats(hitpoints: effective_HP, attack: effective_attack, defense: effective_defense, special_attack: effective_special_attack, special_defense: effective_special_defense, speed: effective_speed)
+      }
+
+    }
 }
 
 struct Trainer {
@@ -166,6 +185,7 @@ func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pok
 
 struct State {
     // TODO: describe a battle state
+    // 2 entraineurs, 2 pokemons actifs,
 }
 
 func battle(trainers: inout [Trainer], behavior: (State, Trainer) -> Move) -> () {
