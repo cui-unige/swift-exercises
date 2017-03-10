@@ -717,6 +717,19 @@ let pokemon_Tyranitar = Pokemon(
 *******************************************************************************
 ******************************************************************************/
 
+func Environment_Modifier(environment : Environment, move : Move) -> Int {
+  var Modifier : Int = 1
+
+  switch (environment.weather, move.type) {
+  case(harsh_sunlight, .fire) : Modifier = 1.5
+  case(rain, .water) : Modifier = 1.5
+      
+
+  }
+
+
+}
+
 // http://bulbapedia.bulbagarden.net/wiki/Damage
 func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pokemon) -> Int {
     // TODO
