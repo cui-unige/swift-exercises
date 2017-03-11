@@ -459,7 +459,7 @@ struct Environment {
 
 // http://bulbapedia.bulbagarden.net/wiki/Type/Type_chart
 //DONE!
-func typeModifier(attacking: Type, defending : Type) -> Double {
+func typeModifier(attacking: Type, defending : Type) -> Float {
     switch (attacking, defending){
     case (.normal  , .normal  ): return 1
     case (.normal  , .fighting): return 1
@@ -825,18 +825,64 @@ func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pok
 
     damage = Int(Float(damage)/50.0)+2
 
-    var modifier: Int = 1
+    var modifier: Float = 1
 
 
+    //Les differences due au temps
+    switch environment.weather {
+
+    case .rain:
+      switch move.type{
+      case .water:
+        modifier = modifier * 1.5
+      case .fire:
+        modifier = modifier * 0.5
+      default:
+        modifier = modifier * 1
+      }
+
+    case .harsh_sunlight:
+      switch move.type {
+      case .water:
+        modifier = modifier * 0.5
+      case .fire:
+        modifier = modifier * 1.5
+      default:
+        modifier = modifier * 1
+      }
 
 
+    default:
+      modifier = modifier * 1
+    }
+
+    //critique:
+
+    if((random() % 16) == 0){
+      modifier = modifier * 1.5
+    }
 
 
+    //random
+    modifier = modifier * Float( (random() % 16 ) + 85)/100
 
+    //STAB
+    if(pokemon.species.type.0 == move.type){
+      modifier = modifier * 1.5
+    }
+    else if let type = pokemon.species.type.1 {
+      if type == move.type{
+        modifier = modifier * 1.5
+      }
+    }
 
+    //type
+    modifier = modifier * typeModifier(attacking: move.type, defending: target.species.type.0)
+    if let type = target.species.type.1{
+      modifier = modifier * typeModifier(attacking: move.type, defending: type)
+    }
 
-
-    return damage
+    return Int(Float(damage) * modifier)
 
 }
 
