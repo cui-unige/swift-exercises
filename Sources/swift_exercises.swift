@@ -75,14 +75,16 @@ enum Terrain {
     case misty
 }
 
-// http://bulbapedia.bulbagarden.net/wiki/Move
 struct Move : Hashable {
     let id          : Int
     let name        : String
     let description : String
     let category    : Category
     let type        : Type
-    var power       : Int
+    let power       : Int
+	// let selfStatChange: Stats
+	// let foeStatChange: Stats
+	// let weatherChange: ?
     let accuracy    : Int
     let powerpoints : Int
     let priority    : Int
@@ -209,7 +211,8 @@ struct Pokemon {
 	let type			  : (Type, Type?)
 	let nature            : Nature
 	let species           : Species
-	var moves             : [Move: Int] // Move -> remaining powerpoints
+	var moves             : [Move] // Move
+	var movePowerPoint	  : [Int] // remaining powerpoints
 	let base_values		  : Stats
 	let individual_values : Stats
 	var effort_values     : Stats
@@ -274,10 +277,8 @@ var kangaskhan = Pokemon(
 	type : species_kangaskhan.type,
 	nature: .hardy,
 	species: species_kangaskhan,
-	moves: [move_reversal: 15,
-			move_earthquake: 10,
-			move_iceBeam: 10,
-			move_suckerPunch: 5],
+	moves: [move_reversal, move_earthquake,	move_iceBeam, move_suckerPunch],
+	movePowerPoint: [15,10,10,5],
 	base_values: species_kangaskhan.base_values,
 	individual_values: Stats(
 		hitpoints: 31,
@@ -318,10 +319,8 @@ var kangaskhan2 = Pokemon(
 	type : species_kangaskhan.type,
 	nature: .hardy,
 	species: species_kangaskhan,
-	moves: [move_reversal: 15,
-			move_earthquake: 10,
-			move_iceBeam: 10,
-			move_suckerPunch: 5],
+	moves: [move_reversal, move_earthquake,	move_iceBeam, move_suckerPunch],
+	movePowerPoint: [15,10,10,5],
 	base_values: species_kangaskhan.base_values,
 	individual_values: Stats(
 		hitpoints: 31,
@@ -407,7 +406,7 @@ func typeToInt(type: Type) -> Int {
 		case .dragon: return 15
 		case .dark: return 16
 		case .fairy: return 17
-		default: return -1 //
+		//default: return -1 //never executed
 	}
 }
 
@@ -484,6 +483,8 @@ struct State {
     // TODO: describe a battle state
 }
 
+
+
 func battle(trainers: inout [Trainer], behavior: (State, Trainer) -> Move) -> () {
 
     // TODO:
@@ -491,8 +492,8 @@ func battle(trainers: inout [Trainer], behavior: (State, Trainer) -> Move) -> ()
 
 	var partyA: [Pokemon]? = trainers[0].party	// player
 	var partyB: [Pokemon]? = trainers[1].party	// pc
-	var KOPartyA: [Pokemon]? = []
-	var KOPartyB: [Pokemon]? = []
+
+	// check nicknames, if they exist use them instead of standard names
 
 	print("trainer a sent out", partyA![0], "trainer B sent out", partyB![0])
 
@@ -501,30 +502,45 @@ func battle(trainers: inout [Trainer], behavior: (State, Trainer) -> Move) -> ()
 		// get environment info
 		// print if non-default
 
-
+		/*
 		print("what to do? [F]ight, [B]ag, [P]okemon")	//pick player move
 		var playerMove = readLine()
 
-		if ( playerMove == ("F") || playerMove == ("f") || playerMove == ("Fight") || playerMove == ("fight") ) {
-			// print list of index (1-4), move names, descriptions, power and accuracy
-			print()
-			var playerMove = readLine()
+		if ( playerMove == "F" || playerMove == "f" || playerMove == "Fight" || playerMove == "fight" ) {
+			// if sum of PP = 0
+				// struggle
+			// else
+				// print index (1-4), move names, descriptions, power, accuracy, PP
+				// ask for user input
+				// check move has PP left
+					// damage + effects
 
 
 		}
-		else if ( playerMove == ("B") || playerMove == ("b") || playerMove == ("Bag") || playerMove == ("bag") ) {
+		else if ( playerMove == "B" || playerMove == "b" || playerMove == "Bag" || playerMove == "bag" ) {
 			// print contents of bag with an index
 			// tell player to choose the index of the item
 
 		}
-		else if ( playerMove == ("P") || playerMove == ("p") || playerMove == ("Pokemon") || playerMove == ("pokemon") ) {
+		else if ( playerMove == "P" || playerMove == "p" || playerMove == "Pokemon" || playerMove == "pokemon" ) {
 			// print pokemon, their level, HP, and status condition
+			// ask for user input, pick a pokemon
 			//check that pokemon isn't Ko before sending it out
 		}
 		else {
 			//...
 		}
+		*/
 
+		// the "move" is just randomly chosen between the known moves, eventually expand this to allow for user input and to change pokemon and use items
+		var moveAIndex: Int = Int(drand48()*5) // does this round or truncate? also assumes a pokemon knows four moves
+		var moveBIndex: Int = Int(drand48()*5)
+		var moveA: Move = partyA![0].moves[moveAIndex]
+		var moveB: Move = partyB![0].moves[moveBIndex]
+
+		let firstToMove, secondToMove: Trainer
+		if (moveA.priority > moveB.priority)
+			{ 		}
 
 		// trainers pick a move, or switch pokemon, or use an object
 			// pokemon: check it's valid and non-KO, priority 6
