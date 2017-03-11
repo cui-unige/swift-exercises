@@ -1,5 +1,12 @@
 // http://bulbapedia.bulbagarden.net/wiki/Type
 import Foundation
+#if os(Linux)
+import SwiftGlibc
+
+public func arc4random_uniform(_ max: UInt32) -> Int32 {
+  return (SwiftGlibc.rand() % Int32(max-1))
+}
+#endif
 enum Type {
     case bug
     case dark
@@ -130,8 +137,19 @@ let Reflect = Move(id: 4, name: "Reflect", description: "Lowers the physical dam
 let stats = Stats(hitpoints: 90, attack: 110, defense: 80, special_attack: 80, special_defense: 80, speed: 95)
 
 let attacks: Set = [FireBlast, BodySlam, HyperBeam, Reflect]
-let arcanine = Species(id: 59, name: "Jack", evolutions: [], attacks: attacks, type: (Type.fire, nil), base_values: stats)
+let arcanine_spec = Species(id: 59, name: "Jack", evolutions: [], attacks: attacks, type: (Type.fire, nil), base_values: stats)
 
+
+let curse = Move(id: 1,name: "curse",description: "Curse is a non-damaging Ghost-type move. ",category: Category.status,type: Type.ghost,power: 0,accuracy: 0,powerpoints: 10,priority: 0)
+let aeroblast = Move(id: 2,name: "aeroblast",description: "Aeroblast is a damage-dealing Flying-type move. ",category: Category.special,type: Type.flying,power: 100,accuracy: 95,powerpoints: 5,priority: 0)
+let earthquake = Move(id: 3,name: "earthquake",description: "Earthquake is a damage-dealing Gfloor-type move. ",category: Category.physical,type: Type.ground,power: 100,accuracy: 100,powerpoints: 10,priority: 0)
+let recover = Move(id: 4,name: "recover",description: "Recover is a non-damaging Normal-type move. ",category: Category.status,type: Type.normal,power: 0,accuracy: 0,powerpoints: 10,priority: 0)
+
+let speciesEmpty : Set<Species> = []
+let Attaque: Set = [curse,aeroblast,earthquake,recover]
+let Values = Stats(hitpoints: 106,attack: 90,defense: 130,special_attack: 90,special_defense: 154,speed: 110)
+
+let lugia_spec = Species(id: 249,name: "maria",evolutions: speciesEmpty,attacks: Attaque,type: (Type.flying, Type.psychic),base_values: Values)
 // Do you use an enum, a map or constants/variables?
 // http://bulbapedia.bulbagarden.net/wiki/List_of_Pokémon_by_National_Pokédex_number
 
@@ -246,20 +264,132 @@ let type_modifiers: [Type: [Type: Double]] = [
 
 // http://bulbapedia.bulbagarden.net/wiki/Type/Type_chart
 func typeModifier(attacking: Type, defending : Type) -> Double {
-  
+
     return (type_modifiers[attacking]?[defending])!
 }
 
+
+func randomNumber(min: Int, max: Int) -> Int {
+    let randomNum = Int(arc4random_uniform(UInt32(max - min)))+min
+    return randomNum
+}
 // http://bulbapedia.bulbagarden.net/wiki/Damage
 func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pokemon) -> Int {
-    // TODO
-    return 0
+  let attack = Double(move.category == .physical ? pokemon.effective_stats.attack : pokemon.effective_stats.special_attack)
+  let defense = Double(move.category == .physical ? target.effective_stats.defense : target.effective_stats.special_defense)
+
+
+  let STAB: Double
+  var other: Double = 1
+  var base = Double(move.power)
+  let type_effectiveness: Double
+
+  let rand1 = Double(randomNumber(min: 85, max: 100))
+  let random: Double = rand1/100 //irandom number from 0.85 to 1.00.
+  let rand2 = Double(randomNumber(min: 2, max:4))
+  let critical: Double = rand2/2 //Critical is 2 for a critical hit in Generations I-V, 1.5 for a critical hit from Generation VI onwards, and 1 otherwise.
+
+  if let secondType = target.species.type.1 { //If 2 types
+      type_effectiveness = typeModifier(attacking: move.type, defending: target.species.type.0) * typeModifier(attacking: move.type, defending: secondType)
+  } else { //If One type
+      type_effectiveness = typeModifier(attacking: move.type, defending: target.species.type.0)
+  }
+
+
+  if move.type == pokemon.species.type.0 || move.type == pokemon.species.type.1 {
+      STAB = 1.5
+  } else {
+      STAB = 1
+  }
+
+  //valeur val other aec changement d'environment
+
+  switch environment.weather{
+      case .rain(let heavy):
+          if move.type == .fire {
+              if heavy {
+                  other = 0 //Fire-type moves cannot be executed
+              } else {
+                  base = base * 0.5 //Fire-type moves do 50% less damage.
+              }
+          }
+          if move.type == .water {
+              base = base * 1.5 //Water-type moves do 50% more damage
+          }
+
+      case .harsh_sunlight(let extremely):
+          if move.type == .water {
+              if extremely {
+                  other = 0 //Water-type moves cannot be executed
+              }
+              else {
+                  base = base * 0.5 //Water-type moves do 50% less damage
+              }
+              if move.type == .fire {
+                  base = base * 1.5 //Fire-type moves do 50% more damage
+              }
+
+          }
+      case .mysterious_air_current:
+          if ((target.species.type.0 == .flying || target.species.type.1 == .flying) && type_effectiveness == 2) {
+              other = other * 0.5
+          }
+      default:
+          break
+  }
+
+  switch environment.terrain{
+      case .electric:
+          if (move.type == .electric && (pokemon.species.type.0 != .flying || pokemon.species.type.1 != .flying)) {
+              other = other * 1.5 // Electric Terrain increases the power of Electric-type moves used by grounded Pokémon by 50%
+          }
+          if (target.species.type.0 == .electric || target.species.type.1 == .electric){
+              other = other * 0.5 // Decreases the damages on targeted pokemon if he's of type electric
+          }
+      case .grassy:
+          if (move.type == .grass && (pokemon.species.type.0 != .flying || pokemon.species.type.1 != .flying)) {
+              other = other * 1.5 // Grassy Terrain increases the power of grass-type moves used by grounded Pokémon by 50%
+          }
+          if (target.species.type.0 == .grass || target.species.type.1 == .grass){
+              other = other * 0.5 // Decreases the damages on targeted pokemon if he's of type grass
+          }
+      case .psychic:
+          if (move.type == .psychic && (pokemon.species.type.0 != .flying || pokemon.species.type.1 != .flying)) {
+              other = other * 1.5 // Psychic Terrain increases the power of psychic-type moves used by grounded Pokémon by 50%
+          }
+          if (target.species.type.0 == .psychic || target.species.type.1 == .psychic){
+              other = other * 0.5 // Decreases the damages on targeted pokemon if he's of type psychic
+          }
+      case .misty:
+          if (move.type == .dragon && (target.species.type.0 != .flying || target.species.type.1 != .flying)) {
+              other = other * 0.5 // Mistic Terrain decreases the power of dragon-type moves against grounded pokemons by 50%
+          }
+      default:
+          break
+  }
+
+  //Final Damages
+
+  let modifier = STAB * type_effectiveness * critical * other * random
+  let finalDamage = Int(((Double(2*pokemon.level+10) * attack / defense / 250 * base) + 2) * modifier)
+
+return finalDamage
 }
 
+
+
 struct State {
-    // TODO: describe a battle state
-    // 2 entraineurs, 2 pokemons actifs,
+  let player1: Trainer
+  let player2: Trainer
+  var pokemonAttack: Pokemon
+  var pokemonDefense: Pokemon
+  var pokemonMoveAttack: Move
+  var pokemonMoveDefense: Move
+  var pokemonEnvironment: Environment
 }
+
+/*  INITIALISATION DES VARIABLES POUR LA SIMULTAION DU COMBAT*/
+
 
 func battle(trainers: inout [Trainer], behavior: (State, Trainer) -> Move) -> () {
     // TODO: simulate battle

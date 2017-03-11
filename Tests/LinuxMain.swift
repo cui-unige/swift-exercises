@@ -1,4 +1,5 @@
 import XCTest
+import Glibc
 @testable import swift_exercisesTests
 
 XCTMain([
