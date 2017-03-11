@@ -130,12 +130,12 @@ func ==(lhs: Move, rhs: Move) -> Bool {
 
 // http://bulbapedia.bulbagarden.net/wiki/Statistic
 struct Stats {
-    let hitpoints       : Int
-    let attack          : Int
-    let defense         : Int
-    let special_attack  : Int
-    let special_defense : Int
-    let speed           : Int
+    var hitpoints       : Int
+    var attack          : Int
+    var defense         : Int
+    var special_attack   : Int
+    var special_defense : Int
+    var speed           : Int
 }
 
 struct StatsDouble {
@@ -165,10 +165,6 @@ func ==(lhs: Species, rhs: Species) -> Bool {
     return lhs.id == rhs.id
 }
 
-// TODO: create some species
-// Do you use an enum, a map or constants/variables?
-// http://bulbapedia.bulbagarden.net/wiki/List_of_Pokémon_by_National_Pokédex_number
-
 func effective_stats_HP(Base: Int, IV: Int, EV: Int, level: Int) -> Int {
     let EV_help : Int = (Int)(floor((Double)(EV/4)))
     let Base_help : Int = Base*2
@@ -188,37 +184,46 @@ func effective_stats_other(Base: Int, IV: Int, EV: Int, level: Int, nature_multi
 
 
 struct Pokemon {
-    let nickname          : String?
-    let hitpoints         : Int // remaining hitpoints
-    let size              : Int
-    let weight            : Int
-    let experience        : Int
-    let level             : Int
-    let nature            : Nature
-    let species           : Species
-    let moves             : [Move: Int] // Move -> remaining powerpoints
-    let individual_values : Stats
-    let effort_values     : Stats
-    // TODO: implement the effective stats as a computed property:
-    // https://developer.apple.com/library/content/documentation/Swift/Conceptual/Swift_Programming_Language/Properties.html#//apple_ref/doc/uid/TP40014097-CH14-ID259
+  let nickname          : String?
+  let hitpoints         : Int // remaining hitpoints
+  let size              : Int
+  let weight            : Int
+  let experience        : Int
+  let level             : Int
+  let nature            : Nature
+  let species           : Species
+  let moves             : [Move: Int] // Move -> remaining powerpoints
+  let individual_values : Stats
+  let effort_values     : Stats
+  var effective_stats   : Stats
+  var effective_stats1  : Stats {
 
+    get {
+      let effective_hitpoints       = effective_stats_HP(Base : species.base_values.hitpoints, IV : individual_values.hitpoints, EV: effort_values.hitpoints, level: level)
+      let effective_attack          = effective_stats_other(Base : species.base_values.attack, IV : individual_values.attack, EV: effort_values.attack, level: level, nature_multiplier: (nature_coeff[nature]?.attack)!)
+      let effective_defense         = effective_stats_other(Base : species.base_values.defense, IV : individual_values.defense, EV: effort_values.defense, level: level, nature_multiplier: (nature_coeff[nature]?.defense)!)
+      let effective_special_attack  = effective_stats_other(Base : species.base_values.special_attack, IV : individual_values.special_attack, EV: effort_values.special_attack, level: level, nature_multiplier: (nature_coeff[nature]?.special_attack)!)
+      let effective_special_defense = effective_stats_other(Base : species.base_values.special_defense, IV : individual_values.special_defense, EV: effort_values.special_defense, level: level, nature_multiplier: (nature_coeff[nature]?.special_defense)!)
+      let effective_speed           = effective_stats_other(Base : species.base_values.speed, IV : individual_values.speed, EV: effort_values.speed, level: level, nature_multiplier: (nature_coeff[nature]?.speed)!)
+      return Stats (
+        hitpoints : effective_hitpoints,
+        attack : effective_attack,
+        defense : effective_defense,
+        special_attack : effective_special_attack,
+        special_defense : effective_special_defense,
+        speed : effective_speed
+      )
+    }
+    set{
+      effective_stats.hitpoints = effective_stats1.hitpoints
+      effective_stats.attack = effective_stats1.attack
+      effective_stats.defense = effective_stats1.defense
+      effective_stats.special_attack = effective_stats1.special_attack
+      effective_stats.special_defense = effective_stats1.special_defense
+      effective_stats.speed = effective_stats1.speed
+    }
+  }
 }
-
-
-func effective_stats(Pokemon : Pokemon, nature_multiplier : Double)   -> Stats {
-
-    let effective_hitpoints       = effective_stats_HP(Base : Pokemon.species.base_values.hitpoints, IV : Pokemon.individual_values.hitpoints, EV: Pokemon.effort_values.hitpoints, level: Pokemon.level)
-    let effective_attack          = effective_stats_other(Base : Pokemon.species.base_values.attack, IV : Pokemon.individual_values.attack, EV: Pokemon.effort_values.attack, level: Pokemon.level, nature_multiplier: (nature_coeff[Pokemon.nature]?.attack)!)
-    let effective_defense         = effective_stats_other(Base : Pokemon.species.base_values.defense, IV : Pokemon.individual_values.defense, EV: Pokemon.effort_values.defense, level: Pokemon.level, nature_multiplier: (nature_coeff[Pokemon.nature]?.defense)!)
-    let effective_special_attack  = effective_stats_other(Base : Pokemon.species.base_values.special_attack, IV : Pokemon.individual_values.special_attack, EV: Pokemon.effort_values.special_attack, level: Pokemon.level, nature_multiplier: (nature_coeff[Pokemon.nature]?.special_attack)!)
-    let effective_special_defense = effective_stats_other(Base : Pokemon.species.base_values.special_defense, IV : Pokemon.individual_values.special_defense, EV: Pokemon.effort_values.special_defense, level: Pokemon.level, nature_multiplier: (nature_coeff[Pokemon.nature]?.special_defense)!)
-    let effective_speed           = effective_stats_other(Base : Pokemon.species.base_values.speed, IV : Pokemon.individual_values.speed, EV: Pokemon.effort_values.speed, level: Pokemon.level, nature_multiplier: (nature_coeff[Pokemon.nature]?.speed)!)
-
-  let effective_stats_return = Stats(hitpoints : effective_hitpoints, attack : effective_attack, defense : effective_defense, special_attack : effective_special_attack, special_defense : effective_special_defense, speed : effective_speed)
-  return effective_stats_return
-
-}
-// let TyranitarStast_effectives = effective_stats()
 
 
 struct Trainer {
@@ -623,55 +628,54 @@ func typeModifier(attacking: Type, defending : Type) -> Double {
 ******************************************************************************/
 
 
-let move_earthquake : Move{
-  id = 482,
-  name = "Earthquake",
-  description = "An attack that inflicts the damage by shaking the ground. It is useless against Flying type Pokémon.",
-  category = .physical,
-  type = .ground,
-  power = 100,
-  accuracy = 100,
-  powerpoints = 10,
-  priority = 0
-}
+let move_earthquake = Move(
+  id : 482,
+  name : "Earthquake",
+  description : "An attack that inflicts the damage by shaking the ground. It is useless against Flying type Pokémon.",
+  category : .physical,
+  type : .ground,
+  power : 100,
+  accuracy : 100,
+  powerpoints : 10,
+  priority : 0
+)
 
-let move_stone_edge : Move {
-  id = 168,
-  name = "Stone Edge",
-  decription = "The user stabs the foe with a sharpened stone. It has a high critical-hit ratio.",
-  category = .physical,
-  type = .rock,
-  power = 100,
-  accuracy = 80,
-  powerpoints = 5,
-  priority = 0,
-}
+let move_stone_edge = Move(
+  id : 168,
+  name : "Stone Edge",
+  description : "The user stabs the foe with a sharpened stone. It has a high critical-hit ratio.",
+  category : .physical,
+  type : .rock,
+  power : 100,
+  accuracy : 80,
+  powerpoints : 5,
+  priority : 0
+)
 
-let move_bite : Move {
-  id = 510,
-  name = "Bite",
-  description = "A bite made using sharp fangs. This may cause the opponent to flinch, and it might not attack.",
-  category  = .physical
-  type = .dark,
-  power = 60,
-  accuracy = 100,
-  powerpoints = 25,
-  priority = 0
+let move_bite = Move(
+  id : 510,
+  name : "Bite",
+  description : "A bite made using sharp fangs. This may cause the opponent to flinch, and it might not attack.",
+  category  : .physical,
+  type : .dark,
+  power : 60,
+  accuracy : 100,
+  powerpoints : 25,
+  priority : 0
+)
 
-}
+let move_fire_fang = Move(
+  id : 742,
+  name : "Fire Fang",
+  description : "The user bites with flame-cloaked fangs. It may also make the foe flinch or sustain a burn.",
+  category : .physical,
+  type : .fire,
+  power : 65,
+  accuracy : 100,
+  powerpoints : 15,
+  priority : 0
+)
 
-let move_fire_fang : Move {
-  id = 742,
-  name = "Fire Fang",
-  description = "The user bites with flame-cloaked fangs. It may also make the foe flinch or sustain a burn.",
-  category = .physical,
-  type = .fire,
-  power = 65,
-  accuracy = 100,
-  powerpoints = 15,
-  priority = 0
-
-}
 
 /******************************* SPECIES TYRANITAR ****************************/
 /******************************************************************************/
@@ -687,7 +691,7 @@ let species_Tyranitar = Species(
   id : 248,
   name : "Tyranitar",
   evolutions : [],
-  attacks : [move_earthquake, move_bite, move_stone_edge, move_fire_fang],
+  attacks : [],
   type : (.rock, .dark),
   base_values : species_TyranitarStats
 )
@@ -698,18 +702,29 @@ let Tyranitar_IV = Stats(hitpoints : 5, attack : 6, defense : 5, special_attack 
 let Tyranitar_EV = Stats(hitpoints : 0, attack : 0, defense : 0, special_attack : 0, special_defense : 0, speed : 0)
 
 
-let pokemon_Tyranitar = Pokemon(
+var pokemon_Tyranitar = Pokemon(
   nickname : nil,
-  hitpoints : effective_stats_HP(species_TyranitarStats.hitpoints, Tyranitar_IV.hitpoints, Tyranitar_EV.hitpoints, 50),
-  size : 2.0,
+  hitpoints : effective_stats_HP(Base:species_TyranitarStats.hitpoints, IV:Tyranitar_IV.hitpoints, EV:Tyranitar_EV.hitpoints, level:50),
+  size : 2,
   weight : 202,
   experience : 1,
   level : 50,
   nature : .hardy,
   species : species_Tyranitar,
-  moves : [move_earthquake, move_stone_edge, move_bite, move_fire_fang],
-  individual_values = Tyranitar_IV,
-  effort_values = Tyranitar_EV
+  moves : [move_earthquake : move_earthquake.powerpoints,
+          move_stone_edge : move_stone_edge.powerpoints,
+          move_bite : move_bite.powerpoints,
+          move_fire_fang : move_fire_fang.powerpoints],
+  individual_values : Stats(hitpoints : 5, attack : 6, defense : 5, special_attack : 5, special_defense : 5, speed : 5),
+  effort_values : Stats(hitpoints : 0, attack : 0, defense : 0, special_attack : 0, special_defense : 0, speed : 0),
+  effective_stats : Stats(
+    hitpoints : 100,
+    attack : 134,
+    defense : 110,
+    special_attack : 95,
+    special_defense : 100,
+    speed : 61
+  )
 )
 
 
@@ -717,28 +732,85 @@ let pokemon_Tyranitar = Pokemon(
 *******************************************************************************
 ******************************************************************************/
 
-func Environment_Modifier(environment : Environment, move : Move) -> Int {
-  var Modifier : Int = 1
-
+func Environment_Modifier(environment : Environment, move : Move) -> Double {
+  var Modifier : Double = 1
   switch (environment.weather, move.type) {
-  case(harsh_sunlight, .fire) : Modifier = 1.5
-  case(rain, .water) : Modifier = 1.5
-      
-
-  }
-
-
+    case(.harsh_sunlight, .fire) : Modifier = 1.5
+    case(.harsh_sunlight, .water) : Modifier = 0.5
+    case(.rain, .fire) : Modifier = 0.5
+    case(.rain, .water) : Modifier = 1.5
+    default : Modifier = 1
+    }
+  return Modifier
 }
+
+func critical(pokemon : Pokemon) -> Double{
+  let crit_base = pokemon.species.base_values.speed / 2
+
+  #if os(Linux)
+    let random1 = Int(random() % 256)
+  #else
+    let random1 = Int(arc4random_uniform(256))
+  #endif
+
+  let crit : Double = crit_base < random1 ? 2 : 1
+  return crit
+}
+
 
 // http://bulbapedia.bulbagarden.net/wiki/Damage
 func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pokemon) -> Int {
-    // TODO
-    return 0
+
+  /* Random for the modifier calculations */
+  #if os(Linux)
+    let val_random2 = Double(rand()) / Double(UINT32_MAX) * 0.15 + 0.85
+  #else
+    let val_random2 = Double(arc4random()) / Double(UINT32_MAX) * 0.15 + 0.85
+  #endif
+  /* STAB value */
+  let STAB : Double
+  if move.type == pokemon.species.type.0 || move.type == pokemon.species.type.1 {
+           STAB = 1.5
+        } else {
+           STAB = 1
+  }
+
+    var modifier = 1 * Environment_Modifier(environment : Environment, move : Move) * critical(pokemon : Pokemon) * val_random2 * STAB
+    var help1 = (2 * pokemon.level / 5) + 2 * move.power
+    var help2 = (help1 * (pokemon.effective_stats.attack / target.effective_stats.defense)) / 50
+    var help3 = (help2 + 2) * modifier
+
+    let damage = floor(help3)
+    return damage
 }
+
+
+
+
+
+
+
 
 struct State {
     // TODO: describe a battle state
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 func battle(trainers: inout [Trainer], behavior: (State, Trainer) -> Move) -> () {
     // TODO: simulate battle
