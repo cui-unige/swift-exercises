@@ -133,7 +133,7 @@ struct Stats {
     var hitpoints       : Int
     var attack          : Int
     var defense         : Int
-    var special_attack   : Int
+    var special_attack  : Int
     var special_defense : Int
     var speed           : Int
 }
@@ -732,7 +732,7 @@ var pokemon_Tyranitar = Pokemon(
 *******************************************************************************
 ******************************************************************************/
 
-func Environment_Modifier(environment : Environment, move : Move) -> Double {
+func Environment_Modifier(_ environment : Environment, _ move : Move) -> Double {
   var Modifier : Double = 1
   switch (environment.weather, move.type) {
     case(.harsh_sunlight, .fire) : Modifier = 1.5
@@ -744,7 +744,7 @@ func Environment_Modifier(environment : Environment, move : Move) -> Double {
   return Modifier
 }
 
-func critical(pokemon : Pokemon) -> Double{
+func critical(_ pokemon : Pokemon) -> Double{
   let crit_base = pokemon.species.base_values.speed / 2
 
   #if os(Linux)
@@ -759,7 +759,7 @@ func critical(pokemon : Pokemon) -> Double{
 
 
 // http://bulbapedia.bulbagarden.net/wiki/Damage
-func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pokemon) -> Int {
+func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pokemon) -> Double {
 
   /* Random for the modifier calculations */
   #if os(Linux)
@@ -775,24 +775,46 @@ func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pok
            STAB = 1
   }
 
-    var modifier = 1 * Environment_Modifier(environment : Environment, move : Move) * critical(pokemon : Pokemon) * val_random2 * STAB
-    var help1 = (2 * pokemon.level / 5) + 2 * move.power
-    var help2 = (help1 * (pokemon.effective_stats.attack / target.effective_stats.defense)) / 50
-    var help3 = (help2 + 2) * modifier
+    let modifier : Double = 1 * Environment_Modifier(environment, move) * critical(pokemon) * val_random2 * STAB
+    let help1 : Int = ((2 * pokemon.level / 5) + 2) * move.power
+    let help2 : Int = (help1 * (pokemon.effective_stats.attack / target.effective_stats.defense)) / 50
+    let help3 : Double = ((Double)(help2) + 2.0) * modifier
 
     let damage = floor(help3)
     return damage
 }
 
+/* Initialise variable to chose first one to move if everything is equal */
+let first_random : Int = 1
+
+func check_order(_ pokemon1 : Pokemon, _ move1 : Move, _ pokemon2 : Pokemon, _ move2 : Move, _ first_random : Int) -> Int{
+
+  var first_move : Int = first_random
 
 
-
-
-
-
-
-struct State {
-    // TODO: describe a battle state
+    if (move1.priority > move2.priority) {
+      first_move = 1
+    }
+    else if (move1.priority < move2.priority) {
+      first_move = 2
+    }
+    else if (move1.priority == move2.priority) {
+      if (pokemon1.effective_stats.speed > pokemon2.effective_stats.speed){
+        first_move = 1
+      }
+      else if (pokemon1.effective_stats.speed < pokemon2.effective_stats.speed){
+        first_move = 2
+      }
+      else {
+        if (first_move == 1) {
+          first_move = 2
+        }
+        else if (first_move == 2) {
+          first_move = 1
+        }
+      }
+    }
+  return first_move
 }
 
 
@@ -800,18 +822,50 @@ struct State {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-func battle(trainers: inout [Trainer], behavior: (State, Trainer) -> Move) -> () {
+// func battle(trainers: inout [Trainer], behavior: (State, Trainer) -> Move) -> () {
     // TODO: simulate battle
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//}
