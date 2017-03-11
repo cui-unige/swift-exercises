@@ -1,5 +1,5 @@
 //210 Granbull
-//import Foundation
+import Glibc
 
 
 // http://bulbapedia.bulbagarden.net/wiki/Type
@@ -126,6 +126,34 @@ func ==(lhs: Species, rhs: Species) -> Bool {
     return lhs.id == rhs.id
 }
 
+//attacks:
+
+let play_rough_move = Move(
+  id: 0,
+  name: "play rough",
+  description: " The user plays rough with the target and attacks it. This may also lower the target's Attack stat. ",
+  category: .physical,
+  type: .fairy,
+  power: 90,
+  accuracy: 90,
+  powerpoints:10,
+  priority: 0
+)
+
+let fire_blast_move = Move(
+  id: 0,
+  name: "fire blast",
+  description: "  The target is attacked with an intense blast of all-consuming fire. This may also leave the target with a burn.  ",
+  category: .special,
+  type: .fire,
+  power: 110,
+  accuracy: 85,
+  powerpoints:5,
+  priority: 0
+)
+
+
+
 // TODO: create some species
 // Do you use an enum, a map or constants/variables?
 // http://bulbapedia.bulbagarden.net/wiki/List_of_Pokémon_by_National_Pokédex_number
@@ -134,7 +162,7 @@ let granbull_species = Species(
   id: 210,
   name: "Granbull",
   evolutions: [],
-  attacks: [],
+  attacks: [fire_blast_move, play_rough_move],
   type: (.fairy, nil),
   base_values:Stats(
     hitpoints: 90,
@@ -159,6 +187,238 @@ let granbull_species = Species(
     temp=(temp / 100) + 5
     return Int(Float(temp) * nature)
   }
+  //Je met des valeurs 9 ou 10 ou 11 pour pouvoir retourner un type Stats qui prends des int à l'intérieur, je cast et divise plus tard.
+  func calcul_modif_nature(nature: Nature) -> Stats{
+
+    switch (nature){
+    case .hardy: return Stats(
+      hitpoints: 10,
+      attack: 10,
+      defense: 10,
+      special_attack: 10,
+      special_defense: 10,
+      speed:10
+    )
+
+    case .lonely: return Stats(
+      hitpoints: 10,
+      attack: 11,
+      defense: 9,
+      special_attack: 10,
+      special_defense: 10,
+      speed:10
+    )
+
+    case .brave: return Stats(
+      hitpoints: 10,
+      attack: 11,
+      defense: 10,
+      special_attack: 10,
+      special_defense: 10,
+      speed:9
+    )
+
+  case .adamant: return Stats(
+    hitpoints: 10,
+    attack: 11,
+    defense: 10,
+    special_attack: 9,
+    special_defense: 10,
+    speed:10
+  )
+
+  case .naughty: return Stats(
+    hitpoints: 10,
+    attack: 11,
+    defense: 10,
+    special_attack: 10,
+    special_defense: 9,
+    speed:10
+  )
+
+case .bold: return Stats(
+  hitpoints: 10,
+  attack: 9,
+  defense: 11,
+  special_attack: 10,
+  special_defense: 10,
+  speed:10
+)
+
+case .docile: return Stats(
+  hitpoints: 10,
+  attack: 10,
+  defense: 10,
+  special_attack: 10,
+  special_defense: 10,
+  speed:10
+)
+
+case .relaxed: return Stats(
+  hitpoints: 10,
+  attack: 10,
+  defense: 11,
+  special_attack: 10,
+  special_defense: 10,
+  speed:9
+)
+
+case .impish: return Stats(
+  hitpoints: 10,
+  attack: 10,
+  defense: 11,
+  special_attack: 9,
+  special_defense: 10,
+  speed:10
+)
+
+case .lax: return Stats(
+  hitpoints: 10,
+  attack: 10,
+  defense: 11,
+  special_attack: 10,
+  special_defense: 9,
+  speed:10
+)
+
+case .timid: return Stats(
+  hitpoints: 10,
+  attack: 9,
+  defense: 10,
+  special_attack: 10,
+  special_defense: 10,
+  speed:11
+)
+
+case .hasty: return Stats(
+  hitpoints: 10,
+  attack: 10,
+  defense: 9,
+  special_attack: 10,
+  special_defense: 10,
+  speed:11
+)
+
+case .serious: return Stats(
+  hitpoints: 10,
+  attack: 10,
+  defense: 10,
+  special_attack: 10,
+  special_defense: 10,
+  speed:10
+)
+
+case .jolly: return Stats(
+  hitpoints: 10,
+  attack: 10,
+  defense: 10,
+  special_attack: 9,
+  special_defense: 10,
+  speed:11
+)
+
+case .naive: return Stats(
+  hitpoints: 10,
+  attack: 10,
+  defense: 10,
+  special_attack: 10,
+  special_defense: 9,
+  speed:11
+)
+
+case .modest: return Stats(
+  hitpoints: 10,
+  attack: 9,
+  defense: 10,
+  special_attack: 11,
+  special_defense: 10,
+  speed:10
+)
+
+case .mild: return Stats(
+  hitpoints: 10,
+  attack: 10,
+  defense: 9,
+  special_attack: 11,
+  special_defense: 10,
+  speed:10
+)
+
+case .quiet: return Stats(
+  hitpoints: 10,
+  attack: 10,
+  defense: 10,
+  special_attack: 11,
+  special_defense: 10,
+  speed:9
+)
+
+case .bashful: return Stats(
+  hitpoints: 10,
+  attack: 10,
+  defense: 10,
+  special_attack: 10,
+  special_defense: 10,
+  speed:10
+)
+
+case .rash: return Stats(
+  hitpoints: 10,
+  attack: 10,
+  defense: 10,
+  special_attack: 11,
+  special_defense: 9,
+  speed:10
+)
+
+case .calm: return Stats(
+  hitpoints: 10,
+  attack: 9,
+  defense: 10,
+  special_attack: 10,
+  special_defense: 11,
+  speed:10
+)
+
+case .gentle: return Stats(
+  hitpoints: 10,
+  attack: 10,
+  defense: 9,
+  special_attack: 10,
+  special_defense: 11,
+  speed:10
+)
+
+case .sassy: return Stats(
+  hitpoints: 10,
+  attack: 10,
+  defense: 10,
+  special_attack: 10,
+  special_defense: 11,
+  speed:9
+)
+
+case .careful: return Stats(
+  hitpoints: 10,
+  attack: 10,
+  defense: 10,
+  special_attack: 9,
+  special_defense: 11,
+  speed:10
+)
+
+case .quirky: return Stats(
+  hitpoints: 10,
+  attack: 10,
+  defense: 10,
+  special_attack: 10,
+  special_defense: 10,
+  speed:10
+)
+    }
+
+
+  }
 
 struct Pokemon {
     let nickname          : String?
@@ -166,7 +426,7 @@ struct Pokemon {
     let size              : Int
     let weight            : Int
     let experience        : Int
-    let level             : Int // TODO
+    let level             : Int
     let nature            : Nature
     let species           : Species
     let moves             : [Move: Int] // Move -> remaining powerpoints
@@ -174,15 +434,15 @@ struct Pokemon {
     let effort_values     : Stats
     // DONE: implement the effective stats as a computed property:
     // https://developer.apple.com/library/content/documentation/Swift/Conceptual/Swift_Programming_Language/Properties.html#//apple_ref/doc/uid/TP40014097-CH14-ID259
-    // TODO add nature
+    // DONE add nature
      var effective_stats   : Stats {
        return Stats(
-         hitpoints: calcul_stat_hp(base_stat: species.base_values.hitpoints, iv: individual_values.hitpoints, ev: effort_values.hitpoints, level:level ),
-         attack: calcul_stat_other(base_stat: species.base_values.attack, iv: individual_values.attack, ev: effort_values.attack, level:level, nature:1),
-         defense: calcul_stat_other(base_stat: species.base_values.defense, iv: individual_values.defense, ev: effort_values.defense, level:level, nature:1),
-         special_attack: calcul_stat_other(base_stat: species.base_values.special_attack, iv: individual_values.special_attack, ev: effort_values.special_attack, level:level, nature:1),
-         special_defense: calcul_stat_other(base_stat: species.base_values.special_defense, iv: individual_values.special_defense, ev: effort_values.special_defense, level:level, nature:1),
-         speed: calcul_stat_other(base_stat: species.base_values.speed, iv: individual_values.speed, ev: effort_values.speed, level:level, nature:1))
+         hitpoints:       calcul_stat_hp(   base_stat: species.base_values.hitpoints,       iv: individual_values.hitpoints,       ev: effort_values.hitpoints,       level:level ),
+         attack:          calcul_stat_other(base_stat: species.base_values.attack,          iv: individual_values.attack,          ev: effort_values.attack,          level:level, nature: Float(calcul_modif_nature(nature: nature).attack)/10 ),
+         defense:         calcul_stat_other(base_stat: species.base_values.defense,         iv: individual_values.defense,         ev: effort_values.defense,         level:level, nature: Float(calcul_modif_nature(nature: nature).defense)/10),
+         special_attack:  calcul_stat_other(base_stat: species.base_values.special_attack,  iv: individual_values.special_attack,  ev: effort_values.special_attack,  level:level, nature: Float(calcul_modif_nature(nature: nature).special_attack)/10),
+         special_defense: calcul_stat_other(base_stat: species.base_values.special_defense, iv: individual_values.special_defense, ev: effort_values.special_defense, level:level, nature: Float(calcul_modif_nature(nature: nature).special_defense)/10),
+         speed:           calcul_stat_other(base_stat: species.base_values.speed,           iv: individual_values.speed,           ev: effort_values.speed,           level:level, nature: Float(calcul_modif_nature(nature: nature).speed)/10))
 
      }
 }
@@ -198,7 +458,7 @@ struct Environment {
 }
 
 // http://bulbapedia.bulbagarden.net/wiki/Type/Type_chart
-//DONE! 
+//DONE!
 func typeModifier(attacking: Type, defending : Type) -> Double {
     switch (attacking, defending){
     case (.normal  , .normal  ): return 1
@@ -550,8 +810,34 @@ func typeModifier(attacking: Type, defending : Type) -> Double {
 
 // http://bulbapedia.bulbagarden.net/wiki/Damage
 func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pokemon) -> Int {
-    // TODO
-    return 0
+
+    var damage: Int = 2*pokemon.level
+    damage = Int((Float(damage)/5)+2)*move.power
+
+    switch (move.category){
+    case .physical:
+      damage = damage*Int(Float(pokemon.effective_stats.attack)/Float(pokemon.effective_stats.defense))
+    case .special:
+      damage = damage*Int(Float(pokemon.effective_stats.special_attack)/Float(pokemon.effective_stats.special_defense))
+    case .status:
+      damage = 0//Ne devrait jamais arriver, on pourait throw une exeption
+    }
+
+    damage = Int(Float(damage)/50.0)+2
+
+    var modifier: Int = 1
+
+
+
+
+
+
+
+
+
+
+    return damage
+
 }
 
 struct State {
