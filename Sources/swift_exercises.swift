@@ -390,14 +390,14 @@ func calcul_avantage_Nature(saNature: Nature, son_stat: Stats_enum ) -> Int {
 
 struct Pokemon {
     let nickname          : String?
-    let hitpoints         : Int // remaining hitpoints
+    var hitpoints         : Int // remaining hitpoints
     let size              : Int
     let weight            : Int
     let experience        : Int
     let level             : Int
     let nature            : Nature
     let species           : Species
-    let moves             : [Move: Int] // Move -> remaining powerpoints
+    let moves             : [Move] // Move -> remaining powerpoints
     let individual_values : Stats
     let effort_values     : Stats
     var effective_stats   : Stats { // effective_stats for Generations I and II)
@@ -862,17 +862,17 @@ struct State{
    // joueur 1
    let trainer1: Trainer;
    let pokemon1: Pokemon; // il s'agit du pokemon actuellement selectionné
-   let pokemon1_dispo: [Pokemon]; // les pokemons restants pour le joueur 1
-   let pokemon1_HS: [Pokemon]; // pokemon
+   var pokemon1_dispo: [Pokemon]; // les pokemons restants pour le joueur 1
+   var pokemon1_HS: [Pokemon]; // pokemon
 
    // joueur 2
    let trainer2: Trainer;
    let pokemon2: Pokemon;
-   let pokemon2_dispo: [Pokemon]; // les pokemons restants pour le joueur 2
-   let pokemon2_HS: [Pokemon]; // pokemon
+   var pokemon2_dispo: [Pokemon]; // les pokemons restants pour le joueur 2
+   var pokemon2_HS: [Pokemon]; // pokemon
 
    // milieu de jeu
-   let environement: Environment;
+   var environement: Environment;
    let terrain: Terrain;
 
    // tout les attaques utilisés selon l'ordre
@@ -880,7 +880,60 @@ struct State{
 }
 
 
+/* Déclaration des joueurs (Trainers) */
+let pikachu_paul = Pokemon(
+                      nickname: "Pika Pika",
+                      hitpoints:  35,
+                      size:  4 ,
+                      weight: 15  ,
+                      experience: 0  ,
+                      level:    2,
+                      nature:   Nature.timid,
+                      species: pikachu,
+                      moves:  [thunderShockAttack, quickattack],
+                      individual_values:   pikachuStats,
+                      effort_values: pikachuStats
+
+
+);
+
+let charizard_paul = Pokemon(
+                      nickname: "Dracaufeu",
+                      hitpoints:  35,
+                      size:  150,
+                      weight: 100  ,
+                      experience: 5  ,
+                      level:    3,
+                      nature:   Nature.bold,
+                      species: charizard,
+                      moves:  [moveAirSlash, moveDragonClaw, moveEmber, moveFlareBlitz, moveGrowl],
+                      individual_values:   charizardStat,
+                      effort_values: charizardStat
+
+
+)
+
+var Paul = Trainer(pokemons: [pikachu_paul, charizard_paul]);
+
+var Martin = Trainer(pokemons: [pikachu_paul, charizard_paul]);
+
+var Diego = Trainer(pokemons: [pikachu_paul, charizard_paul]);
+
+var all_Trainer: [Trainer] = [Paul, Martin, Diego];
+
+
 
 func battle(trainers: inout [Trainer], behavior: (State, Trainer) -> Move) -> () {
     // TODO: simulate battle
+
+    var joueur: Int = 1;
+
+    print("Veuillez choisir votre joueur:");
+
+    for i in 0..(all_Trainer.count -1) {
+        print("\(i+1) name: \(all_Trainer(i+1)\n);
+    }
+
 }
+
+*/
