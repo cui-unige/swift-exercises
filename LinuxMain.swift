@@ -3,4 +3,5 @@ import XCTest
 
 XCTMain([
      testCase(swift_exercisesTests.allTests),
+     battle(),
 ])

@@ -1,4 +1,4 @@
-
+import Foundation
 
 // http://bulbapedia.bulbagarden.net/wiki/Type
 enum Type {
@@ -398,7 +398,8 @@ struct Pokemon {
     let level             : Int
     let nature            : Nature
     let species           : Species
-    let moves             : [Move] // Move -> remaining powerpoints
+    var moves             : [Move] // Move -> remaining powerpoints
+    var powerpoints       : Int
     let individual_values : Stats
     let effort_values     : Stats
     var effective_stats   : Stats { // effective_stats for Generations I and II)
@@ -820,14 +821,13 @@ func typeModifier(attacking: Type, defending : Type) -> Double {
 /* Fonction damage
 http://bulbapedia.bulbagarden.net/wiki/Damage
 
---Est ce que l'on doit faire le modifier comme dans la formule?
 --Si attaque status: damage = 0?
+*/
+func damage(pokemon: Pokemon, move: Move, target: Pokemon) -> Int {
 
- */
-
-func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pokemon) -> Int {
-
-    let var1_damage: Int = ((2 * pokemon.level)/5) + 2
+   let var1_damage: Int = ((2 * pokemon.level)/5) + 2
+    
+    return var1_damage;
 
     switch (move.category){
 
@@ -835,18 +835,19 @@ func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pok
 
         let var2_damage: Int = (var1_damage * move.power * pokemon.effective_stats.attack) / (50*target.effective_stats.defense)
 
-        return Int(Double(var2_damage + 2) * typeModifier(attacking: pokemon.species.type.0, defending : target.species.type.0))
+        return Int(Double(var2_damage + 2) * typeModifier(attacking: pokemon.species.type.0, defending : target.species.type.0));
 
     case(.special):
 
       let var2_damage: Int = (var1_damage * move.power * pokemon.effective_stats.special_attack) / (50*target.effective_stats.special_defense)
 
-      return Int(Double(var2_damage + 2) * typeModifier(attacking: pokemon.species.type.0, defending : target.species.type.0))
+      return Int(Double(var2_damage + 2) * typeModifier(attacking: pokemon.species.type.0, defending : target.species.type.0));
 
-    case(.status): return 0
+    case(.status):
+        return 0;
+    default:
+        return 0;
   }
-
-
   }
 
 /* structure d'une attaque */
@@ -874,60 +875,119 @@ struct State{
    var pokemon2_HS: [Pokemon]; // pokemon
 
    // milieu de jeu
-  // var environement: Environment;
-
-   // tout les attaques utilisés selon l'ordre
-   var all_attacks: [attacks];
+   //var environement: Environment;
 }
 
 
-/* Déclaration des joueurs (Trainers) */
+
+
+
+let allAttacksSquirtle = [bubble, water_gun]
+
+let squirtleBaseValues = Stats(
+    hitpoints: 44,
+    attack: 48,
+    defense: 65,
+    special_attack: 50,
+    special_defense: 64,
+    speed: 43
+)
+
+let squirtleIndividualValues = Stats(
+    hitpoints: 47,
+    attack: 42,
+    defense: 69,
+    special_attack: 47,
+    special_defense: 61,
+     speed: 41
+)
+
+let squirtleEffortValues = Stats(
+        hitpoints: 0,
+        attack: 0,
+        defense: 1,
+        special_attack: 0,
+        special_defense: 0,
+        speed: 0
+)
+
 let pikachu_paul = Pokemon(
-                      nickname: "Pika Pika",
-                      hitpoints:  35,
-                      size:  4 ,
-                      weight: 15  ,
-                      experience: 0  ,
-                      level:    2,
-                      nature:   Nature.timid,
-                      species: pikachu,
-                      moves:  [thunderShockAttack, quickattack],
-                      individual_values:   pikachuStats,
-                      effort_values: pikachuStats
-
-
+    nickname: "Pika Pika",
+    hitpoints:  35,
+    size:  4 ,
+    weight: 15  ,
+    experience: 0  ,
+    level:    2,
+    nature:   Nature.timid,
+    species: pikachu,
+    moves:  [thunderShockAttack, quickattack],
+    powerpoints: 200,
+    individual_values:   pikachuStats,
+    effort_values: pikachuStats
+    
+    
 );
 
 let charizard_paul = Pokemon(
-                      nickname: "Dracaufeu",
-                      hitpoints:  35,
-                      size:  150,
-                      weight: 100  ,
-                      experience: 5  ,
-                      level:    3,
-                      nature:   Nature.bold,
-                      species: charizard,
-                      moves:  [moveAirSlash, moveDragonClaw, moveEmber, moveFlareBlitz, moveGrowl],
-                      individual_values:   charizardStat,
-                      effort_values: charizardStat
-
-
+    nickname: "Dracaufeu",
+    hitpoints:  35,
+    size:  150,
+    weight: 100  ,
+    experience: 5  ,
+    level:    3,
+    nature:   Nature.bold,
+    species: charizard,
+    moves:  [moveAirSlash, moveDragonClaw, moveEmber, moveFlareBlitz, moveGrowl],
+    powerpoints: 220,
+    individual_values:   charizardStat,
+    effort_values: charizardStat
+    
+    
 )
 
-var Paul = Trainer(name: "Paul", pokemons: [pikachu_paul, charizard_paul]);
 
-var Martin = Trainer(name: "Martin", pokemons: [pikachu_paul, charizard_paul]);
+let raichuIndividualValues = Stats(
+    hitpoints: 58,
+    attack: 94,
+    defense: 53,
+    special_attack: 91,
+    special_defense: 80,
+    speed: 110
+)
 
-var Diego = Trainer(name: "Diego", pokemons: [pikachu_paul, charizard_paul]);
+let raichuEffortValues = Stats(
+    hitpoints: 0,
+    attack: 0,
+    defense: 0,
+    special_attack: 0,
+    special_defense: 0,
+    speed: 3
+)
+
+
+let allAttacksPikachu = [thunderShockAttack]
+
+let squirtle_test = Pokemon(nickname: "squirtle",
+                       hitpoints: 47, size: 3, weight: 300, experience: 0, level: 1,
+                       nature: Nature.calm, species: squirtle, moves: allAttacksSquirtle, powerpoints: 150,
+                       individual_values: squirtleIndividualValues, effort_values: squirtleEffortValues)
+
+var Paul = Trainer(name: "Paul", pokemons: [pikachu_paul, charizard_paul, squirtle_test]);
+
+var Martin = Trainer(name: "Martin", pokemons: [charizard_paul]);
+
+var Diego = Trainer(name: "Diego", pokemons: [charizard_paul]);
+
 
 var all_Trainer: [Trainer] = [Paul, Martin, Diego];
+
 
 /* Cette fonction renvoie vraie si l'entree n'est pas valide
 faux si l'entree est valide */
 func entree_juste(entree : String?, nb: Int)-> Bool {
 
-  for i in 1 ... nb {
-    let nombre_string = String(i)
+  for i in 0 ... (nb - 1) {
+    let nombre_string = String(i+1)
     if entree == nombre_string {
         return false;
     }
@@ -936,26 +996,23 @@ func entree_juste(entree : String?, nb: Int)-> Bool {
   return true;
 
 }
+/* Pour tout les entrées compris dans l'intervalle 1 ... nb --> on vérifie s'il correspond a l'entree de luttilisateur
+    true si oui, sinon false
+ */
+func entree_compris(entree : String?, nb: Int)-> Bool {
+    
+    for i in 0 ... (nb - 1) {
+        let nombre_string = String(i+1)
+        if entree == nombre_string {
+            return true;
+        }
+    }
 
-/* TODO: readline probleme */
-func tester_une_fonction() {
-    var rejouer : Int = 0;
-    repeat {
-
-      /*######### Est-ce-que le joueur veut rejouer? ##################*/
-      print("\n\nVoulez-vous rejouer? [Y/N : par défaut le jeu se termine]\n")
-
-      let utilisateur_rejouer: String? = readLine(strippingNewline: true);
-      if (utilisateur_rejouer == "y" )||(utilisateur_rejouer == "Y") {
-          print("Vous avez choisi de rejouer.\n")
-          rejouer = 1;
-      } else {
-        print("Vous avez choisi d'arrêter de jouer\n")
-      }
-
-  }  while (rejouer == 1) // repeat while pour rejouer
+    return false;
+    
 }
 
+	
 
 
 /* Fonction qui permet de retirer un pokemon d'un tableau de pokemon */
@@ -971,64 +1028,75 @@ func remove_pokemon(array: [Pokemon], element: Pokemon?) -> [Pokemon] {
   }
 }
 
-func battle(trainers: inout [Trainer], behavior: (State, Trainer) -> Move) -> () {
+/* fonction qui elimine les attacks que lon ne peut pas faire car pas assez de powerpoints */
+func eliminate_unusable_moves(pokemon: Pokemon) -> [Move]{
+
+  let val_max = pokemon.powerpoints
+  var new_moves = pokemon.moves
+    if pokemon.moves.count > 0 {
+
+        for i in (0 ... (pokemon.moves.count - 1)).reversed(){ //reversed comme cela, il suffit de supprimer les index (et cela ne change pas les index des autres)
+
+            if pokemon.moves[i].powerpoints > val_max {
+                new_moves.remove(at: i)
+            }
+        }}
+        else{
+
+    }
+ 
+  return new_moves
+}
+
+func fin_du_match() {
+    print("Voulez-vous rejouer? [Y pour oui/ N pour non]")
+    let entree_utilisateur: String? = readLine()
+    if (entree_utilisateur == "Y") || (entree_utilisateur == "y") {
+        battle()
+    }
+    else if (entree_utilisateur == "N") || (entree_utilisateur == "n"){
+      print("Dommage, tu ne sais pas ce que tu rates...\n\n")
+    }
+    else {
+      print("Vu que vous assez le temps d'appuyer sur un autre caractère que ceux prévu, je vous relance le jeu :D")
+      battle()
+    }
+}
+
+func battle() {
     // TODO: simulate battle
 
-    var rejouer : Int = 1; // vaut 1 si l'on veut rejouer
-
-    repeat {
-
-
-
     /* ######## Début, choix du joueur ######## */
-
     /* ******* Utilisateur choisi ******** */
     print("Veuillez choisir votre joueur:");
-
     for i in 0 ... (all_Trainer.count - 1) {
-        print("\(i+1) name: \(all_Trainer[i].name)\n");
-    }
-
+        print("\(i+1) name: \(all_Trainer[i].name!)\n");
+      }
     var entree_utilisateur: String?; // var qui contient l'entrée de l'Utilisateur
-
     repeat {
         entree_utilisateur = readLine()
-
-    } while (entree_juste(entree: entree_utilisateur, nb: all_Trainer.count))
-
+      } while (entree_juste(entree: entree_utilisateur, nb: all_Trainer.count))
     // la variable semble etre bon, nous pouvons faire un unwrapping et utiliser la valeur
-
-    var entree_int_user = Int(entree_utilisateur!)! - 1;
-
-    print("\nVous avez choisi \(all_Trainer[entree_int_user].name). Un très bon choix!\n");
-
-    var joueur_IRL: Trainer = all_Trainer[entree_int_user];
-
+    let entree_int_user = Int(entree_utilisateur!)! - 1;
+    print("\nVous avez choisi \(all_Trainer[entree_int_user].name!). Un très bon choix!\n");
+    let joueur_IRL: Trainer = all_Trainer[entree_int_user];
 
     /* ******* Ordinateur choisi ******** */
 
-    var ordi_player: Int; // var qui contiendra le numéro du joueur PC
+    var ordi_player: Int = Int(arc4random_uniform(UInt32(all_Trainer.count))); // var qui contiendra le numéro du joueur PC
+    
     repeat {
-
       /* utilisation de arc4random a des pb sur linux
-         voir lien: https://bugs.swift.org/browse/SR-685
-      */
-      /* TODO: PROBLEME RANDOM*/
-  /*    #if os(Linux)
-          var ordi_player = Int(random() % (all_Trainer.count + 1))
-      #else
-          var ordi_player = Int(arc4random_uniform(all_Trainer.count))
-      #endif
+         voir lien: https://bugs.swift.org/browse/SR-685 */
 
-      // TODO: faire en sorte que le random fonctionne
-*/
-        ordi_player = entree_int_user + 1;
+          ordi_player = Int(arc4random_uniform(UInt32(all_Trainer.count)))
 
-    } while (ordi_player == entree_int_user)
 
-    var joueur_PC = all_Trainer[ordi_player];
+      } while (ordi_player == entree_int_user)
 
-    print("L'ordinateur a choisi \(all_Trainer[ordi_player].name).\n");
+    let joueur_PC = all_Trainer[ordi_player];
+
+    print("L'ordinateur a choisi \(all_Trainer[ordi_player].name!).\n");
 
 
     var pokemon_actuel_joueur : Pokemon?;
@@ -1052,7 +1120,7 @@ func battle(trainers: inout [Trainer], behavior: (State, Trainer) -> Move) -> ()
     } while (entree_juste(entree: entree_utilisateur_pokemon, nb: joueur_IRL.pokemons.count))
 
 
-    var entree_int_user_pokemon = Int(entree_utilisateur_pokemon!)! - 1;
+    let entree_int_user_pokemon = Int(entree_utilisateur_pokemon!)! - 1;
       pokemon_actuel_joueur = joueur_IRL.pokemons[entree_int_user_pokemon];
       print("Vous avez choisi: \(joueur_IRL.pokemons[entree_int_user_pokemon].nickname!)\n")
 
@@ -1060,7 +1128,7 @@ func battle(trainers: inout [Trainer], behavior: (State, Trainer) -> Move) -> ()
     /* Choix du PC */
 
     // TODO: random
-    var choix_pokemon_PC = entree_int_user_pokemon + 1;
+    let choix_pokemon_PC = Int(arc4random_uniform(UInt32(joueur_PC.pokemons.count)));
     pokemon_actuel_PC = joueur_PC.pokemons[choix_pokemon_PC];
     print("Le PC a choisi: \(joueur_PC.pokemons[choix_pokemon_PC].nickname!)\n")
 
@@ -1080,12 +1148,12 @@ func battle(trainers: inout [Trainer], behavior: (State, Trainer) -> Move) -> ()
                             trainer2: joueur_PC,
                             pokemon2: pokemon_actuel_PC,
                             pokemon2_dispo: joueur_PC.pokemons,
-                            pokemon2_HS: [],
+                            pokemon2_HS: []
 
-                        //    environment:
+                           // environment: Environment(weather: Weather[Int(arc4random_uniform(UInt32(8)], terrain: Terrain[Int(arc4random_uniform(UInt32(5)])
 
 
-                            all_attacks: []
+        
     )
 
     // Début du jeu, nous enlevons le premier pokemon en cours d'utilisation des pokemons dispo
@@ -1093,99 +1161,228 @@ func battle(trainers: inout [Trainer], behavior: (State, Trainer) -> Move) -> ()
     jeu_actuel.pokemon1_dispo = remove_pokemon(array: jeu_actuel.pokemon1_dispo, element: jeu_actuel.pokemon1)
     jeu_actuel.pokemon2_dispo = remove_pokemon(array: jeu_actuel.pokemon2_dispo, element: jeu_actuel.pokemon2)
 
-  var a_qui_le_tour: Int = 1; // vaut 1 s'il s'agit du joueur ou 2 s'il s'agit du PC
-  
+    // Pour ce code, le joueur commencera toujours le jeu
+    var a_qui_le_tour: Int = 1; // vaut 1 s'il s'agit du joueur ou 2 s'il s'agit du PC
+
     print("####### DEBUT DU JEU #######\n\t\(joueur_IRL.name!) VS \(joueur_PC.name!)\n")
     repeat {
+        // On print pour chaque round, le numéro du Round ainsi que le nombre de powerpoints et hitpoints restants pour le joueur et le PC
+        print("###### ROUND \(round) #####\n")
+        print("Il vous reste \(jeu_actuel.pokemon1!.powerpoints) powerpoints\n et \(jeu_actuel.pokemon1!.hitpoints) hitpoints\n")
+        print("\nVotre adversaire a \(jeu_actuel.pokemon2!.powerpoints)powerpoints\n et \(jeu_actuel.pokemon2!.hitpoints) hitpoints\n")
 
-      print("###### ROUND \(round) #####\n")
+        
+        
+        // Si le joueur et le PC possède chacun un pokemon
+        if (jeu_actuel.pokemon1 != nil && jeu_actuel.pokemon2 != nil) {
+        
+                // Si le joueur actuel est le player
+                if a_qui_le_tour == 1 {
+                        print("C'est à votre tour de jouer.\n Veuillez choisir une attaque:\n")
+                    
+                        // On élimine tout les attaques inutilisables: powerpoints insuffisant
+                        jeu_actuel.pokemon1!.moves = eliminate_unusable_moves(pokemon: jeu_actuel.pokemon1!)
+                    
+                        // S'il dispose plus d'une attaque disponible
+                        if jeu_actuel.pokemon1!.moves.count > 0  {
+                            
+                            // On lui print les possibilités
+                            for i in 0 ... (jeu_actuel.pokemon1!.moves.count - 1) {
+                                print("\(i+1). \(jeu_actuel.pokemon1!.moves[i].name):\n\tdescription: \(jeu_actuel.pokemon1!.moves[i].description)\n\t nb powerpoints nécessaire: \(jeu_actuel.pokemon1!.moves[i].powerpoints)\n")
+                            }
+                            
+                            // On récupère la donnée (initialisation nécessaire pour pouvoir faire un repear while
+                            var user_attack_choice: String?;
+                            repeat {
+                                user_attack_choice = readLine();
+                                // En redemande à l'utilisateur d'entrée une donnée correct tant que celle ci est incorrect
+                            }  while (entree_juste(entree: user_attack_choice, nb: jeu_actuel.pokemon1!.moves.count))
+             
+    
+                            // On revérifie l'entrée
+                            if entree_compris(entree: user_attack_choice, nb: jeu_actuel.pokemon1!.moves.count) {
+                                // Si l'entrée correspond à une attaque possible, on fait le unwrapping pour pouvoir l'utiliser
+                                let user_attack_int: Int = Int(user_attack_choice!)! - 1
+        
+                                // on retire le nb de powerpoints utilisés
+                                jeu_actuel.pokemon1!.powerpoints -= jeu_actuel.pokemon1!.moves[user_attack_int].powerpoints
+   
+                                // on retire le nb de hitpoints a ladversaire
+                                let damage_on_adv = damage(pokemon: jeu_actuel.pokemon1!, move: jeu_actuel.pokemon1!.moves[user_attack_int], target: jeu_actuel.pokemon2!)
+
+                
+                                // On informe le joueur sur ce qu'il a fait
+                                print("Vous avez attaquer le pokemon \(jeu_actuel.pokemon2!.nickname!) avec votre \(jeu_actuel.pokemon1!.nickname!) avec votre attaque: \(jeu_actuel.pokemon1!.moves[user_attack_int].name)\n")
+                
+                                // si pokemon adversaire KO
+                                if damage_on_adv > jeu_actuel.pokemon2!.hitpoints {
+                                    print("Vous avez mis le Pokemon de l'adversaire à terre.\n")
+
+                                    // le joueur 2 doit choisir un nouveau pokemon si yen a de dispo
+                                    if jeu_actuel.pokemon2_dispo.count > 0 {
+
+                                        // nombre aléatoire pour choisir un nv pokemon
+                                        let random = Int(arc4random_uniform(UInt32(jeu_actuel.pokemon2_dispo.count))) // entre 0 et pokemon2_dispo.count
+                                        jeu_actuel.pokemon2 = jeu_actuel.pokemon2_dispo[random]
+                                        jeu_actuel.pokemon2_dispo.remove(at: random)
+                                        print("Votre adversaire ne se laisse pas faire, il choisit d'appeler \(jeu_actuel.pokemon2!.nickname)\n")
+                                        a_qui_le_tour = 2 // on passe la main a l'adversaire
+                                    }
+                                        // Si le PC n'a plus de pokemon dispo
+                                    else {
+                                        print("Bravo, vous avez gagné! Votre adversaire n'a plus de Pokemon a disposition\n")
+                                        jeu_actuel.pokemon2 = nil;
+                                        jeu_actuel.pokemon1 = nil;
+                                        fin_du_match()
+                                    }
+
+                                }
+                                // Si le pokemon PC n'est pas KO
+                                else {
+                                    // On félicite le joueur pour avoir infligé cette attaque
+                                    print("Votre attaque a fait un sacré ravage! Félicitations. \n")
+                                    
+                                    // On enleve les hitpoints sur le pokemon du PC
+                                    jeu_actuel.pokemon2!.hitpoints -= damage_on_adv
+                                    
+                                    a_qui_le_tour = 2 // on passe la main a l'adversaire
+                                }
+
+                                // on retire les attaques qui ne sont plus possible pour ce pokemon: le pokemon adv pas besoin ==> perte uniquement de hitpoints
+                                jeu_actuel.pokemon1!.moves = eliminate_unusable_moves(pokemon: jeu_actuel.pokemon1!)
+
+                
+                            }
+                        }
+                        // Si le pokemon du joueur n'a plus d'attaque possible
+                        else {
+                            print("Votre pokemon n'a plus assez de powerpoints. Vous l'avez trop épuisé.\n Vous n'avez pas été malin \(jeu_actuel.trainer1.name!).\n Choissisez un nouveau pokemon:\n")
+               
+                            // On fait choisir un nouveau pokemon à l'utilisateur si dispo
+                            if jeu_actuel.pokemon1_dispo.count > 0 {
+        
+                                for i in 0 ... (jeu_actuel.pokemon1_dispo.count - 1)  {
+                                    print("\(i+1). \(jeu_actuel.pokemon1_dispo[i].nickname!)\n")
+                                }
+                    
+                                var entree_utilisateur_pokemon: String?
+                                // tant qu'il entre des betises
+                                repeat {
+                                    entree_utilisateur_pokemon = readLine()
+                                } while (entree_juste(entree: entree_utilisateur_pokemon, nb: jeu_actuel.pokemon1_dispo.count))
+                    
+                                // on récupère l'indice du nouveau pokemon
+                                let new_pok = Int(entree_utilisateur_pokemon!)! - 1
+                                // on le définit
+                                jeu_actuel.pokemon1 = jeu_actuel.pokemon1_dispo[new_pok]
+                                // il n'est donc plus disponible
+                                jeu_actuel.pokemon1_dispo.remove(at: new_pok)
+                                // On confirme le choix
+                                print("Votre nouveau Pokemon est \(jeu_actuel.pokemon1!.nickname!)\n")
+                                a_qui_le_tour = 2 // on passe la main a l'adversaire
+                            }
+                            // S'il n'y a plus de pokemon dispo
+                            else{
+                                print("Désolé, vous n'avez plus de Pokemons.\n")
+                                jeu_actuel.pokemon2 = nil;
+                                jeu_actuel.pokemon1 = nil;
+                                fin_du_match()
+                                a_qui_le_tour = 3
+                                 }
+
+                        }
+                    
+                        // Le tour du PC
+                    }
+                else if a_qui_le_tour == 2 {
+                    print("C'est au tour de votre adversaire.\n")
+
+                    // on elimine les attaques inutilisable
+                    jeu_actuel.pokemon2!.moves = eliminate_unusable_moves(pokemon: jeu_actuel.pokemon2!)
+                    // S'il peut faire des attaques
+                    if jeu_actuel.pokemon2!.moves.count > 0  {
+
+                        //random number -> numero de lattaque
+                        let random_attack = Int(arc4random_uniform(UInt32(jeu_actuel.pokemon2!.moves.count)))
+                        // Consommation de powerpoints
+                        jeu_actuel.pokemon2!.powerpoints -= jeu_actuel.pokemon2!.moves[random_attack].powerpoints
+                        // calcule la valeur des dommages: 0000
+                        let damage_on_adv = damage(pokemon: jeu_actuel.pokemon2!, move: jeu_actuel.pokemon2!.moves[random_attack], target: jeu_actuel.pokemon1!)
+            
+                        print("Le pokemon de votre adversaire:\(jeu_actuel.pokemon2!.nickname!) à attaquer votre \(jeu_actuel.pokemon1!.nickname!) avec l'attaque: \(jeu_actuel.pokemon2!.moves[random_attack].name)\n")
 
 
+                        // Si les dommages mettent le pokemon du joueur KO
+                        if damage_on_adv > jeu_actuel.pokemon1!.hitpoints { // si le pokemon a ete mis KO
+                            print("Votre \(jeu_actuel.pokemon1!.nickname!) est KO. Vous avez sous estimé votre adversaire...\n ")
+                            // Si le joueur peut avoir un nouveau pokemon
+                            if jeu_actuel.pokemon1_dispo.count > 0 {
+                                print("Ne vous laisser pas faire \(jeu_actuel.trainer1.name)! Choisissez votre nouveau pokemon:\n")
+                                // On lui présente les options
+                                for i in 0 ... (jeu_actuel.pokemon1_dispo.count - 1) {
+                                    print("\(i+1). \(jeu_actuel.pokemon1_dispo[i].nickname!)\n")
+                                }
+                                // utilisateur choisi
+                                var entree_utilisateur_pokemon: String?
+                                repeat {
+                                    entree_utilisateur_pokemon = readLine()
+                                } while (entree_juste(entree: entree_utilisateur_pokemon, nb: jeu_actuel.pokemon1_dispo.count))
+                                // update des données
+                                let new_pok = Int(entree_utilisateur_pokemon!)! - 1
+                                jeu_actuel.pokemon1 = jeu_actuel.pokemon1_dispo[new_pok]
+                                jeu_actuel.pokemon1_dispo.remove(at: new_pok)
 
+                                print("Votre nouveau Pokemon est \(jeu_actuel.pokemon1!.nickname!)\n")
+                                a_qui_le_tour = 1;
+                            }
+                            // Si le joueur n'a plus de pokemons
+                            else {
+                                print("Désolé vous n'avez plus de pokemon, vous avez perdu.\n")
+                                jeu_actuel.pokemon2 = nil;
+                                jeu_actuel.pokemon1 = nil;
+                                fin_du_match()
+                            }
+                        } // si le pokemon n'a pas été mis KO
+                        else {
+                            // update des valeurs
+                            jeu_actuel.pokemon1!.hitpoints -= damage_on_adv
+                            print("Votre adversaire a réussi a vous attaquer, mais ne vous laisser pas faire!")
+                            a_qui_le_tour = 1;
+                        }
+                    }
+                    // Si le PC ne peut pas faire d'attaque
+                    else {
+                        print("\(jeu_actuel.trainer2.name!) vous a sous-estimé. Son Pokemon ne peut plus attaqué.\nIl choisit un nouveau Pokemon.\n")
+                        // Il choisit un nouveau pokemon s'il peut
+                        if jeu_actuel.pokemon2_dispo.count > 0 {
+                            let random = Int(arc4random_uniform(UInt32(jeu_actuel.pokemon2_dispo.count))) // entre 0 et pokemon2_dispo.count
+                            jeu_actuel.pokemon2 = jeu_actuel.pokemon2_dispo[random]
+                            jeu_actuel.pokemon2_dispo.remove(at: random)
+                            print("Votre redoutable adversaire ne se laisse pas faire, il choisit d'appeler \(jeu_actuel.pokemon2!.nickname!)\n")
+                            a_qui_le_tour = 1
+                        }
+                    }
+               
+            }
+            // Si a_qui_le_tour prend une autre valeur que 1 et 2
+            else {
+                    print("FIN DU JEU")
+                    jeu_actuel.pokemon2 = nil;
+                    jeu_actuel.pokemon1 = nil;
+                    fin_du_match()
+            }
+
+          } // fin du if: si les deux possèdent un pokemon
+        else { // s'ils n'ont pas de pokemons
+            print("L'un des joueurs n'a pas de pokemons")
+            jeu_actuel.pokemon2 = nil;
+            jeu_actuel.pokemon1 = nil;
+            fin_du_match()
+        }
+        // next round
         round = round + 1;
-    } while ((jeu_actuel.pokemon1_dispo.count > 0) && (jeu_actuel.pokemon1 != nil)) || ((jeu_actuel.pokemon2_dispo.count > 0) && (jeu_actuel.pokemon2 != nil))
+    } while ((jeu_actuel.pokemon1 != nil) && (jeu_actuel.pokemon2 != nil)) // on fait des rounds tant qu'il y a des pokemons
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    /*######### Est-ce-que le joueur veut rejouer? ##################*/
-    print("\n\nVoulez-vous rejouer? [Y/N : par défaut le jeu se termine]\n\n")
-
-    let utilisateur_rejouer: String? = readLine()
-
-    if (utilisateur_rejouer == "y" )||(utilisateur_rejouer == "Y") {
-        rejouer = 1;
-    } else {
-      rejouer = 0;
-    }
-
-}  while (rejouer == 1) // repeat while pour rejouer
 
 
 
