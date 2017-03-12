@@ -1,6 +1,5 @@
-import Foundation	// floor, random, etc
-
-
-print("test")
+print("starting...")
 
 battle(trainers: &trainers)
+
+print("done!")

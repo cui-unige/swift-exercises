@@ -514,8 +514,10 @@ func battle(trainers: inout [Trainer]) -> () {
 
 	var partyA: [Pokemon]? = trainers[0].party	// player
 	var partyB: [Pokemon]? = trainers[1].party	// pc
-	//var partyAFainted: [Pokemon]? = nil
-	//var partyBFainted: [Pokemon]? = nil
+	let partyASize: Int = partyA!.count
+	let partyBSize: Int = partyB!.count
+	var partyAFainted: Int = 0
+	var partyBFainted: Int = 0
 
 
 	for _ in partyA! {	// sets pokemon stats to their "default" level (all pokemon, for both trainers)
@@ -525,12 +527,10 @@ func battle(trainers: inout [Trainer]) -> () {
 		partyB![0].current_stats = partyB![0].effective_stats
 	}
 
-
 	// TODO: check nicknames, if they exist use them instead of standard names
+	print("trainer A sent out", partyA![0].nickname as Any, "trainer B sent out", partyB![0].nickname as Any)
 
-	print("trainer A sent out", partyA![0].name, "trainer B sent out", partyB![0].name)
-
-	while (partyA != nil && partyB != nil) {
+	while ( (partyASize != partyAFainted) && (partyBSize != partyBFainted) ) {
 
 		// TODO: get environment info, print if non-default
 
@@ -570,7 +570,6 @@ func battle(trainers: inout [Trainer]) -> () {
 		let moveB: Move = partyB![0].moves[moveBIndex]
 
 		// TODO: check PPs!
-
 		// TODO: print("A's pokemon used", moveA)
 
 		// compute move order for the current turn
@@ -604,23 +603,39 @@ func battle(trainers: inout [Trainer]) -> () {
 		// TODO: check if move changes stats, act accordingly
 
 		// first deals damage to second
-		// TODO: rly ugly, fix
-		if firstToMove == trainerA {
-			let damageDone = damage(pokemon: trainers[0].party[0], move: moveA, target: trainers[1].party[0])
-			trainers[1].party[0].current_stats.hitpoints -=  damageDone
-			print(trainers[1].party[0], "HP:", trainers[1].party[0].current_stats.hitpoints, "/", trainers[1].party[0].current_stats.hitpoints)
+		let first: Int; let second: Int
+		if firstToMove == trainerA { first = 0; second = 1 }
+		else { first = 1; second = 0 }
+
+		var attacker = first; var defender = second
+
+		for index in (0...1) { // loops twice, once per pokemon attack
+
+			if (index == 1) {	// if second half of turn, swaps attacker and defender
+				var swap: Int
+				swap = defender
+				defender = attacker
+				attacker = swap
+			}
+
+			let damageDone = damage(pokemon: trainers[attacker].party[0], move: moveA, target: trainers[defender].party[0])
+			trainers[defender].party[0].current_stats.hitpoints -=  damageDone
+			print(trainers[defender].party[0], "HP:", trainers[defender].party[0].current_stats.hitpoints, "/", trainers[defender].party[0].current_stats.hitpoints)
 			// TODO: recoil
 			if (trainers[1].party[0].current_stats.hitpoints == 0) {
-				print(trainers[1].party[0], "fainted!")
-				swap(&trainers[1].party[0], &trainers[1].party[1])
-				//if
+				print(trainers[1].name, "'s ", trainers[1].party[0], "fainted!")
+				partyBFainted += 1
+				// change pokemon
+				// skip next half of turn (second can't actually attack if he got KO'd)
+			if (trainers[0].party[0].current_stats.hitpoints == 0) {
+				print(trainers[0].name, "'s ", trainers[0].party[0], "fainted!")
+				partyAFainted += 1
+				// change pokemon
+				}
 			}
 		}
-		else {
-			// trainerB goes first
-		}
 
-
+//
 
 
 		// first to move
