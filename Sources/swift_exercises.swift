@@ -173,7 +173,6 @@ let nature_coeff: [Nature: StatsDouble] = [
 // TODO: create some species
 // Do you use an enum, a map or constants/variables?
 // http://bulbapedia.bulbagarden.net/wiki/List_of_Pokémon_by_National_Pokédex_number
-
 let curse = Move(id: 1,name: "curse",description: "Curse is a non-damaging Ghost-type move. ",category: Category.status,type: Type.ghost,power: 0,accuracy: 0,powerpoints: 10,priority: 0)
 let aeroblast = Move(id: 2,name: "aeroblast",description: "Aeroblast is a damage-dealing Flying-type move. ",category: Category.special,type: Type.flying,power: 100,accuracy: 95,powerpoints: 5,priority: 0)
 let earthquake = Move(id: 3,name: "earthquake",description: "Earthquake is a damage-dealing Gfloor-type move. ",category: Category.physical,type: Type.ground,power: 100,accuracy: 100,powerpoints: 10,priority: 0)
@@ -361,7 +360,6 @@ func typeModifier(attacking: Type, defending : Type) -> Double {
 
 // http://bulbapedia.bulbagarden.net/wiki/Damage
 // let lugia = Species(id: 249,name: "maria",evolutions: speciesEmpty,attacks: Attaque,type: (Type.flying, Type.psychic),base_values: Values)
-
 func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pokemon) -> Int {
    let attaque = Double(move.category == .physical ? pokemon.effective_stats.attack : pokemon.effective_stats.special_attack)
    let defense = Double(move.category == .physical ? target.effective_stats.defense : target.effective_stats.special_defense)
@@ -455,7 +453,7 @@ var battle_part2: Int = 1
 func battle(trainers: inout [Trainer]) -> ()
 {
     print("--------------------------------------------------\n")
-    if currentState.pokemon_attack.effective_stats.speed > currentState.pokemon_defense.effective_stats.speed && battle_part2 == 1
+    if currentState.pokemon_attack.effective_stats.speed > currentState.pokemon_defense.effective_stats.speed && battle_part2 == 1 // c'est le tour du joueur
     {
       for i in 0...(currentState.pokemon_attack.moves.count - 1)
       {
@@ -464,7 +462,7 @@ func battle(trainers: inout [Trainer]) -> ()
       print("\(currentState.pokemon_attack.moves.count) Run")
       print("\(currentState.pokemon_attack.moves.count + 1) Menu\n")
 
-      //on dit que e joueur chosie 1
+      //on dit que le joueur chosie 1
       print("on suppose que le joueur chosie 1 car on ne peut le demander sur linux\n")
       var choice_battle: Int = 1
 
@@ -485,31 +483,30 @@ func battle(trainers: inout [Trainer]) -> ()
             go()
           }else
           {
-            currentState.pokemon_moveAttack = currentState.pokemon_attack.moves[choice_battle] //Selecting appropriate move
-            currentState.pokemon_moveAttack.powerpoints -= 1 //Decreasing PP
+            currentState.pokemon_moveAttack = currentState.pokemon_attack.moves[choice_battle]
+            currentState.pokemon_moveAttack.powerpoints -= 1
             martin_user.pokemons[currentPokemon].moves[choice_battle].powerpoints -= 1
             if (currentState.pokemon_moveAttack.powerpoints == 0)
             {
               print("\nNo PP for the move")
-              currentState.pokemon_attack.moves.remove(at: choice_battle) //Removing move
-              martin_user.pokemons[currentPokemon].moves.remove(at: choice_battle)//Updating bob's pokemon
+              currentState.pokemon_attack.moves.remove(at: choice_battle)
+              martin_user.pokemons[currentPokemon].moves.remove(at: choice_battle)
             }
             else
             {
-              currentState.pokemon_attack.moves[choice_battle] = currentState.pokemon_moveAttack //Updating global attacks list
+              currentState.pokemon_attack.moves[choice_battle] = currentState.pokemon_moveAttack
             }
             if ((currentState.pokemon_attack.nickname == "Kiki") && (currentState.pokemon_moveAttack.id == 3))
             {
-              currentState.pokemon_environment.weather = Weather.clear_skies //Updating conditions
+              currentState.pokemon_environment.weather = Weather.clear_skies
             }
           }
         }
         damages = damage(environment: currentState.pokemon_environment, pokemon: currentState.pokemon_attack, move: currentState.pokemon_moveAttack, target: currentState.pokemon_defense)
-        currentState.pokemon_defense.hitpoints = currentState.pokemon_defense.hitpoints - damages; //Remaining hitpoints
-
+        currentState.pokemon_defense.hitpoints = currentState.pokemon_defense.hitpoints - damages;
         if currentState.pokemon_defense.hitpoints <= 0 {
             print("Pokemon was killed !\n");
-            abort(); //Exciting game
+            abort();
         }
     }
     else
@@ -517,11 +514,11 @@ func battle(trainers: inout [Trainer]) -> ()
       damages = damage(environment: currentState.pokemon_environment, pokemon: currentState.pokemon_defense, move: currentState.pokemon_moveDefense, target: currentState.pokemon_attack)
       currentState.pokemon_attack.hitpoints = currentState.pokemon_attack.hitpoints - damages;
 
-      currentState.pokemon_moveDefense.powerpoints -= 1 //Decreasing PP
-
-      if (currentState.pokemon_moveDefense.powerpoints == 0){
+      currentState.pokemon_moveDefense.powerpoints -= 1
+      if (currentState.pokemon_moveDefense.powerpoints == 0)
+      {
           print("No PP for the move")
-          currentState.pokemon_defense.moves.remove(at:  0) //Removing move
+          currentState.pokemon_defense.moves.remove(at:  0)
       }
 
       if currentState.pokemon_attack.hitpoints <= 0 {
@@ -537,7 +534,7 @@ func battle(trainers: inout [Trainer]) -> ()
         print("Pokemon Attack : \(currentState.pokemon_attack.nickname)\t| Specie: \(currentState.pokemon_attack.species.name)");
         print("Pokemon Defense : \(currentState.pokemon_defense.nickname)\t| Specie: \(currentState.pokemon_defense.species.name)\n");
         print("Selected move : \(currentState.pokemon_moveAttack.name). Damages done: \(damages) \n");
-        battle_part2 = 0 //Changing player
+        battle_part2 = 0
     }
     else
     {
@@ -550,11 +547,11 @@ func battle(trainers: inout [Trainer]) -> ()
            let random_currentstate = Int(arc4random_uniform(3))
         #endif
         currentState.pokemon_moveDefense = currentState.pokemon_defense.moves[random_currentstate];
-        battle_part2 = 1; //Changing player
+        battle_part2 = 1;
     }
     print("Hitpoints : \(currentState.pokemon_attack.nickname) : \(currentState.pokemon_attack.hitpoints)");
     print("Hitpoints : \(currentState.pokemon_defense.nickname) : \(currentState.pokemon_defense.hitpoints) \n");
-    battle(trainers: &trainers); //Next round
+    battle(trainers: &trainers);
 }
 
 var martin_user = Trainer(pokemons: [lugia, entei])
@@ -574,6 +571,7 @@ var currentState = State(player_1: martin_user,
    player_2: pepito_user,
    pokemon_attack: martin_user.pokemons[0],
    pokemon_defense: pepito_user.pokemons[0],
+   //pas obliger dans mon cas mais permet de simplifier si on ne prend pas toujours le 0 
    pokemon_moveAttack: martin_user.pokemons[0].moves[0],
    pokemon_moveDefense: pepito_user.pokemons[0].moves[rand_attaque],
  pokemon_environment: Game_environnement)
@@ -593,7 +591,6 @@ func go() -> ()
 
   //normalent on demande se que veut faire le joueur mais sur Linux la command ne marche pas.
   //move_player = readLine()
-
   #if os(Linux)
      move_player = Int(random() % 3)
   #else
