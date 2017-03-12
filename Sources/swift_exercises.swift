@@ -421,7 +421,6 @@ func typeToInt(type: Type) -> Int {
 		case .dragon: return 15
 		case .dark: return 16
 		case .fairy: return 17
-		//default: return -1 //never executed
 	}
 }
 
@@ -447,7 +446,7 @@ func typeModifier(attacking: Type, defending : Type)-> Double {
 		[  1,  1,  2,  1,  2,  1,  1,  1,0.5,0.5,0.5,  2,  1,  1,0.5,  2,  1,  1], // ice
 		[  1,  1,  1,  1,  1,  1,  1,  1,0.5,  1,  1,  1,  1,  1,  1,  2,  1,  0], // dragon
 		[  1,0.5,  1,  1,  1,  1,  1,  2,  1,  1,  1,  1,  1,  2,  1,  1,0.5,0.5], // dark
-		[  1,  2,  1,0.5,  1,  1,  1,  1,0.5,0.5,  1,  1,  1,  1,  1,  2,  2,  1] // fairy
+		[  1,  2,  1,0.5,  1,  1,  1,  1,0.5,0.5,  1,  1,  1,  1,  1,  2,  2,  1]  // fairy
 	]
 
 	return (multiplierMatrix[attackingID][defendingID])
@@ -496,14 +495,9 @@ func damage(pokemon: Pokemon, move: Move, target: Pokemon) -> Double {
 	let attDefRatio: Double
 	if (move.category == .physical) { attDefRatio = pokemon.effective_stats.attack / target.effective_stats.defense }
 	else if (move.category == .special) { attDefRatio = pokemon.effective_stats.special_attack / target.effective_stats.special_defense }
-	else { attDefRatio = 0 }
+	else { attDefRatio = 0 } // stat-only; 0 damage as safety
 	let damage : Double = (tempDamage * attDefRatio * Double(move.power) * 2) * modifier
     return damage
-}
-
-struct State {
-    // TODO: describe a battle state
-	// is this even needed? all factors are already accounted for, unless you go into some VERY specific details
 }
 
 
@@ -570,7 +564,8 @@ func battle(trainers: inout [Trainer]) -> () {
 		let moveB: Move = partyB![0].moves[moveBIndex]
 
 		// TODO: check PPs!
-		// TODO: print("A's pokemon used", moveA)
+		// TODO: print("A's pokemon used", moveA), etc.
+
 
 		// compute move order for the current turn
 		// priority: non-damaging
@@ -610,27 +605,27 @@ func battle(trainers: inout [Trainer]) -> () {
 		var attacker = first; var defender = second
 
 		for index in (0...1) { // loops twice, once per pokemon attack
+			if trainers[defender].party[0].current_stats.hitpoints >= 0 { //skips second half of turn if second pokemon got KO'd by first
+				if (index == 1) {	// if second half of turn, swaps attacker and defender
+					var swap: Int
+					swap = defender
+					defender = attacker
+					attacker = swap
+				}
 
-			if (index == 1) {	// if second half of turn, swaps attacker and defender
-				var swap: Int
-				swap = defender
-				defender = attacker
-				attacker = swap
-			}
-
-			let damageDone = damage(pokemon: trainers[attacker].party[0], move: moveA, target: trainers[defender].party[0])
-			trainers[defender].party[0].current_stats.hitpoints -=  damageDone
-			print(trainers[defender].party[0], "HP:", trainers[defender].party[0].current_stats.hitpoints, "/", trainers[defender].party[0].current_stats.hitpoints)
-			// TODO: recoil
-			if (trainers[1].party[0].current_stats.hitpoints == 0) {
-				print(trainers[1].name, "'s ", trainers[1].party[0], "fainted!")
-				partyBFainted += 1
-				// change pokemon
-				// skip next half of turn (second can't actually attack if he got KO'd)
-			if (trainers[0].party[0].current_stats.hitpoints == 0) {
-				print(trainers[0].name, "'s ", trainers[0].party[0], "fainted!")
-				partyAFainted += 1
-				// change pokemon
+				let damageDone = damage(pokemon: trainers[attacker].party[0], move: moveA, target: trainers[defender].party[0])
+				trainers[defender].party[0].current_stats.hitpoints -=  damageDone
+				print(trainers[defender].party[0], "HP:", trainers[defender].party[0].current_stats.hitpoints, "/", trainers[defender].party[0].effective_stats.hitpoints)
+				// TODO: recoil
+				if (trainers[1].party[0].current_stats.hitpoints <= 0) {
+					print(trainers[1].name, "'s ", trainers[1].party[0], "fainted!")
+					partyBFainted += 1
+					// change pokemon
+				if (trainers[0].party[0].current_stats.hitpoints <= 0) {
+					print(trainers[0].name, "'s ", trainers[0].party[0], "fainted!")
+					partyAFainted += 1
+					// change pokemon
+					}
 				}
 			}
 		}
