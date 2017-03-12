@@ -1,3 +1,5 @@
+
+
 // http://bulbapedia.bulbagarden.net/wiki/Type
 enum Type {
     case bug
@@ -921,19 +923,131 @@ var Diego = Trainer(pokemons: [pikachu_paul, charizard_paul]);
 
 var all_Trainer: [Trainer] = [Paul, Martin, Diego];
 
+/* Cette fonction renvoie vraie si l'entree n'est pas valide
+faux si l'entree est valide */
+func entree_juste(entree : String?, nb: Int)-> Bool {
+
+  for i in 1 ... nb {
+    let nombre_string = String(i)
+    if entree == nombre_string {
+        return false;
+    }
+  }
+  print("Votre entrée est invalide");
+  return true;
+
+}
+
+func tester_une_fonction() {
+    var rejouer : Int = 1;
+    repeat {
+      /*######### Est-ce-que le joueur veut rejouer? ##################*/
+      print("\n\nVoulez-vous rejouer? [Y/N : par défaut le jeu se termine]\n\n")
+
+      let utilisateur_rejouer: String? = readLine()
+
+      if (utilisateur_rejouer == "y" )||(utilisateur_rejouer == "Y") {
+          rejouer = 1;
+      } else {
+        rejouer = 0;
+      }
+
+  }  while (rejouer == 1) // repeat while pour rejouer
+}
+
+
+
+
 
 
 func battle(trainers: inout [Trainer], behavior: (State, Trainer) -> Move) -> () {
     // TODO: simulate battle
 
-    var joueur: Int = 1;
+    var rejouer : Int = 1; // vaut 1 si l'on veut rejouer
 
+    repeat {
+
+
+    /* ######## Début, choix du joueur ######## */
+
+    /* ******* Utilisateur choisi ******** */
     print("Veuillez choisir votre joueur:");
 
-    for i in 0..(all_Trainer.count -1) {
-        print("\(i+1) name: \(all_Trainer(i+1)\n);
+    for i in 0 ... (all_Trainer.count - 1) {
+        print("\(i+1) name: \(all_Trainer[i+1])\n");
     }
 
-}
+    var entree_utilisateur: String?; // var qui contient l'entrée de l'Utilisateur
 
-*/
+    repeat {
+        entree_utilisateur = readLine()
+
+    } while (entree_juste(entree: entree_utilisateur, nb: all_Trainer.count))
+
+    // la variable semble etre bon, nous pouvons faire un unwrapping et utiliser la valeur
+
+    let entree_int_user = Int(entree_utilisateur!)! - 1;
+
+    print("\nVous avez choisi \(all_Trainer[entree_int_user]). Un très bon choix!\n");
+
+    let joueur_IRL: Trainer = all_Trainer[entree_int_user];
+
+    /* ******* Ordinateur choisi ******** */
+
+    var ordi_player: Int; // var qui contiendra le numéro du joueur PC
+    repeat {
+
+      /* utilisation de arc4random a des pb sur linux
+         voir lien: https://bugs.swift.org/browse/SR-685
+      */
+      /*  #if os(Linux)
+            var ordi_player = Int(random() % (all_Trainer.count + 1))
+        #else
+            var ordi_player = Int(arc4random_uniform(UInt32(all_Trainer.count)))
+        #endif
+      */
+      //var ordi_player = arc4random_uniform(all_Trainer.count) // génère un nb entre 0 et la valeur entrée - 1
+
+      // TODO: faire en sorte que le random fonctionne
+
+      ordi_player = entree_int_user + 1;
+
+    } while (ordi_player == entree_int_user)
+
+    let joueur_PC = all_Trainer[ordi_player];
+
+    print("L'ordinateur a choisi \(all_Trainer[ordi_player]).\n");
+
+
+
+
+
+
+    /*##################### COMBAT ###################*/
+
+    /* le combat se déroule entre joueur_IRL et joueur_PC */
+
+
+
+
+
+
+
+
+    /*######### Est-ce-que le joueur veut rejouer? ##################*/
+    print("\n\nVoulez-vous rejouer? [Y/N : par défaut le jeu se termine]\n\n")
+
+    let utilisateur_rejouer: String? = readLine()
+
+    if (utilisateur_rejouer == "y" )||(utilisateur_rejouer == "Y") {
+        rejouer = 1;
+    } else {
+      rejouer = 0;
+    }
+
+}  while (rejouer == 1) // repeat while pour rejouer
+
+
+
+
+}
