@@ -1,3 +1,7 @@
+//210 Granbull
+import Glibc
+
+
 // http://bulbapedia.bulbagarden.net/wiki/Type
 enum Type {
     case bug
@@ -76,6 +80,7 @@ enum Terrain {
     case misty
 }
 
+
 // http://bulbapedia.bulbagarden.net/wiki/Move
 struct Move : Hashable {
     let id          : Int
@@ -121,30 +126,341 @@ func ==(lhs: Species, rhs: Species) -> Bool {
     return lhs.id == rhs.id
 }
 
+//attacks:
+
+let play_rough_move = Move(
+  id: 0,
+  name: "play rough",
+  description: " The user plays rough with the target and attacks it. This may also lower the target's Attack stat. ",
+  category: .physical,
+  type: .fairy,
+  power: 90,
+  accuracy: 90,
+  powerpoints:10,
+  priority: 0
+)
+
+let fire_blast_move = Move(
+  id: 0,
+  name: "fire blast",
+  description: "  The target is attacked with an intense blast of all-consuming fire. This may also leave the target with a burn.  ",
+  category: .special,
+  type: .fire,
+  power: 110,
+  accuracy: 85,
+  powerpoints:5,
+  priority: 0
+)
+
+
+
 // TODO: create some species
 // Do you use an enum, a map or constants/variables?
 // http://bulbapedia.bulbagarden.net/wiki/List_of_Pokémon_by_National_Pokédex_number
 
+let granbull_species = Species(
+  id: 210,
+  name: "Granbull",
+  evolutions: [],
+  attacks: [fire_blast_move, play_rough_move],
+  type: (.fairy, nil),
+  base_values:Stats(
+    hitpoints: 90,
+    attack: 120,
+    defense: 75,
+    special_attack: 60,
+    special_defense: 60,
+    speed: 45
+  )
+
+  )
+
+  func calcul_stat_hp(base_stat: Int, iv: Int, ev: Int, level: Int ) -> Int{
+    //J'ai du ajouter une variable temporaire pour que le compilateur ne timeout pas sur une expression
+    var temp:Int=((2 * level + iv + (ev / 4)) * level) //Je ne sais pas si ev/4 arrondit correctement.
+    temp=(temp / 100) //idem
+    return temp + level + 10
+  }
+
+  func calcul_stat_other(base_stat: Int, iv: Int, ev: Int, level: Int, nature: Float ) -> Int{
+    var temp:Int=((2 * level + iv + (ev / 4)) * level)
+    temp=(temp / 100) + 5
+    return Int(Float(temp) * nature)
+  }
+  //Je met des valeurs 9 ou 10 ou 11 pour pouvoir retourner un type Stats qui prends des int à l'intérieur, je cast et divise plus tard.
+  func calcul_modif_nature(nature: Nature) -> Stats{
+
+    switch (nature){
+    case .hardy: return Stats(
+      hitpoints: 10,
+      attack: 10,
+      defense: 10,
+      special_attack: 10,
+      special_defense: 10,
+      speed:10
+    )
+
+    case .lonely: return Stats(
+      hitpoints: 10,
+      attack: 11,
+      defense: 9,
+      special_attack: 10,
+      special_defense: 10,
+      speed:10
+    )
+
+    case .brave: return Stats(
+      hitpoints: 10,
+      attack: 11,
+      defense: 10,
+      special_attack: 10,
+      special_defense: 10,
+      speed:9
+    )
+
+  case .adamant: return Stats(
+    hitpoints: 10,
+    attack: 11,
+    defense: 10,
+    special_attack: 9,
+    special_defense: 10,
+    speed:10
+  )
+
+  case .naughty: return Stats(
+    hitpoints: 10,
+    attack: 11,
+    defense: 10,
+    special_attack: 10,
+    special_defense: 9,
+    speed:10
+  )
+
+case .bold: return Stats(
+  hitpoints: 10,
+  attack: 9,
+  defense: 11,
+  special_attack: 10,
+  special_defense: 10,
+  speed:10
+)
+
+case .docile: return Stats(
+  hitpoints: 10,
+  attack: 10,
+  defense: 10,
+  special_attack: 10,
+  special_defense: 10,
+  speed:10
+)
+
+case .relaxed: return Stats(
+  hitpoints: 10,
+  attack: 10,
+  defense: 11,
+  special_attack: 10,
+  special_defense: 10,
+  speed:9
+)
+
+case .impish: return Stats(
+  hitpoints: 10,
+  attack: 10,
+  defense: 11,
+  special_attack: 9,
+  special_defense: 10,
+  speed:10
+)
+
+case .lax: return Stats(
+  hitpoints: 10,
+  attack: 10,
+  defense: 11,
+  special_attack: 10,
+  special_defense: 9,
+  speed:10
+)
+
+case .timid: return Stats(
+  hitpoints: 10,
+  attack: 9,
+  defense: 10,
+  special_attack: 10,
+  special_defense: 10,
+  speed:11
+)
+
+case .hasty: return Stats(
+  hitpoints: 10,
+  attack: 10,
+  defense: 9,
+  special_attack: 10,
+  special_defense: 10,
+  speed:11
+)
+
+case .serious: return Stats(
+  hitpoints: 10,
+  attack: 10,
+  defense: 10,
+  special_attack: 10,
+  special_defense: 10,
+  speed:10
+)
+
+case .jolly: return Stats(
+  hitpoints: 10,
+  attack: 10,
+  defense: 10,
+  special_attack: 9,
+  special_defense: 10,
+  speed:11
+)
+
+case .naive: return Stats(
+  hitpoints: 10,
+  attack: 10,
+  defense: 10,
+  special_attack: 10,
+  special_defense: 9,
+  speed:11
+)
+
+case .modest: return Stats(
+  hitpoints: 10,
+  attack: 9,
+  defense: 10,
+  special_attack: 11,
+  special_defense: 10,
+  speed:10
+)
+
+case .mild: return Stats(
+  hitpoints: 10,
+  attack: 10,
+  defense: 9,
+  special_attack: 11,
+  special_defense: 10,
+  speed:10
+)
+
+case .quiet: return Stats(
+  hitpoints: 10,
+  attack: 10,
+  defense: 10,
+  special_attack: 11,
+  special_defense: 10,
+  speed:9
+)
+
+case .bashful: return Stats(
+  hitpoints: 10,
+  attack: 10,
+  defense: 10,
+  special_attack: 10,
+  special_defense: 10,
+  speed:10
+)
+
+case .rash: return Stats(
+  hitpoints: 10,
+  attack: 10,
+  defense: 10,
+  special_attack: 11,
+  special_defense: 9,
+  speed:10
+)
+
+case .calm: return Stats(
+  hitpoints: 10,
+  attack: 9,
+  defense: 10,
+  special_attack: 10,
+  special_defense: 11,
+  speed:10
+)
+
+case .gentle: return Stats(
+  hitpoints: 10,
+  attack: 10,
+  defense: 9,
+  special_attack: 10,
+  special_defense: 11,
+  speed:10
+)
+
+case .sassy: return Stats(
+  hitpoints: 10,
+  attack: 10,
+  defense: 10,
+  special_attack: 10,
+  special_defense: 11,
+  speed:9
+)
+
+case .careful: return Stats(
+  hitpoints: 10,
+  attack: 10,
+  defense: 10,
+  special_attack: 9,
+  special_defense: 11,
+  speed:10
+)
+
+case .quirky: return Stats(
+  hitpoints: 10,
+  attack: 10,
+  defense: 10,
+  special_attack: 10,
+  special_defense: 10,
+  speed:10
+)
+    }
+
+
+  }
+
 struct Pokemon {
     let nickname          : String?
-    let hitpoints         : Int // remaining hitpoints
+    var life              : Int // vie restante
     let size              : Int
     let weight            : Int
     let experience        : Int
     let level             : Int
     let nature            : Nature
     let species           : Species
-    let moves             : [Move: Int] // Move -> remaining powerpoints
+    let moves             : [(move: Move, pp: Int)] // Move -> remaining powerpoints, j'ai décidé d'en faire un tupple  plutôt qu'un dictionnaire, je trouvais plus pratique
     let individual_values : Stats
     let effort_values     : Stats
-    // TODO: implement the effective stats as a computed property:
+    // DONE: implement the effective stats as a computed property:
     // https://developer.apple.com/library/content/documentation/Swift/Conceptual/Swift_Programming_Language/Properties.html#//apple_ref/doc/uid/TP40014097-CH14-ID259
-    // var effective_stats   : Stats {
-    // }
+    // DONE add nature
+     var effective_stats   : Stats {
+       return Stats(
+         hitpoints:       calcul_stat_hp(   base_stat: species.base_values.hitpoints,       iv: individual_values.hitpoints,       ev: effort_values.hitpoints,       level:level ),
+         attack:          calcul_stat_other(base_stat: species.base_values.attack,          iv: individual_values.attack,          ev: effort_values.attack,          level:level, nature: Float(calcul_modif_nature(nature: nature).attack)/10 ),
+         defense:         calcul_stat_other(base_stat: species.base_values.defense,         iv: individual_values.defense,         ev: effort_values.defense,         level:level, nature: Float(calcul_modif_nature(nature: nature).defense)/10),
+         special_attack:  calcul_stat_other(base_stat: species.base_values.special_attack,  iv: individual_values.special_attack,  ev: effort_values.special_attack,  level:level, nature: Float(calcul_modif_nature(nature: nature).special_attack)/10),
+         special_defense: calcul_stat_other(base_stat: species.base_values.special_defense, iv: individual_values.special_defense, ev: effort_values.special_defense, level:level, nature: Float(calcul_modif_nature(nature: nature).special_defense)/10),
+         speed:           calcul_stat_other(base_stat: species.base_values.speed,           iv: individual_values.speed,           ev: effort_values.speed,           level:level, nature: Float(calcul_modif_nature(nature: nature).speed)/10))
+
+     }
 }
 
+
 struct Trainer {
+    let name : String
     let pokemons : [Pokemon]
+}
+
+extension Trainer : Hashable {
+  var hashValue: Int{
+    return name.hashValue
+  }
+
+  static func == (lhs : Trainer, rhs: Trainer) -> Bool{
+    return lhs.name == rhs.name
+  }
 }
 
 struct Environment {
@@ -153,21 +469,587 @@ struct Environment {
 }
 
 // http://bulbapedia.bulbagarden.net/wiki/Type/Type_chart
-func typeModifier(attacking: Type, defending : Type) -> Double {
-    // TODO: encode type/type chart
-    return 1
+//DONE!
+func typeModifier(attacking: Type, defending : Type) -> Float {
+    switch (attacking, defending){
+    case (.normal  , .normal  ): return 1
+    case (.normal  , .fighting): return 1
+    case (.normal  , .flying  ): return 1
+    case (.normal  , .poison  ): return 1
+    case (.normal  , .ground  ): return 1
+    case (.normal  , .rock    ): return 0.5
+    case (.normal  , .bug     ): return 1
+    case (.normal  , .ghost   ): return 0
+    case (.normal  , .steel   ): return 0.5
+    case (.normal  , .fire    ): return 1
+    case (.normal  , .water   ): return 1
+    case (.normal  , .grass   ): return 1
+    case (.normal  , .electric): return 1
+    case (.normal  , .psychic ): return 1
+    case (.normal  , .ice     ): return 1
+    case (.normal  , .dragon  ): return 1
+    case (.normal  , .dark    ): return 1
+    case (.normal  , .fairy   ): return 1
+
+    case (.fighting, .normal  ): return 2
+    case (.fighting, .fighting): return 1
+    case (.fighting, .flying  ): return 0.5
+    case (.fighting, .poison  ): return 0.5
+    case (.fighting, .ground  ): return 1
+    case (.fighting, .rock    ): return 2
+    case (.fighting, .bug     ): return 0.5
+    case (.fighting, .ghost   ): return 0
+    case (.fighting, .steel   ): return 2
+    case (.fighting, .fire    ): return 1
+    case (.fighting, .water   ): return 1
+    case (.fighting, .grass   ): return 1
+    case (.fighting, .electric): return 1
+    case (.fighting, .psychic ): return 0.5
+    case (.fighting, .ice     ): return 2
+    case (.fighting, .dragon  ): return 1
+    case (.fighting, .dark    ): return 2
+    case (.fighting, .fairy   ): return 0.5
+
+    case (.flying  , .normal  ): return 1
+    case (.flying  , .fighting): return 2
+    case (.flying  , .flying  ): return 1
+    case (.flying  , .poison  ): return 1
+    case (.flying  , .ground  ): return 1
+    case (.flying  , .rock    ): return 0.5
+    case (.flying  , .bug     ): return 2
+    case (.flying  , .ghost   ): return 1
+    case (.flying  , .steel   ): return 0.5
+    case (.flying  , .fire    ): return 1
+    case (.flying  , .water   ): return 1
+    case (.flying  , .grass   ): return 2
+    case (.flying  , .electric): return 0.5
+    case (.flying  , .psychic ): return 1
+    case (.flying  , .ice     ): return 1
+    case (.flying  , .dragon  ): return 1
+    case (.flying  , .dark    ): return 1
+    case (.flying  , .fairy   ): return 1
+
+    case (.poison  , .normal  ): return 1
+    case (.poison  , .fighting): return 1
+    case (.poison  , .flying  ): return 1
+    case (.poison  , .poison  ): return 0.5
+    case (.poison  , .ground  ): return 0.5
+    case (.poison  , .rock    ): return 0.5
+    case (.poison  , .bug     ): return 1
+    case (.poison  , .ghost   ): return 0.5
+    case (.poison  , .steel   ): return 0
+    case (.poison  , .fire    ): return 1
+    case (.poison  , .water   ): return 1
+    case (.poison  , .grass   ): return 2
+    case (.poison  , .electric): return 1
+    case (.poison  , .psychic ): return 1
+    case (.poison  , .ice     ): return 1
+    case (.poison  , .dragon  ): return 1
+    case (.poison  , .dark    ): return 1
+    case (.poison  , .fairy   ): return 2
+
+    case (.ground  , .normal  ): return 1
+    case (.ground  , .fighting): return 1
+    case (.ground  , .flying  ): return 0
+    case (.ground  , .poison  ): return 2
+    case (.ground  , .ground  ): return 1
+    case (.ground  , .rock    ): return 2
+    case (.ground  , .bug     ): return 0.5
+    case (.ground  , .ghost   ): return 1
+    case (.ground  , .steel   ): return 2
+    case (.ground  , .fire    ): return 2
+    case (.ground  , .water   ): return 1
+    case (.ground  , .grass   ): return 0.5
+    case (.ground  , .electric): return 2
+    case (.ground  , .psychic ): return 1
+    case (.ground  , .ice     ): return 1
+    case (.ground  , .dragon  ): return 1
+    case (.ground  , .dark    ): return 1
+    case (.ground  , .fairy   ): return 1
+
+    case (.rock    , .normal  ): return 1
+    case (.rock    , .fighting): return 0.5
+    case (.rock    , .flying  ): return 2
+    case (.rock    , .poison  ): return 1
+    case (.rock    , .ground  ): return 0.5
+    case (.rock    , .rock    ): return 1
+    case (.rock    , .bug     ): return 2
+    case (.rock    , .ghost   ): return 1
+    case (.rock    , .steel   ): return 0.5
+    case (.rock    , .fire    ): return 2
+    case (.rock    , .water   ): return 1
+    case (.rock    , .grass   ): return 1
+    case (.rock    , .electric): return 1
+    case (.rock    , .psychic ): return 1
+    case (.rock    , .ice     ): return 2
+    case (.rock    , .dragon  ): return 1
+    case (.rock    , .dark    ): return 1
+    case (.rock    , .fairy   ): return 1
+
+    case (.bug     , .normal  ): return 1
+    case (.bug     , .fighting): return 0.5
+    case (.bug     , .flying  ): return 0.5
+    case (.bug     , .poison  ): return 0.5
+    case (.bug     , .ground  ): return 1
+    case (.bug     , .rock    ): return 1
+    case (.bug     , .bug     ): return 1
+    case (.bug     , .ghost   ): return 0.5
+    case (.bug     , .steel   ): return 0.5
+    case (.bug     , .fire    ): return 0.5
+    case (.bug     , .water   ): return 1
+    case (.bug     , .grass   ): return 2
+    case (.bug     , .electric): return 1
+    case (.bug     , .psychic ): return 2
+    case (.bug     , .ice     ): return 1
+    case (.bug     , .dragon  ): return 1
+    case (.bug     , .dark    ): return 2
+    case (.bug     , .fairy   ): return 0.5
+
+    case (.ghost   , .normal  ): return 0
+    case (.ghost   , .fighting): return 1
+    case (.ghost   , .flying  ): return 1
+    case (.ghost   , .poison  ): return 1
+    case (.ghost   , .ground  ): return 1
+    case (.ghost   , .rock    ): return 1
+    case (.ghost   , .bug     ): return 1
+    case (.ghost   , .ghost   ): return 2
+    case (.ghost   , .steel   ): return 1
+    case (.ghost   , .fire    ): return 1
+    case (.ghost   , .water   ): return 1
+    case (.ghost   , .grass   ): return 1
+    case (.ghost   , .electric): return 1
+    case (.ghost   , .psychic ): return 2
+    case (.ghost   , .ice     ): return 1
+    case (.ghost   , .dragon  ): return 1
+    case (.ghost   , .dark    ): return 0.5
+    case (.ghost   , .fairy   ): return 1
+
+    case (.steel   , .normal  ): return 1
+    case (.steel   , .fighting): return 1
+    case (.steel   , .flying  ): return 1
+    case (.steel   , .poison  ): return 1
+    case (.steel   , .ground  ): return 1
+    case (.steel   , .rock    ): return 2
+    case (.steel   , .bug     ): return 1
+    case (.steel   , .ghost   ): return 1
+    case (.steel   , .steel   ): return 0.5
+    case (.steel   , .fire    ): return 0.5
+    case (.steel   , .water   ): return 0.5
+    case (.steel   , .grass   ): return 1
+    case (.steel   , .electric): return 0.5
+    case (.steel   , .psychic ): return 1
+    case (.steel   , .ice     ): return 2
+    case (.steel   , .dragon  ): return 1
+    case (.steel   , .dark    ): return 1
+    case (.steel   , .fairy   ): return 2
+
+    case (.fire    , .normal  ): return 1
+    case (.fire    , .fighting): return 1
+    case (.fire    , .flying  ): return 1
+    case (.fire    , .poison  ): return 1
+    case (.fire    , .ground  ): return 1
+    case (.fire    , .rock    ): return 0.5
+    case (.fire    , .bug     ): return 2
+    case (.fire    , .ghost   ): return 1
+    case (.fire    , .steel   ): return 2
+    case (.fire    , .fire    ): return 0.5
+    case (.fire    , .water   ): return 0.5
+    case (.fire    , .grass   ): return 2
+    case (.fire    , .electric): return 1
+    case (.fire    , .psychic ): return 1
+    case (.fire    , .ice     ): return 2
+    case (.fire    , .dragon  ): return 0.5
+    case (.fire    , .dark    ): return 1
+    case (.fire    , .fairy   ): return 1
+
+    case (.water   , .normal  ): return 1
+    case (.water   , .fighting): return 1
+    case (.water   , .flying  ): return 1
+    case (.water   , .poison  ): return 1
+    case (.water   , .ground  ): return 2
+    case (.water   , .rock    ): return 2
+    case (.water   , .bug     ): return 1
+    case (.water   , .ghost   ): return 1
+    case (.water   , .steel   ): return 1
+    case (.water   , .fire    ): return 2
+    case (.water   , .water   ): return 0.5
+    case (.water   , .grass   ): return 0.5
+    case (.water   , .electric): return 1
+    case (.water   , .psychic ): return 1
+    case (.water   , .ice     ): return 1
+    case (.water   , .dragon  ): return 0.5
+    case (.water   , .dark    ): return 1
+    case (.water   , .fairy   ): return 1
+
+    case (.grass   , .normal  ): return 1
+    case (.grass   , .fighting): return 1
+    case (.grass   , .flying  ): return 0.5
+    case (.grass   , .poison  ): return 0.5
+    case (.grass   , .ground  ): return 2
+    case (.grass   , .rock    ): return 2
+    case (.grass   , .bug     ): return 0.5
+    case (.grass   , .ghost   ): return 1
+    case (.grass   , .steel   ): return 0.5
+    case (.grass   , .fire    ): return 0.5
+    case (.grass   , .water   ): return 2
+    case (.grass   , .grass   ): return 0.5
+    case (.grass   , .electric): return 1
+    case (.grass   , .psychic ): return 1
+    case (.grass   , .ice     ): return 1
+    case (.grass   , .dragon  ): return 0.5
+    case (.grass   , .dark    ): return 1
+    case (.grass   , .fairy   ): return 1
+
+    case (.electric, .normal  ): return 1
+    case (.electric, .fighting): return 1
+    case (.electric, .flying  ): return 2
+    case (.electric, .poison  ): return 1
+    case (.electric, .ground  ): return 0
+    case (.electric, .rock    ): return 1
+    case (.electric, .bug     ): return 1
+    case (.electric, .ghost   ): return 1
+    case (.electric, .steel   ): return 1
+    case (.electric, .fire    ): return 1
+    case (.electric, .water   ): return 2
+    case (.electric, .grass   ): return 0.5
+    case (.electric, .electric): return 0.5
+    case (.electric, .psychic ): return 1
+    case (.electric, .ice     ): return 1
+    case (.electric, .dragon  ): return 0.5
+    case (.electric, .dark    ): return 1
+    case (.electric, .fairy   ): return 1
+
+    case (.psychic , .normal  ): return 1
+    case (.psychic , .fighting): return 1
+    case (.psychic , .flying  ): return 1
+    case (.psychic , .poison  ): return 2
+    case (.psychic , .ground  ): return 1
+    case (.psychic , .rock    ): return 1
+    case (.psychic , .bug     ): return 1
+    case (.psychic , .ghost   ): return 1
+    case (.psychic , .steel   ): return 0.5
+    case (.psychic , .fire    ): return 1
+    case (.psychic , .water   ): return 1
+    case (.psychic , .grass   ): return 1
+    case (.psychic , .electric): return 1
+    case (.psychic , .psychic ): return 0.5
+    case (.psychic , .ice     ): return 1
+    case (.psychic , .dragon  ): return 1
+    case (.psychic , .dark    ): return 0
+    case (.psychic , .fairy   ): return 1
+
+    case (.ice     , .normal  ): return 1
+    case (.ice     , .fighting): return 1
+    case (.ice     , .flying  ): return 2
+    case (.ice     , .poison  ): return 1
+    case (.ice     , .ground  ): return 2
+    case (.ice     , .rock    ): return 1
+    case (.ice     , .bug     ): return 1
+    case (.ice     , .ghost   ): return 1
+    case (.ice     , .steel   ): return 0.5
+    case (.ice     , .fire    ): return 0.5
+    case (.ice     , .water   ): return 0.5
+    case (.ice     , .grass   ): return 2
+    case (.ice     , .electric): return 1
+    case (.ice     , .psychic ): return 1
+    case (.ice     , .ice     ): return 0.5
+    case (.ice     , .dragon  ): return 2
+    case (.ice     , .dark    ): return 1
+    case (.ice     , .fairy   ): return 1
+
+    case (.dragon  , .normal  ): return 1
+    case (.dragon  , .fighting): return 1
+    case (.dragon  , .flying  ): return 1
+    case (.dragon  , .poison  ): return 1
+    case (.dragon  , .ground  ): return 1
+    case (.dragon  , .rock    ): return 1
+    case (.dragon  , .bug     ): return 1
+    case (.dragon  , .ghost   ): return 1
+    case (.dragon  , .steel   ): return 0.5
+    case (.dragon  , .fire    ): return 1
+    case (.dragon  , .water   ): return 1
+    case (.dragon  , .grass   ): return 1
+    case (.dragon  , .electric): return 1
+    case (.dragon  , .psychic ): return 1
+    case (.dragon  , .ice     ): return 1
+    case (.dragon  , .dragon  ): return 2
+    case (.dragon  , .dark    ): return 1
+    case (.dragon  , .fairy   ): return 0
+
+    case (.dark    , .normal  ): return 1
+    case (.dark    , .fighting): return 0.5
+    case (.dark    , .flying  ): return 1
+    case (.dark    , .poison  ): return 1
+    case (.dark    , .ground  ): return 1
+    case (.dark    , .rock    ): return 1
+    case (.dark    , .bug     ): return 1
+    case (.dark    , .ghost   ): return 2
+    case (.dark    , .steel   ): return 1
+    case (.dark    , .fire    ): return 1
+    case (.dark    , .water   ): return 1
+    case (.dark    , .grass   ): return 1
+    case (.dark    , .electric): return 1
+    case (.dark    , .psychic ): return 2
+    case (.dark    , .ice     ): return 1
+    case (.dark    , .dragon  ): return 1
+    case (.dark    , .dark    ): return 0.5
+    case (.dark    , .fairy   ): return 0.5
+
+    case (.fairy   , .normal  ): return 1
+    case (.fairy   , .fighting): return 2
+    case (.fairy   , .flying  ): return 1
+    case (.fairy   , .poison  ): return 0.5
+    case (.fairy   , .ground  ): return 1
+    case (.fairy   , .rock    ): return 1
+    case (.fairy   , .bug     ): return 1
+    case (.fairy   , .ghost   ): return 1
+    case (.fairy   , .steel   ): return 0.5
+    case (.fairy   , .fire    ): return 0.5
+    case (.fairy   , .water   ): return 1
+    case (.fairy   , .grass   ): return 1
+    case (.fairy   , .electric): return 1
+    case (.fairy   , .psychic ): return 1
+    case (.fairy   , .ice     ): return 1
+    case (.fairy   , .dragon  ): return 2
+    case (.fairy   , .dark    ): return 2
+    case (.fairy   , .fairy   ): return 1
+
+
+    }
+
 }
 
 // http://bulbapedia.bulbagarden.net/wiki/Damage
 func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pokemon) -> Int {
-    // TODO
-    return 0
+
+    var damage: Int = 2*pokemon.level
+    damage = Int((Float(damage)/5)+2)*move.power
+
+    switch (move.category){
+    case .physical:
+      damage = damage*Int(Float(pokemon.effective_stats.attack)/Float(pokemon.effective_stats.defense))
+    case .special:
+      damage = damage*Int(Float(pokemon.effective_stats.special_attack)/Float(pokemon.effective_stats.special_defense))
+    case .status:
+      damage = 0//Ne devrait jamais arriver, on pourait throw une exeption
+    }
+
+    damage = Int(Float(damage)/50.0)+2
+
+    var modifier: Float = 1
+
+
+    //Les differences due au temps
+    switch environment.weather {
+
+    case .rain:
+      switch move.type{
+      case .water:
+        modifier = modifier * 1.5
+      case .fire:
+        modifier = modifier * 0.5
+      default:
+        modifier = modifier * 1
+      }
+
+    case .harsh_sunlight:
+      switch move.type {
+      case .water:
+        modifier = modifier * 0.5
+      case .fire:
+        modifier = modifier * 1.5
+      default:
+        modifier = modifier * 1
+      }
+
+
+    default:
+      modifier = modifier * 1
+    }
+
+    //critique:
+
+    if((random() % 16) == 0){
+      modifier = modifier * 1.5
+    }
+
+
+    //random
+    modifier = modifier * Float( (random() % 16 ) + 85)/100
+
+    //STAB
+    if(pokemon.species.type.0 == move.type){
+      modifier = modifier * 1.5
+    }
+    else if let type = pokemon.species.type.1 {
+      if type == move.type{
+        modifier = modifier * 1.5
+      }
+    }
+
+    //type
+    modifier = modifier * typeModifier(attacking: move.type, defending: target.species.type.0)
+    if let type = target.species.type.1{
+      modifier = modifier * typeModifier(attacking: move.type, defending: type)
+    }
+
+    return Int(Float(damage) * modifier)
+
 }
 
 struct State {
-    // TODO: describe a battle state
+
+  let trainers: [Trainer]
+  //Les pokemons en jeux, selon le dresseur.
+  var pokemon_des_dresseurs: [Trainer : Pokemon]
+  var environment: Environment
+
+
+
 }
 
+//La fonction behaviour
+func choose_random_attack(state: State, trainer: Trainer) -> Move{
+  let pokemon : Pokemon = state.pokemon_des_dresseurs[trainer]!
+  var numero_attack = random() % pokemon.moves.count
+
+  //Va boucler si aucune attaque n'a de pp restant.
+  //La manière de boucler induit un biais sur l'attaque choise si il y en a avec 0 pp.
+  while (pokemon.moves[numero_attack].pp == 0){
+  numero_attack = (numero_attack + 1) %  pokemon.moves.count
+  }
+
+  return pokemon.moves[numero_attack].move
+}
+
+
+//Nous dit s'il reste des pokemons vivants au dresseur passé en paramètre.
+func pokemon_alive_left(trainer: Trainer) -> Bool{
+  for pokemon in trainer.pokemons {
+      if (pokemon.life != 0){
+        return true
+      }
+  }
+
+  return false
+}
+
+//Cette fonction fait se battre deux pokemons jusqu'à la mort de l'un des deux
+func two_pokemons_battle(state: inout State, behavior: (State, Trainer) -> Move) ->(){
+
+  var KO: Bool = false
+
+  //Tant que les deux pokemons ont encore des vies
+  while (!KO){
+    let moves: [Move] = [behavior(state, state.trainers[0]), behavior(state, state.trainers[1])]
+
+    var premier: Int = 0 //Variable indiquant quel pokemon attaqera en premier
+
+    let priority = moves[0].priority - moves[1].priority
+    let speed = state.pokemon_des_dresseurs[state.trainers[0]]!.effective_stats.speed - state.pokemon_des_dresseurs[state.trainers[1]]!.effective_stats.speed
+
+    //Détermination du pokemon attaquant le premier
+    if (priority < 0 ){
+      premier = 1
+    }
+    else if priority > 0{
+      premier = 0
+    }
+    else{ //priority == 0
+      if(speed < 0){
+        premier = 1
+      }
+      else if(speed > 0){
+        premier = 0
+      }
+      else{
+        premier = random() % 2
+      }
+    }
+
+    let deuxieme = 1 - premier
+
+    /*Je ne maitrise pas assez les notations et les effets de bords, dans ces langages sans pointeurs explicites
+     pour écire premier_pokemon = state.pokemon_des_dresseurs[state.trainers[0]]! et être sûr que tout se modifiera bien */
+
+     //On attaque
+     state.pokemon_des_dresseurs[state.trainers[deuxieme]]!.life = state.pokemon_des_dresseurs[state.trainers[deuxieme]]!.life - damage(environment: state.environment, pokemon: state.pokemon_des_dresseurs[state.trainers[premier]]!, move: moves[premier], target: state.pokemon_des_dresseurs[state.trainers[deuxieme]]! )
+
+     //Si le pokemon est KO
+     if(state.pokemon_des_dresseurs[state.trainers[deuxieme]]!.life < 0){
+       state.pokemon_des_dresseurs[state.trainers[deuxieme]]!.life = 0
+       KO = true
+     }
+     else{//Sinon, l'autre attaque
+       state.pokemon_des_dresseurs[state.trainers[premier]]!.life = state.pokemon_des_dresseurs[state.trainers[premier]]!.life - damage(environment: state.environment, pokemon: state.pokemon_des_dresseurs[state.trainers[deuxieme]]!, move: moves[deuxieme], target: state.pokemon_des_dresseurs[state.trainers[premier]]! )
+
+       if(state.pokemon_des_dresseurs[state.trainers[premier]]!.life < 0){
+         state.pokemon_des_dresseurs[state.trainers[premier]]!.life = 0
+         KO = true
+       }
+     }
+   }
+
+
+
+}
+
+
+//On va envoyer les pokemons dans l'ordre de l'équipe pour chaque dresseur.
+//On considère que trainers ne contient que deux éléments
+/*Les éléments manquant pour que ce soit un vrai combat pokemon sont: (liste non exhaustive)
+-La possibilité de choisir son attaque au lieu de la lancer aléatoirement
+-les attaques de status
+-les effets secondaires des attaques
+-La précision des attaques
+-Les effets secondaires des coups critiques (ne pas être affecter par les changements de stats par ex.)
+-la possibilité de changer de pokemon au cours d'un combat
+-les objets et talents des pokemons
+*/
+
+
 func battle(trainers: inout [Trainer], behavior: (State, Trainer) -> Move) -> () {
-    // TODO: simulate battle
+
+  var state : State = State(
+    trainers: [trainers[0], trainers[1]],
+    //On initialise avec les deux premiers pokemons, on les changeras après si ils sont ko
+    pokemon_des_dresseurs: [trainers[0]: trainers[0].pokemons[0], trainers[1]: trainers[1].pokemons[0] ],
+    //On initialise un terrain normal et un ciel clair
+    environment: Environment(
+      weather: Weather.clear_skies,
+      terrain: Terrain.normal
+    )
+  )
+
+  //Tant qu'il reste des pokemon aux deux dresseurs
+  while (pokemon_alive_left(trainer: trainers[0]) && pokemon_alive_left(trainer: trainers[1])) {
+
+    if state.pokemon_des_dresseurs[trainers[0]]!.life == 0{
+      //On envoie le premier pokemon non ko
+      for pokemon in trainers[0].pokemons{
+        if pokemon.life > 0{
+          state.pokemon_des_dresseurs[trainers[0]] = pokemon
+        }
+      }
+    }
+
+    if state.pokemon_des_dresseurs[trainers[1]]!.life == 0{
+      //On envoie le premier pokemon non ko
+      for pokemon in trainers[1].pokemons{
+        if pokemon.life > 0{
+          state.pokemon_des_dresseurs[trainers[0]] = pokemon
+        }
+      }
+    }
+
+
+    //On fait se battre les pokemons jusqu'à la mort
+    two_pokemons_battle(state: &state, behavior: behavior)
+
+
+  }
+  //end while
+
+
+
 }
