@@ -1,6 +1,5 @@
 import Foundation
 
-/* TODO se pencher sur le combat en sois */
 
 // http://bulbapedia.bulbagarden.net/wiki/Type
 enum Type {
@@ -739,7 +738,20 @@ struct State {
     var pokemon2_hp : Int
 }
 
+var Battle_State = State(
+  pokemon1_hp : 0,
+  pokemon2_hp : 0
+)
 
+func check_state(_ combat_state : State) -> Bool {
+  if (combat_state.pokemon1_hp <= 0) {
+    return true
+  } else if (combat_state.pokemon2_hp <= 0){
+    return true
+  } else{
+    return false
+  }
+}
 
 func Environment_Modifier(_ environment : Environment, _ move : Move) -> Double {
   var Modifier : Double = 1
@@ -768,7 +780,7 @@ func critical(_ pokemon : Pokemon) -> Double{
 
 
 // http://bulbapedia.bulbagarden.net/wiki/Damage
-func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pokemon) -> Int {
+func damage(_ environment : Environment, _ pokemon: Pokemon, _ move: Move, _ target: Pokemon) -> Int {
 
   /* Random for the modifier calculations */
   #if os(Linux)
@@ -852,64 +864,46 @@ func chose_attack(_ pokemon1 : Pokemon, _ pokemon2 : Pokemon) -> (Int, Int) {
   return (Int(move_pokemon1!)!, Int(move_pokemon2!)!)
 }
 
-func one_turn(_ pokemon1 : Pokemon, _ pokemon2 : Pokemon){
+var Test_variable_state : Int = 0
+
+func one_turn(_ pokemon1 : Pokemon, _ pokemon2 : Pokemon, _ environment : Environment) -> Bool{
+
+/* a mettre qq part */
+
+  if (Test_variable_state == 0) {
+    Battle_State.pokemon1_hp = pokemon1.hitpoints
+    Battle_State.pokemon2_hp = pokemon2.hitpoints
+    Test_variable_state = 1
+  }
 
   let chosen_attacks : (Int, Int) = chose_attack(pokemon1, pokemon2)
   let move_used_pokemon1 : Int = chosen_attacks.0 - 1
   let move_used_pokemon2 : Int = chosen_attacks.1 - 1
   let pokemon_priority : Int = check_order(pokemon1, pokemon1.moves[move_used_pokemon1]!, pokemon2, pokemon2.moves[move_used_pokemon2]!, first_random)
 
-  //if (pokemon_priority == 1) {
-    //let dmg : Int = damage()
-//  }
-
-
+  if (pokemon_priority == 1) {
+    let dmg : Int = damage(environment, pokemon1, pokemon1.moves[move_used_pokemon1]!, pokemon2)
+    Battle_State.pokemon2_hp = Battle_State.pokemon2_hp - dmg
+    if check_state(Battle_State){
+      return true
+    }
+  } else {
+    let dmg : Int = damage(environment, pokemon2, pokemon2.moves[move_used_pokemon2]!, pokemon1)
+    Battle_State.pokemon1_hp = Battle_State.pokemon1_hp - dmg
+    if check_state(Battle_State){
+      return true
+    }
+  }
+  return false
 }
 
-// func battle(trainers: inout [Trainer], behavior: (State, Trainer) -> Move) -> () {
-    // TODO: simulate battle
+func battle(_ pokemon1 : Pokemon, _ pokemon2 : Pokemon, _ environment_battle : Environment) -> () {
 
+  var end_battle : Bool = false
 
+  while !(end_battle){
+    chose_attack(pokemon1, pokemon2)
+    end_battle = one_turn(pokemon1, pokemon2, environment_battle)
+  }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//}
+}
