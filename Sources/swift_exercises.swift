@@ -92,6 +92,7 @@ let earthquake = Move(
     priority: 0
 )
 
+// Implementation of few moves
 let solar_beam = Move(
     id: 76,
     name: "Solar Beam",
@@ -236,7 +237,9 @@ struct Pokemon {
                                           [1, 1, 0.9, 1.1, 1],
                                           [1, 1, 1, 1, 1]]
 
-        // swift is shit omfg i can't even do this in one line wtf i non-unironically have to cut this formula in multiple lines and wow i don't even
+        // swift is stupid omg i can't do this in one line
+        // srsly i non-unironically have to cut this formula in multiple lines
+        // i don't even
         let hp1 = 2 * species.base_values.hitpoints + individual_values.hitpoints;
         let hp2 = Double(hp1 + (effort_values.hitpoints / 4) * level) / 100
         let hp3 = Int(floor(hp2) + Double(level) + 10);
@@ -321,6 +324,7 @@ func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pok
     let pkmType = pokemon.species.type;
     let tarType = target.species.type;
 
+    // I haven't implemented everything, but the code is structured in such a way it should be easy
     let targets: Double = 1
     let weather: Double = 1
     let badge: Double = 1
@@ -340,7 +344,7 @@ func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pok
 struct State {
     let environment: Environment
     let trainers: [Trainer]
-    let pokemon_fighting: [Int] // Indice of the fighting pokemon for the two players
+    let pokemon_fighting: [Int] // Indice of the fighting pokemon for the two players. For example, trainer 0 have [pikachu, ho-oh]. Indice 0 is for pikachu while 1 is for ho-oh
     let winner: Int? // 0 = first player, 1 = second, nil = none
 }
 
@@ -355,6 +359,7 @@ func choose_action(trainer: Trainer) -> Action {
     return .attack
 }
 
+// Choose a pokemon between the avaible ones of a trainer (hp > 0)
 func select_pokemon(trainer: Trainer) -> Int? {
     var selected: Int? = nil;
     var indice: Int = 0
@@ -370,6 +375,7 @@ func select_pokemon(trainer: Trainer) -> Int? {
     return selected
 }
 
+// Return a correctly initialized State (will be used by battle())
 func battle_init(trainers: [Trainer]) -> State {
     let environment = Environment(weather: .clear_skies, terrain: .normal);
     let pkm1 = select_pokemon(trainer: trainers[0]);
@@ -387,7 +393,7 @@ func battle_init(trainers: [Trainer]) -> State {
     return State(environment: environment, trainers: trainers, pokemon_fighting: [pkm1!, pkm2!], winner: winner)
 }
 
-// DOESN'T SEEM TO TAKE POWERPOINTS INTO ACCOUNT
+// Choose a random move between the avaible ones of a pokemon (pp > 0)
 func choose_move(pokemon: Pokemon) -> Move {
     var filtered_moves = [Move]();
 
@@ -400,6 +406,7 @@ func choose_move(pokemon: Pokemon) -> Move {
     return filtered_moves[random() % filtered_moves.count]
 }
 
+// Probably not the shortest function possible for choosing which pokemon goes first, but it works
 func choose_first(pkm1: Pokemon, pkm2: Pokemon, move1: Move?, move2: Move?) -> [Int] {
     var order: [Int];
 
@@ -440,15 +447,14 @@ func choose_first(pkm1: Pokemon, pkm2: Pokemon, move1: Move?, move2: Move?) -> [
     return order
 }
 
-// var state: State = battle_init(trainers)
-// state = battle(state)
+// This function is recurive. It takes a State and returns a new one (with used items, updated pokemons' hp, the winner etc.)
 func battle(state: State) -> State {
     if(state.winner != nil) {
         return state
     }
 
-    var environment = state.environment;
-
+    // Some variables for the sake of clarity
+    let environment = state.environment;
     var p = state.trainers;
     var pkm_ind = state.pokemon_fighting;
     var pkm = [p[0].pokemons[pkm_ind[0]], p[1].pokemons[pkm_ind[1]]];
@@ -456,6 +462,7 @@ func battle(state: State) -> State {
 
     var move: [Move?] = [nil, nil];
 
+    // Each player choose an action
     for i in 0...1 {
         switch choose_action(trainer: p[i]) {
             case .attack:
@@ -465,7 +472,7 @@ func battle(state: State) -> State {
                 pkm_ind[i] = new_indice!;
                 pkm[i] = p[i].pokemons[pkm_ind[i]];
             case .use_item:
-              print("lol");
+              print("Not implemented yet.");
         }
     }
 
@@ -475,6 +482,9 @@ func battle(state: State) -> State {
         // Damage
         if(random() % 100 < move[ind]!.accuracy) {
             let dmg = damage(environment: environment, pokemon: pkm[ind], move: move[ind]!, target: pkm[(ind+1)%2]);
+
+            // apply weather / environment modifiers
+
             pkm[(ind+1)%2].battle_stats.hitpoints -= dmg;
             if(pkm[(ind+1)%2].battle_stats.hitpoints < 0) {pkm[(ind+1)%2].battle_stats.hitpoints = 0};
             pkm[ind].moves[move[ind]!]! -= 1;
@@ -491,10 +501,13 @@ func battle(state: State) -> State {
         // Check if other pokemon is dead
         if(pkm[(ind+1)%2].battle_stats.hitpoints <= 0) {
             let new_indice = select_pokemon(trainer: p[(ind+1)%2]);
+
+            // The other trainer can't change his pokemon --> he loses
             if(new_indice == nil) {
-                winner = (ind+1)%2;
+                winner = ind;
                 break;
             }
+
             print("New pokemon for player ", ind)
             pkm_ind[(ind+1)%2] = new_indice!;
             pkm[(ind+1)%2] = p[ind].pokemons[pkm_ind[(ind+1)%2]];
@@ -505,7 +518,6 @@ func battle(state: State) -> State {
     print("HP pkm 1 : ", p[1].pokemons[pkm_ind[1]].battle_stats.hitpoints);
 
     // new turn
-
     return battle(state: State( environment: environment, trainers: p,
                                 pokemon_fighting: pkm_ind, winner: winner))
 }
