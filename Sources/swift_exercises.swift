@@ -92,6 +92,42 @@ let earthquake = Move(
     priority: 0
 )
 
+let solar_beam = Move(
+    id: 76,
+    name: "Solar Beam",
+    description: "Super beam (very strong!!!)",
+    category: .special,
+    type: .grass,
+    power: 120,
+    accuracy: 100,
+    powerpoints: 10,
+    priority: 0
+)
+
+let thunder = Move(
+    id: 87,
+    name: "Thunder",
+    description: "Super thunder (!!!)",
+    category: .special,
+    type: .electric,
+    power: 110,
+    accuracy: 70,
+    powerpoints: 10,
+    priority: 0
+)
+
+let facade = Move(
+    id: 263,
+    name: "Facade",
+    description: "it was merely an act xddddddddd",
+    category: .physical,
+    type: .normal,
+    power: 70,
+    accuracy: 100,
+    powerpoints: 20,
+    priority: 0
+)
+
 // http://bulbapedia.bulbagarden.net/wiki/Move
 struct Move : Hashable {
     let id          : Int
@@ -150,7 +186,8 @@ let hooh: Pokemon = Pokemon(
   species: Species(
     id: 253, name: "Ho-Oh", evolutions: [], attacks: [], type: (.fire, .flying), base_values: Stats(hitpoints: 106, attack: 130, defense: 90, special_attack: 110, special_defense: 154, speed: 90)
   ),
-  moves: [earthquake: earthquake.powerpoints],
+  moves: [  earthquake: earthquake.powerpoints, solar_beam: solar_beam.powerpoints,
+            thunder: thunder.powerpoints, facade: facade.powerpoints],
   individual_values: Stats(hitpoints: 15, attack: 21, defense: 23, special_attack: 12, special_defense: 26, speed: 24),
   effort_values: Stats(hitpoints: 66, attack: 100, defense: 60, special_attack: 30, special_defense: 75, speed: 90)
 )
@@ -199,28 +236,32 @@ struct Pokemon {
                                           [1, 1, 0.9, 1.1, 1],
                                           [1, 1, 1, 1, 1]]
 
-        // ****************************** ASK 4 HALP CUZ IDK HOW TO TEST THIS SHIT AND WHETHER I HAVE TO USE SELF.
+        // swift is shit omfg i can't even do this in one line wtf i non-unironically have to cut this formula in multiple lines and wow i don't even
+        let hp1 = 2 * species.base_values.hitpoints + individual_values.hitpoints;
+        let hp2 = Double(hp1 + (effort_values.hitpoints / 4) * level) / 100
+        let hp3 = Int(floor(hp2) + Double(level) + 10);
 
-        // var to compute the different stats in multiple lines without declaring tons of temporary variables
-        var hp = Int((2 * species.base_values.hitpoints + individual_values.hitpoints + Int(effort_values.hitpoints / 4) * level) / 100)
-        hp = hp + level + 10;
+        let att1 = 2 * species.base_values.attack + individual_values.attack;
+        let att2 = Double(att1 + (effort_values.attack / 4) * level) / 100
+        let att3 = Int(floor(Double(floor(att2) + 5) * natureChart[nature.rawValue][0]))
 
-        var att = Int((2 * species.base_values.attack + individual_values.attack + Int(effort_values.attack / 4) * level) / 100)
-        att = Int(Double(att + 5) * natureChart[nature.rawValue][0])
+        let def1 = 2 * species.base_values.defense + individual_values.defense
+        let def2 = Double(def1 + (effort_values.defense / 4) * level) / 100
+        let def3 = Int(floor(Double(floor(def2) + 5) * natureChart[nature.rawValue][1]))
 
-        var def = Int((2 * species.base_values.defense + individual_values.defense + Int(effort_values.defense / 4) * level) / 100)
-        def = Int(Double(def + 5) * natureChart[nature.rawValue][1])
+        let satt1 = 2 * species.base_values.special_attack + individual_values.special_attack
+        let satt2 = Double(satt1 + (effort_values.special_attack / 4) * level) / 100
+        let satt3 = Int(floor(Double(floor(satt2) + 5) * natureChart[nature.rawValue][2]))
 
-        var satt = Int((2 * species.base_values.special_attack + individual_values.special_attack + Int(effort_values.special_attack / 4) * level) / 100)
-        satt = Int(Double(satt + 5) * natureChart[nature.rawValue][2])
+        let sdef1 = 2 * species.base_values.special_defense + individual_values.special_defense
+        let sdef2 = Double(sdef1 + (effort_values.special_defense / 4) * level) / 100
+        let sdef3 = Int(floor(Double(floor(sdef2) + 5) * natureChart[nature.rawValue][3]))
 
-        var sdef = Int((2 * species.base_values.special_defense + individual_values.special_defense + Int(effort_values.special_defense / 4) * level) / 100)
-        sdef = Int(Double(sdef + 5) * natureChart[nature.rawValue][3])
+        let spe1 = 2 * species.base_values.speed + individual_values.speed
+        let spe2 = Double(spe1 + (effort_values.speed / 4) * level) / 100
+        let spe3 = Int(floor(Double(floor(spe2) + 5) * natureChart[nature.rawValue][4]))
 
-        var spe = Int((2 * species.base_values.speed + individual_values.speed + Int(effort_values.speed / 4) * level) / 100)
-        spe = Int(Double(spe + 5) * natureChart[nature.rawValue][4])
-
-        return Stats(hitpoints: hp, attack: att, defense: def, special_attack: satt, special_defense: sdef, speed: spe)
+        return Stats(hitpoints: hp3, attack: att3, defense: def3, special_attack: satt3, special_defense: sdef3, speed: spe3)
       }
     }
 
@@ -280,9 +321,9 @@ func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pok
     let pkmType = pokemon.species.type;
     let tarType = target.species.type;
 
-    let targets: Double = 1 // won't be implemented... soon
+    let targets: Double = 1
     let weather: Double = 1
-    let badge: Double = 1 // won't be implemented... son
+    let badge: Double = 1
     let critical: Double = Int(random() % 256) > (pokemon.species.base_values.speed / 2) ? 1.5 : 1
     let random_value: Double = (100 - Double(random() % 16)) / 100
     let stab: Double = (move.type == pkmType.0 || move.type == pkmType.1!) ? 1.5 : 1
@@ -292,7 +333,7 @@ func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pok
 
     let modifier: Double = targets * weather * badge * critical * random_value * stab * type * burn * other
 
-    return 1 + (random() % 10)//Int(Double(pokemon.battle_stats.attack) * modifier)
+    return Int(Double(pokemon.battle_stats.attack) * modifier)
 }
 
 // has to be initialized before calling battle
@@ -435,20 +476,26 @@ func battle(state: State) -> State {
         if(random() % 100 < move[ind]!.accuracy) {
             let dmg = damage(environment: environment, pokemon: pkm[ind], move: move[ind]!, target: pkm[(ind+1)%2]);
             pkm[(ind+1)%2].battle_stats.hitpoints -= dmg;
+            if(pkm[(ind+1)%2].battle_stats.hitpoints < 0) {pkm[(ind+1)%2].battle_stats.hitpoints = 0};
             pkm[ind].moves[move[ind]!]! -= 1;
             p[(ind+1)%2].pokemons[pkm_ind[(ind+1)%2]].battle_stats = pkm[(ind+1)%2].battle_stats;
-            print("Pokemon ", ind, " attacks pokemon ", (ind+1)%2, " with ",  dmg, " damage!");
+            print("Pokemon ", ind, " attacks pokemon ", (ind+1)%2, " with ", move[ind]!.name, " (", dmg, " damage!)");
 
+        }
+
+        else {
+            print("Pokemon ", ind, " attacks pokemon ", (ind+1)%2, " with ", move[ind]!.name, " but... misses");
+            pkm[ind].moves[move[ind]!]! -= 1;
         }
 
         // Check if other pokemon is dead
         if(pkm[(ind+1)%2].battle_stats.hitpoints <= 0) {
             let new_indice = select_pokemon(trainer: p[(ind+1)%2]);
-            print("NEW INDICE: ", new_indice)
             if(new_indice == nil) {
                 winner = (ind+1)%2;
                 break;
             }
+            print("New pokemon for player ", ind)
             pkm_ind[(ind+1)%2] = new_indice!;
             pkm[(ind+1)%2] = p[ind].pokemons[pkm_ind[(ind+1)%2]];
         }
