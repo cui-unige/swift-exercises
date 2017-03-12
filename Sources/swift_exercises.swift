@@ -781,11 +781,11 @@ var currentState = State(player1: ash,player2: mystie,pokemon1:ash.pokemons[0],p
  var DMG: Int = 0
  var turn: Int = 1
 
-func battle(trainers: inout [Trainer], behavior: (State, Trainer) -> Move) -> () {
+func battle(trainers: inout [Trainer]) -> () {
     // TODO: simulate battle
  //1 for ash turn 2 for mystie turn ash always starts first
 
-
+if turn == 1 {
     print("player1 turn")
     print("please choose a Move")
     print("\(1) \(currentState.pokemon1.moves[1].name)")
@@ -824,7 +824,7 @@ if currentState.pokemon2.hitpoints <= 0 {
   print("Msties pokemon fainted")
   print("Ash is the winner")
 }
-
+}
 if turn == 2 {
   print("player2 turn")
   print("please choose a Move")
@@ -866,9 +866,11 @@ if currentState.pokemon1.hitpoints <= 0 {
 
   }
 
+  var our_trainers = [ash,mystie]
   func go()->(){
     print("battle");
-    print("\n select a pokemon \n");
+    print("\n Mystie vs Ash \n");
+    battle(trainers: &our_trainers)
 
    //NOTE Cant make it work correctly due to an error with wercker
    //Details : using wercker build starts downloading packages with each call
