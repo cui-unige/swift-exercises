@@ -422,7 +422,7 @@ case .quirky: return Stats(
 
 struct Pokemon {
     let nickname          : String?
-    let life              : Int // vie restante
+    var life              : Int // vie restante
     let size              : Int
     let weight            : Int
     let experience        : Int
@@ -898,8 +898,11 @@ func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pok
 }
 
 struct State {
-    //Les pokemons en jeux, selon le dresseur.
-    var pokemon_du_dresseur: [Trainer : Pokemon]
+
+  let trainers: [Trainer]
+  //Les pokemons en jeux, selon le dresseur.
+  var pokemon_des_dresseurs: [Trainer : Pokemon]
+  var environment: Environment
 
 
 
@@ -907,7 +910,7 @@ struct State {
 
 //La fonction behaviour
 func choose_random_attack(state: State, trainer: Trainer) -> Move{
-  let pokemon : Pokemon = state.pokemon_du_dresseur[trainer]!
+  let pokemon : Pokemon = state.pokemon_des_dresseurs[trainer]!
   var numero_attack = random() % pokemon.moves.count
 
   //Va boucler si aucune attaque n'a de pp restant.
@@ -922,7 +925,7 @@ func choose_random_attack(state: State, trainer: Trainer) -> Move{
 
 //Nous dit s'il reste des pokemons vivants au dresseur passé en paramètre.
 func pokemon_alive_left(trainer: Trainer) -> Bool{
-  for pokemon in trainer.pokemon {
+  for pokemon in trainer.pokemons {
       if (pokemon.life != 0){
         return true
       }
@@ -931,25 +934,121 @@ func pokemon_alive_left(trainer: Trainer) -> Bool{
   return false
 }
 
+//Cette fonction fait se battre deux pokemons jusqu'à la mort de l'un des deux
+func two_pokemons_battle(state: inout State, behavior: (State, Trainer) -> Move) ->(){
+
+  var KO: Bool = false
+
+  //Tant que les deux pokemons ont encore des vies
+  while (!KO){
+    let moves: [Move] = [behavior(state, state.trainers[0]), behavior(state, state.trainers[1])]
+
+    var premier: Int = 0 //Variable indiquant quel pokemon attaqera en premier
+
+    let priority = moves[0].priority - moves[1].priority
+    let speed = state.pokemon_des_dresseurs[state.trainers[0]]!.effective_stats.speed - state.pokemon_des_dresseurs[state.trainers[1]]!.effective_stats.speed
+
+    //Détermination du pokemon attaquant le premier
+    if (priority < 0 ){
+      premier = 1
+    }
+    else if priority > 0{
+      premier = 0
+    }
+    else{ //priority == 0
+      if(speed < 0){
+        premier = 1
+      }
+      else if(speed > 0){
+        premier = 0
+      }
+      else{
+        premier = random() % 2
+      }
+    }
+
+    let deuxieme = 1 - premier
+
+    /*Je ne maitrise pas assez les notations et les effets de bords, dans ces langages sans pointeurs explicites
+     pour écire premier_pokemon = state.pokemon_des_dresseurs[state.trainers[0]]! et être sûr que tout se modifiera bien */
+
+     //On attaque
+     state.pokemon_des_dresseurs[state.trainers[deuxieme]]!.life = state.pokemon_des_dresseurs[state.trainers[deuxieme]]!.life - damage(environment: state.environment, pokemon: state.pokemon_des_dresseurs[state.trainers[premier]]!, move: moves[premier], target: state.pokemon_des_dresseurs[state.trainers[deuxieme]]! )
+
+     //Si le pokemon est KO
+     if(state.pokemon_des_dresseurs[state.trainers[deuxieme]]!.life < 0){
+       state.pokemon_des_dresseurs[state.trainers[deuxieme]]!.life = 0
+       KO = true
+     }
+     else{//Sinon, l'autre attaque
+       state.pokemon_des_dresseurs[state.trainers[premier]]!.life = state.pokemon_des_dresseurs[state.trainers[premier]]!.life - damage(environment: state.environment, pokemon: state.pokemon_des_dresseurs[state.trainers[deuxieme]]!, move: moves[deuxieme], target: state.pokemon_des_dresseurs[state.trainers[premier]]! )
+
+       if(state.pokemon_des_dresseurs[state.trainers[premier]]!.life < 0){
+         state.pokemon_des_dresseurs[state.trainers[premier]]!.life = 0
+         KO = true
+       }
+     }
+   }
+
+
+
+}
+
 
 //On va envoyer les pokemons dans l'ordre de l'équipe pour chaque dresseur.
+//On considère que trainers ne contient que deux éléments
+/*Les éléments manquant pour que ce soit un vrai combat pokemon sont: (liste non exhaustive)
+-La possibilité de choisir son attaque au lieu de la lancer aléatoirement
+-les attaques de status
+-les effets secondaires des attaques
+-La précision des attaques
+-Les effets secondaires des coups critiques (ne pas être affecter par les changements de stats par ex.)
+-la possibilité de changer de pokemon au cours d'un combat
+-les objets et talents des pokemons
+*/
+
 
 func battle(trainers: inout [Trainer], behavior: (State, Trainer) -> Move) -> () {
 
+  var state : State = State(
+    trainers: [trainers[0], trainers[1]],
+    //On initialise avec les deux premiers pokemons, on les changeras après si ils sont ko
+    pokemon_des_dresseurs: [trainers[0]: trainers[0].pokemons[0], trainers[1]: trainers[1].pokemons[0] ],
+    //On initialise un terrain normal et un ciel clair
+    environment: Environment(
+      weather: Weather.clear_skies,
+      terrain: Terrain.normal
+    )
+  )
+
+  //Tant qu'il reste des pokemon aux deux dresseurs
+  while (pokemon_alive_left(trainer: trainers[0]) && pokemon_alive_left(trainer: trainers[1])) {
+
+    if state.pokemon_des_dresseurs[trainers[0]]!.life == 0{
+      //On envoie le premier pokemon non ko
+      for pokemon in trainers[0].pokemons{
+        if pokemon.life > 0{
+          state.pokemon_des_dresseurs[trainers[0]] = pokemon
+        }
+      }
+    }
+
+    if state.pokemon_des_dresseurs[trainers[1]]!.life == 0{
+      //On envoie le premier pokemon non ko
+      for pokemon in trainers[1].pokemons{
+        if pokemon.life > 0{
+          state.pokemon_des_dresseurs[trainers[0]] = pokemon
+        }
+      }
+    }
 
 
+    //On fait se battre les pokemons jusqu'à la mort
+    two_pokemons_battle(state: &state, behavior: behavior)
 
 
-
-
-
-
-
-
-
-
-
-
+  }
+  //end while
 
 
 
