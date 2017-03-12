@@ -160,6 +160,7 @@ let move_reversal: Move = Move(
 	description: "Stronger if the user's HP is low.",
 	category: .physical,
 	type: .fighting,
+	// fix this so it actually uses the pokemon's hitpoints, whether it is this specific kangaskhan or not
 	power: computeReversalPower(currentHitpoints: Double(kangaskhan.current_stats.hitpoints), maxHitpoints: Double(kangaskhan.effective_stats.hitpoints)),	// ?
 	accuracy: 100,
 	powerpoints: 15,
@@ -203,6 +204,7 @@ let move_suckerPunch: Move = Move(
 )
 
 struct Pokemon {
+	let name			  : String
 	let nickname          : String?
 	let size              : Float
 	let weight            : Float
@@ -213,6 +215,11 @@ struct Pokemon {
 	let species           : Species
 	var moves             : [Move] // Move
 	var movePowerPoint	  : [Int] // remaining powerpoints
+	var statusCondition  : [Int]	// only major ones
+	// [burn, freeze, paralysis, (bad)poison, sleep, confusion]
+	// 0 if not affected, 1 if affected
+	// poison is 1, bad poison is 2
+	// for sleep and confusion, the Int is the number of turns that have passed while the condition was active
 	let base_values		  : Stats
 	let individual_values : Stats
 	var effort_values     : Stats
@@ -269,6 +276,7 @@ func computeStats(base_values: Stats, individual_values: Stats, effort_values: S
 }
 
 var kangaskhan = Pokemon(
+	name: "Kangaskhan",
 	nickname: "KANGS",
 	size: 2.2,
 	weight: 80,
@@ -279,6 +287,7 @@ var kangaskhan = Pokemon(
 	species: species_kangaskhan,
 	moves: [move_reversal, move_earthquake,	move_iceBeam, move_suckerPunch],
 	movePowerPoint: [15,10,10,5],
+	statusCondition: [0, 0, 0, 0, 0, 0],
 	base_values: species_kangaskhan.base_values,
 	individual_values: Stats(
 		hitpoints: 31,
@@ -302,7 +311,7 @@ var kangaskhan = Pokemon(
 		special_defense: 0,
 		speed: 0),
 	current_stats: Stats(
-		hitpoints: 2,
+		hitpoints: 0,
 		attack: 0,
 		defense: 0,
 		special_attack: 0,
@@ -311,6 +320,7 @@ var kangaskhan = Pokemon(
 )
 
 var kangaskhan2 = Pokemon(
+	name: "Kangaskhan",
 	nickname: "KANGS2",
 	size: 2.2,
 	weight: 80,
@@ -321,6 +331,7 @@ var kangaskhan2 = Pokemon(
 	species: species_kangaskhan,
 	moves: [move_reversal, move_earthquake,	move_iceBeam, move_suckerPunch],
 	movePowerPoint: [15,10,10,5],
+	statusCondition: [0, 0, 0, 0, 0, 0],
 	base_values: species_kangaskhan.base_values,
 	individual_values: Stats(
 		hitpoints: 31,
@@ -344,7 +355,7 @@ var kangaskhan2 = Pokemon(
 		special_defense: 0,
 		speed: 0),
 	current_stats: Stats(
-		hitpoints: 2,
+		hitpoints: 0,
 		attack: 0,
 		defense: 0,
 		special_attack: 0,
@@ -366,6 +377,10 @@ struct Trainer {
 	var bag: [Item]
 }
 
+func ==(lhs: Trainer, rhs: Trainer) -> Bool {
+    return lhs.name == rhs.name
+}
+
 let trainerA: Trainer = Trainer(
 	name: "Trainer A",
 	party: [kangaskhan],
@@ -378,7 +393,7 @@ let trainerB : Trainer = Trainer(	// maybe add some other pokemon
 	bag: []
 )
 
-let trainers: [Trainer] = [trainerA, trainerB]
+var trainers: [Trainer] = [trainerA, trainerB]
 
 struct Environment {
     var weather : Weather
@@ -447,14 +462,21 @@ func typeModifier(attacking: Type, defending : Type)-> Double {
 
 
 // http://bulbapedia.bulbagarden.net/wiki/Damage
-func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pokemon) -> Double {
+// add environment effect
+func damage(pokemon: Pokemon, move: Move, target: Pokemon) -> Double {
 
 	var STAB : Double = 1 // initialise with non-STAB multiplier value
-	if ( (kangaskhan.type.0 == move.type) || (pokemon.type.1 == move.type) ) {STAB = 1.5}
+	if ( (pokemon.type.0 == move.type) || (pokemon.type.1 == move.type) ) {STAB = 1.5}
 
 	var typeBonus: Double = typeModifier(attacking: move.type, defending: target.type.0)
 	if (pokemon.type.1 != nil)
-		{typeBonus = typeBonus * typeModifier(attacking: move.type, defending: target.type.1!)}
+		{ typeBonus *= typeModifier(attacking: move.type, defending: target.type.1!) }
+	if (typeBonus == 0)
+		{ print("It doesn't affect", target, "...") }
+	else if ((typeBonus == 0.25) || (typeBonus == 0.5))
+		{ print("It's not very effective...") }
+	else if ((typeBonus == 2) || (typeBonus == 4))
+		{ print("It's super effective!") }
 
 	var critical: Double = 1 // initialise with non-crit mult value
 	let randNum: Int = Int(drand48() * 257) // random int between 0 and 256 (included)
@@ -466,41 +488,51 @@ func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pok
 
 	let randFactor: Double = ((drand48() * 0.15) + 0.85)	// uniformly distributed between 0.85 and 1
 
-	let modifier : Double = STAB * typeBonus * critical * environmentBonus * randFactor
+	let others: Double = 1 // actually calculate this. burn, items, etc.
+
+	let modifier : Double = STAB * typeBonus * critical * environmentBonus * randFactor * others
 
 	let tempDamage: Double = (2 * pokemon.level + 10) / 250
-
-	let attDef: Double
-	if (move.category == .physical) { attDef = pokemon.effective_stats.attack / target.effective_stats.defense }
-	else if (move.category == .special) { attDef = pokemon.effective_stats.special_attack / target.effective_stats.special_defense }
-	else { attDef = 0 }
-
-	let damage : Double = (tempDamage * attDef * Double(move.power) * 2) * modifier
+	let attDefRatio: Double
+	if (move.category == .physical) { attDefRatio = pokemon.effective_stats.attack / target.effective_stats.defense }
+	else if (move.category == .special) { attDefRatio = pokemon.effective_stats.special_attack / target.effective_stats.special_defense }
+	else { attDefRatio = 0 }
+	let damage : Double = (tempDamage * attDefRatio * Double(move.power) * 2) * modifier
     return damage
 }
 
 struct State {
     // TODO: describe a battle state
+	// is this even needed? all factors are already accounted for, unless you go into some VERY specific details
 }
 
 
 
-func battle(trainers: inout [Trainer], behavior: (State, Trainer) -> Move) -> () {
+func battle(trainers: inout [Trainer]) -> () {
 
-    // TODO:
 	print("intro blah blah goes here")
 
 	var partyA: [Pokemon]? = trainers[0].party	// player
 	var partyB: [Pokemon]? = trainers[1].party	// pc
+	//var partyAFainted: [Pokemon]? = nil
+	//var partyBFainted: [Pokemon]? = nil
 
-	// check nicknames, if they exist use them instead of standard names
 
-	print("trainer a sent out", partyA![0], "trainer B sent out", partyB![0])
+	for _ in partyA! {	// sets pokemon stats to their "default" level (all pokemon, for both trainers)
+		partyA![0].current_stats = partyA![0].effective_stats
+	}
+	for _ in partyB! {
+		partyB![0].current_stats = partyB![0].effective_stats
+	}
+
+
+	// TODO: check nicknames, if they exist use them instead of standard names
+
+	print("trainer A sent out", partyA![0].name, "trainer B sent out", partyB![0].name)
 
 	while (partyA != nil && partyB != nil) {
 
-		// get environment info
-		// print if non-default
+		// TODO: get environment info, print if non-default
 
 		/*
 		print("what to do? [F]ight, [B]ag, [P]okemon")	//pick player move
@@ -514,8 +546,6 @@ func battle(trainers: inout [Trainer], behavior: (State, Trainer) -> Move) -> ()
 				// ask for user input
 				// check move has PP left
 					// damage + effects
-
-
 		}
 		else if ( playerMove == "B" || playerMove == "b" || playerMove == "Bag" || playerMove == "bag" ) {
 			// print contents of bag with an index
@@ -532,26 +562,67 @@ func battle(trainers: inout [Trainer], behavior: (State, Trainer) -> Move) -> ()
 		}
 		*/
 
+		// get moves
 		// the "move" is just randomly chosen between the known moves, eventually expand this to allow for user input and to change pokemon and use items
-		var moveAIndex: Int = Int(drand48()*5) // does this round or truncate? also assumes a pokemon knows four moves
-		var moveBIndex: Int = Int(drand48()*5)
-		var moveA: Move = partyA![0].moves[moveAIndex]
-		var moveB: Move = partyB![0].moves[moveBIndex]
+		let moveAIndex: Int = Int(drand48()*5) // assumes a pokemon knows four moves; fix this to get real move count
+		let moveBIndex: Int = Int(drand48()*5)
+		let moveA: Move = partyA![0].moves[moveAIndex]
+		let moveB: Move = partyB![0].moves[moveBIndex]
 
-		let firstToMove, secondToMove: Trainer
-		if (moveA.priority > moveB.priority)
-			{ 		}
+		// TODO: check PPs!
 
-		// trainers pick a move, or switch pokemon, or use an object
-			// pokemon: check it's valid and non-KO, priority 6
-			// obj: check it's valid, priority 6
-			// move: check that it's a valid move, and that it has PP left
-		// same priority?
-			// y:
-				// both are non-damaging: random order (or determined by speed??)
-				// one is damaging: non-damaging first
-				// both are damaging: speed determines order
-			// n: higher priority first
+		// TODO: print("A's pokemon used", moveA)
+
+		// compute move order for the current turn
+		// priority: non-damaging
+		//				higher move priority
+		//					higher pokemon speed
+		let firstToMove: Trainer
+		if ( (moveA.power == 0) || (moveB.power != 0) )
+			{firstToMove =  trainerA}
+		else if ( (moveA.power != 0) || (moveB.power == 0) )
+			{firstToMove =  trainerB}
+		else {
+			if (moveA.priority > moveB.priority)
+				{firstToMove =  trainerA}
+			else if (moveA.priority < moveB.priority)
+				{firstToMove =  trainerB}
+			else {
+				if (partyA![0].effective_stats.speed > partyB![0].effective_stats.speed)
+					{firstToMove =  trainerA}
+				else if (partyA![0].effective_stats.speed < partyB![0].effective_stats.speed)
+					{firstToMove =  trainerB}
+				else {	//same speed and priority -> random order
+					if (drand48() > 0.5)
+						{firstToMove =  trainerA}
+					else
+						{firstToMove =  trainerA}
+				}
+			}
+
+		// TODO: check if move changes weather, act accordingly
+		// TODO: check if move changes stats, act accordingly
+
+		// first deals damage to second
+		// TODO: rly ugly, fix
+		if firstToMove == trainerA {
+			let damageDone = damage(pokemon: trainers[0].party[0], move: moveA, target: trainers[1].party[0])
+			trainers[1].party[0].current_stats.hitpoints -=  damageDone
+			print(trainers[1].party[0], "HP:", trainers[1].party[0].current_stats.hitpoints, "/", trainers[1].party[0].current_stats.hitpoints)
+			// TODO: recoil
+			if (trainers[1].party[0].current_stats.hitpoints == 0) {
+				print(trainers[1].party[0], "fainted!")
+				swap(&trainers[1].party[0], &trainers[1].party[1])
+				//if
+			}
+		}
+		else {
+			// trainerB goes first
+		}
+
+
+
+
 		// first to move
 			// check status conditions, see if move can be executed (can always switch pokemon)
 				// move changes weather?
@@ -590,11 +661,6 @@ func battle(trainers: inout [Trainer], behavior: (State, Trainer) -> Move) -> ()
 								// y: second tries sending out another pokemon
 		// nonzero status conditions on either pokemon: apply effects
 			// KO? try sending out another pokemon
+		}
 	}
-}
-
-
-func initialise() -> Int {
-	// call other stuff here
-	return 0
 }
