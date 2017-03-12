@@ -192,7 +192,7 @@ struct Pokemon {
   let level             : Int
   let nature            : Nature
   let species           : Species
-  let moves             : [Move: Int] // Move -> remaining powerpoints
+  let moves             : [Move?]
   let individual_values : Stats
   let effort_values     : Stats
   var effective_stats   : Stats
@@ -711,10 +711,10 @@ var pokemon_Tyranitar = Pokemon(
   level : 50,
   nature : .hardy,
   species : species_Tyranitar,
-  moves : [move_earthquake : move_earthquake.powerpoints,
-          move_stone_edge : move_stone_edge.powerpoints,
-          move_bite : move_bite.powerpoints,
-          move_fire_fang : move_fire_fang.powerpoints],
+  moves : [move_earthquake,
+          move_stone_edge,
+          move_bite,
+          move_fire_fang],
   individual_values : Stats(hitpoints : 5, attack : 6, defense : 5, special_attack : 5, special_defense : 5, speed : 5),
   effort_values : Stats(hitpoints : 0, attack : 0, defense : 0, special_attack : 0, special_defense : 0, speed : 0),
   effective_stats : Stats(
@@ -731,6 +731,15 @@ var pokemon_Tyranitar = Pokemon(
 /******************************************************************************
 *******************************************************************************
 ******************************************************************************/
+
+
+/****************************** STATE Struct *********************************/
+struct State {
+    var pokemon1_hp : Int
+    var pokemon2_hp : Int
+}
+
+
 
 func Environment_Modifier(_ environment : Environment, _ move : Move) -> Double {
   var Modifier : Double = 1
@@ -759,7 +768,7 @@ func critical(_ pokemon : Pokemon) -> Double{
 
 
 // http://bulbapedia.bulbagarden.net/wiki/Damage
-func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pokemon) -> Double {
+func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pokemon) -> Int {
 
   /* Random for the modifier calculations */
   #if os(Linux)
@@ -780,7 +789,7 @@ func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pok
     let help2 : Int = (help1 * (pokemon.effective_stats.attack / target.effective_stats.defense)) / 50
     let help3 : Double = ((Double)(help2) + 2.0) * modifier
 
-    let damage = floor(help3)
+    let damage = Int(floor(help3))
     return damage
 }
 
@@ -818,9 +827,44 @@ func check_order(_ pokemon1 : Pokemon, _ move1 : Move, _ pokemon2 : Pokemon, _ m
 }
 
 
+/* User choses attack of the Pokemons */
+func chose_attack(_ pokemon1 : Pokemon, _ pokemon2 : Pokemon) -> (Int, Int) {
+  print("Chose attack for \(pokemon1.species.name) between :")
+  print("1: \(pokemon1.moves[0])")
+  print("2: \(pokemon1.moves[1])")
+  print("3: \(pokemon1.moves[2])")
+  print("4: \(pokemon1.moves[3])")
+
+  print("Please input the Integer of the move :")
+  let move_pokemon1 = readLine()
 
 
+  print("Chose attack for \(pokemon2.species.name) between :")
+  print("1: \(pokemon2.moves[0])")
+  print("2: \(pokemon2.moves[1])")
+  print("3: \(pokemon2.moves[2])")
+  print("4: \(pokemon2.moves[3])")
 
+  print("Please input the Integer of the move :")
+  let move_pokemon2 = readLine()
+
+
+  return (Int(move_pokemon1!)!, Int(move_pokemon2!)!)
+}
+
+func one_turn(_ pokemon1 : Pokemon, _ pokemon2 : Pokemon){
+
+  let chosen_attacks : (Int, Int) = chose_attack(pokemon1, pokemon2)
+  let move_used_pokemon1 : Int = chosen_attacks.0 - 1
+  let move_used_pokemon2 : Int = chosen_attacks.1 - 1
+  let pokemon_priority : Int = check_order(pokemon1, pokemon1.moves[move_used_pokemon1]!, pokemon2, pokemon2.moves[move_used_pokemon2]!, first_random)
+
+  //if (pokemon_priority == 1) {
+    //let dmg : Int = damage()
+//  }
+
+
+}
 
 // func battle(trainers: inout [Trainer], behavior: (State, Trainer) -> Move) -> () {
     // TODO: simulate battle
