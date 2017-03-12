@@ -239,7 +239,8 @@ struct Pokemon {
 
 
 struct Trainer {
-    let pokemons : [Pokemon]
+  let name : String
+  let pokemons : [Pokemon]
 }
 
 struct Environment {
@@ -755,7 +756,11 @@ var Battle_State = State(
   pokemon1_hp : 0,
   pokemon2_hp : 0
 )
+/******************************************************************************/
 
+
+
+/*************************** Check state of combat ****************************/
 func check_state(_ combat_state : State) -> Bool {
   if (combat_state.pokemon1_hp <= 0) {
     return true
@@ -765,7 +770,11 @@ func check_state(_ combat_state : State) -> Bool {
     return false
   }
 }
+/******************************************************************************/
 
+
+
+/*********************** Environment modifier *********************************/
 func Environment_Modifier(_ environment : Environment, _ move : Move) -> Double {
   var Modifier : Double = 1
   switch (environment.weather, move.type) {
@@ -777,7 +786,11 @@ func Environment_Modifier(_ environment : Environment, _ move : Move) -> Double 
     }
   return Modifier
 }
+/******************************************************************************/
 
+
+
+/*********************** Critical chance calculator ***************************/
 func critical(_ pokemon : Pokemon) -> Double{
   let crit_base = pokemon.species.base_values.speed / 2
 
@@ -790,8 +803,11 @@ func critical(_ pokemon : Pokemon) -> Double{
   let crit : Double = crit_base < random1 ? 2 : 1
   return crit
 }
+/*******************************************************************************/
 
 
+
+/********************************** Damage ************************************/
 // http://bulbapedia.bulbagarden.net/wiki/Damage
 func damage(_ environment : Environment, _ pokemon: Pokemon, _ move: Move, _ target: Pokemon) -> Int {
 
@@ -817,8 +833,11 @@ func damage(_ environment : Environment, _ pokemon: Pokemon, _ move: Move, _ tar
     let damage = Int(floor(help3))
     return damage
 }
+/******************************************************************************/
 
-/* Initialise variable to chose first one to move if everything is equal */
+
+
+/**************************** Check order *************************************/
 let first_random : Int = 1
 
 func check_order(_ pokemon1 : Pokemon, _ move1 : Move, _ pokemon2 : Pokemon, _ move2 : Move, _ first_random : Int) -> Int{
@@ -848,9 +867,11 @@ func check_order(_ pokemon1 : Pokemon, _ move1 : Move, _ pokemon2 : Pokemon, _ m
   }
   return first_move
 }
+/******************************************************************************/
 
 
-/* User choses attack of the Pokemons */
+
+/****************************** Chose attack **********************************/
 func chose_attack(_ pokemon1 : Pokemon, _ pokemon2 : Pokemon) -> (Int, Int) {
   /* Chose attack for 1st Pokemon */
   print("Chose attack for \(pokemon1.species.name) between :")
@@ -875,8 +896,11 @@ func chose_attack(_ pokemon1 : Pokemon, _ pokemon2 : Pokemon) -> (Int, Int) {
   /* Return values of attacks */
   return (Int(move_pokemon1!)!, Int(move_pokemon2!)!)
 }
+/******************************************************************************/
 
 
+
+/****************************** One trun **************************************/
 func one_turn(_ pokemon1 : Pokemon, _ moves_pokemon1_temp : Move_temp, _ pokemon2 : Pokemon , _ moves_pokemon2_temp : Move_temp, _ environment : Environment) -> Bool{
 
 
@@ -914,43 +938,100 @@ func one_turn(_ pokemon1 : Pokemon, _ moves_pokemon1_temp : Move_temp, _ pokemon
   }
   return false
 }
+/******************************************************************************/
 
-func pokemon_battle(_ pokemon1 : Pokemon, _ pokemon2 : Pokemon, _ environment_battle : Environment) -> () {
+
+
+/************************** Switch pokemon ************************************/
+
+func switch_pokemon (_  what_trainer : Trainer) -> Int{
+
+  print("Trainer \(what_trainer.name) wishes to change pokemon ? (y / n)")
+  let answer = readLine()
+
+  if (answer! == "y"){
+    print("What pokemon do you wish to use ?")
+    for k in 0...5{
+      print("\(k+1) : \(what_trainer.pokemons[k].species.name)")
+    }
+    let pokemon_to_put = readLine()
+    let pokemon_int : Int = (Int)(pokemon_to_put!)!
+    return pokemon_int
+  }
+  return 0
+}
+
+/******************************************************************************/
+
+
+
+/************************** Pokemon Battle ************************************/
+func pokemon_battle(_ pokemon1 : Pokemon, _ pokemon2 : Pokemon, _ environment_battle : Environment, _ trainer1 : Trainer, _ trainer2 : Trainer) -> () {
+
+  var var_pokemon1 : Pokemon = pokemon1
+  var var_pokemon2 : Pokemon = pokemon2
 
 
   var end_battle : Bool = false
-  var Test_variable_state : Int = 0
-
-  if (Test_variable_state == 0) {
-    Battle_State.pokemon1_hp = pokemon1.hitpoints
-    Battle_State.pokemon2_hp = pokemon2.hitpoints
-    Test_variable_state = 1
-  }
-
-  var Test_variable_move : Int = 0
-  
-  if (Test_variable_move == 0) {
-    moves_pokemon1_temp.move1[0] = pokemon1.moves[0]!
-    moves_pokemon1_temp.move1[1] = pokemon1.moves[1]!
-    moves_pokemon1_temp.move1[2] = pokemon1.moves[2]!
-    moves_pokemon1_temp.move1[3] = pokemon1.moves[3]!
-
-    moves_pokemon2_temp.move1[0] = pokemon1.moves[0]!
-    moves_pokemon2_temp.move1[1] = pokemon1.moves[1]!
-    moves_pokemon2_temp.move1[2] = pokemon1.moves[2]!
-    moves_pokemon2_temp.move1[3] = pokemon1.moves[3]!
-
-    Test_variable_move = 1
-  }
-
-
+  var Test_variable_battle : Int = 0
 
   while !(end_battle){
+
+    let switch_1 = switch_pokemon(trainer1)
+
+    switch (switch_1){
+      case 1 : var_pokemon1 = trainer1.pokemons[0]
+      case 2 : var_pokemon1 = trainer1.pokemons[1]
+      case 3 : var_pokemon1 = trainer1.pokemons[2]
+      case 4 : var_pokemon1 = trainer1.pokemons[3]
+      case 5 : var_pokemon1 = trainer1.pokemons[4]
+      case 6 : var_pokemon1 = trainer1.pokemons[5]
+    default : Test_variable_battle = 1
+    }
+
+    let switch_2 = switch_pokemon(trainer2)
+    switch (switch_2){
+      case 1 : var_pokemon2 = trainer2.pokemons[0]
+      case 2 : var_pokemon2 = trainer2.pokemons[1]
+      case 3 : var_pokemon2 = trainer2.pokemons[2]
+      case 4 : var_pokemon2 = trainer2.pokemons[3]
+      case 5 : var_pokemon2 = trainer2.pokemons[4]
+      case 6 : var_pokemon2 = trainer2.pokemons[5]
+      default : Test_variable_battle = 1
+    }
+
+    if (Test_variable_battle == 0) {
+
+      Battle_State.pokemon1_hp = var_pokemon1.hitpoints
+      Battle_State.pokemon2_hp = var_pokemon2.hitpoints
+
+      /* pokemon 1 moves into temp moves 1 */
+      moves_pokemon1_temp.move1[0] = var_pokemon1.moves[0]!
+      moves_pokemon1_temp.move1[1] = var_pokemon1.moves[1]!
+      moves_pokemon1_temp.move1[2] = var_pokemon1.moves[2]!
+      moves_pokemon1_temp.move1[3] = var_pokemon1.moves[3]!
+
+      /* pokemon 2 moves into temp moves 2 */
+      moves_pokemon2_temp.move1[0] = var_pokemon2.moves[0]!
+      moves_pokemon2_temp.move1[1] = var_pokemon2.moves[1]!
+      moves_pokemon2_temp.move1[2] = var_pokemon2.moves[2]!
+      moves_pokemon2_temp.move1[3] = var_pokemon2.moves[3]!
+
+      Test_variable_battle = 1
+    }
+
     chose_attack(pokemon1, pokemon2)
-    end_battle = one_turn(pokemon1, moves_pokemon1_temp, pokemon2, moves_pokemon2_temp, environment_battle)
+    end_battle = one_turn(var_pokemon1, moves_pokemon1_temp, var_pokemon2, moves_pokemon2_temp, environment_battle)
+
+    /* Reset of test variable */
+    Test_variable_battle = 0
+
   }
 
 }
+/******************************************************************************/
+
+
 
 /*func trainer_battle(_ trainer1 : Trainer, _ trainer2 : Trainer, environment_battle : Environment) {
 
