@@ -823,7 +823,12 @@ currentState.pokemon1.hitpoints = currentState.pokemon2.hitpoints - DMG;
 if currentState.pokemon2.hitpoints <= 0 {
   print("Msties pokemon fainted")
   print("Ash is the winner")
+}else{
+  //next turn
+  turn = 2
+  go()
 }
+
 }
 if turn == 2 {
   print("player2 turn")
@@ -862,6 +867,10 @@ currentState.pokemon2.hitpoints = currentState.pokemon1.hitpoints - DMG;
 if currentState.pokemon1.hitpoints <= 0 {
   print("Ashs pokemon fainted")
   print("Mystie is the winner")
+}else{
+  //next turn
+  turn = 1
+  go()
 }
 
   }
