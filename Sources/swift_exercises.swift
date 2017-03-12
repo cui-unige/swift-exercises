@@ -123,7 +123,7 @@ func ==(lhs: Species, rhs: Species) -> Bool {
     return lhs.id == rhs.id
 }
 
-// TODO: create some species
+//create some species
 // Do you use an enum, a map or constants/variables?
 // http://bulbapedia.bulbagarden.net/wiki/List_of_Pokémon_by_National_Pokédex_number
 
@@ -173,7 +173,6 @@ let squirtle = Species(
 )
 
 // Dracaufeu Théo David Giovanna
-
 // attacks
 let moveAirSlash = Move(id: 1, name: "Air Slash", description: "Air Slash deals damage and has a 30% chance of causing the target to flinch", category: Category.special, type: Type.flying, power: 75, accuracy: 95, powerpoints: 20, priority: 0)
 
@@ -242,11 +241,11 @@ let pikachu = Species(id: 025,
 
 // Fonction qui renvoie la partie de gauche des effective stats pour cette formule: http://bulbapedia.bulbagarden.net/wiki/Statistic
 func calcule_effective_stats(Base: Int, IV: Int, EV: Int, Level: Int) -> Int {
-let var1: Int = EV/4 // Lors de la division par 4 d'un int, il devient un int
-let var2: Int = (2*Base + IV + var1)*Level/100 //idem
+  let var1: Int = EV/4 // Lors de la division par 4 d'un int, il devient un int
+  let var2: Int = (2*Base + IV + var1)*Level/100 //idem
 
-return var2;
-}
+  return var2;
+  }
 
 // Création de Stats_enum qui permet de faire un case dans la fonction qui suit
 enum Stats_enum {
@@ -423,6 +422,7 @@ struct Pokemon {
 }
 
 struct Trainer {
+    let name: String!
     let pokemons : [Pokemon]
 }
 
@@ -860,22 +860,21 @@ struct attacks{
 /* Cette structure permet de savoir l'état d'un match */
 
 struct State{
-   // TODO: describe a battle
+
    // joueur 1
    let trainer1: Trainer;
-   let pokemon1: Pokemon; // il s'agit du pokemon actuellement selectionné
+   var pokemon1: Pokemon?; // il s'agit du pokemon actuellement selectionné
    var pokemon1_dispo: [Pokemon]; // les pokemons restants pour le joueur 1
    var pokemon1_HS: [Pokemon]; // pokemon
 
    // joueur 2
    let trainer2: Trainer;
-   let pokemon2: Pokemon;
+   var pokemon2: Pokemon?;
    var pokemon2_dispo: [Pokemon]; // les pokemons restants pour le joueur 2
    var pokemon2_HS: [Pokemon]; // pokemon
 
    // milieu de jeu
-   var environement: Environment;
-   let terrain: Terrain;
+  // var environement: Environment;
 
    // tout les attaques utilisés selon l'ordre
    var all_attacks: [attacks];
@@ -915,11 +914,11 @@ let charizard_paul = Pokemon(
 
 )
 
-var Paul = Trainer(pokemons: [pikachu_paul, charizard_paul]);
+var Paul = Trainer(name: "Paul", pokemons: [pikachu_paul, charizard_paul]);
 
-var Martin = Trainer(pokemons: [pikachu_paul, charizard_paul]);
+var Martin = Trainer(name: "Martin", pokemons: [pikachu_paul, charizard_paul]);
 
-var Diego = Trainer(pokemons: [pikachu_paul, charizard_paul]);
+var Diego = Trainer(name: "Diego", pokemons: [pikachu_paul, charizard_paul]);
 
 var all_Trainer: [Trainer] = [Paul, Martin, Diego];
 
@@ -938,18 +937,20 @@ func entree_juste(entree : String?, nb: Int)-> Bool {
 
 }
 
+/* TODO: readline probleme */
 func tester_une_fonction() {
-    var rejouer : Int = 1;
+    var rejouer : Int = 0;
     repeat {
+
       /*######### Est-ce-que le joueur veut rejouer? ##################*/
-      print("\n\nVoulez-vous rejouer? [Y/N : par défaut le jeu se termine]\n\n")
+      print("\n\nVoulez-vous rejouer? [Y/N : par défaut le jeu se termine]\n")
 
-      let utilisateur_rejouer: String? = readLine()
-
+      let utilisateur_rejouer: String? = readLine(strippingNewline: true);
       if (utilisateur_rejouer == "y" )||(utilisateur_rejouer == "Y") {
+          print("Vous avez choisi de rejouer.\n")
           rejouer = 1;
       } else {
-        rejouer = 0;
+        print("Vous avez choisi d'arrêter de jouer\n")
       }
 
   }  while (rejouer == 1) // repeat while pour rejouer
@@ -957,8 +958,18 @@ func tester_une_fonction() {
 
 
 
-
-
+/* Fonction qui permet de retirer un pokemon d'un tableau de pokemon */
+func remove_pokemon(array: [Pokemon], element: Pokemon?) -> [Pokemon] {
+  if element != nil {
+    let index_a_supp = array.index(where: { (item) -> Bool in item.nickname == element!.nickname} )
+    var array_copie = array;
+    array_copie.remove(at: index_a_supp!)
+    return array_copie
+  }
+  else {
+    return array
+  }
+}
 
 func battle(trainers: inout [Trainer], behavior: (State, Trainer) -> Move) -> () {
     // TODO: simulate battle
@@ -968,13 +979,14 @@ func battle(trainers: inout [Trainer], behavior: (State, Trainer) -> Move) -> ()
     repeat {
 
 
+
     /* ######## Début, choix du joueur ######## */
 
     /* ******* Utilisateur choisi ******** */
     print("Veuillez choisir votre joueur:");
 
     for i in 0 ... (all_Trainer.count - 1) {
-        print("\(i+1) name: \(all_Trainer[i+1])\n");
+        print("\(i+1) name: \(all_Trainer[i].name)\n");
     }
 
     var entree_utilisateur: String?; // var qui contient l'entrée de l'Utilisateur
@@ -986,11 +998,12 @@ func battle(trainers: inout [Trainer], behavior: (State, Trainer) -> Move) -> ()
 
     // la variable semble etre bon, nous pouvons faire un unwrapping et utiliser la valeur
 
-    let entree_int_user = Int(entree_utilisateur!)! - 1;
+    var entree_int_user = Int(entree_utilisateur!)! - 1;
 
-    print("\nVous avez choisi \(all_Trainer[entree_int_user]). Un très bon choix!\n");
+    print("\nVous avez choisi \(all_Trainer[entree_int_user].name). Un très bon choix!\n");
 
-    let joueur_IRL: Trainer = all_Trainer[entree_int_user];
+    var joueur_IRL: Trainer = all_Trainer[entree_int_user];
+
 
     /* ******* Ordinateur choisi ******** */
 
@@ -1000,32 +1013,159 @@ func battle(trainers: inout [Trainer], behavior: (State, Trainer) -> Move) -> ()
       /* utilisation de arc4random a des pb sur linux
          voir lien: https://bugs.swift.org/browse/SR-685
       */
-      /*  #if os(Linux)
-            var ordi_player = Int(random() % (all_Trainer.count + 1))
-        #else
-            var ordi_player = Int(arc4random_uniform(UInt32(all_Trainer.count)))
-        #endif
-      */
-      //var ordi_player = arc4random_uniform(all_Trainer.count) // génère un nb entre 0 et la valeur entrée - 1
+      /* TODO: PROBLEME RANDOM*/
+  /*    #if os(Linux)
+          var ordi_player = Int(random() % (all_Trainer.count + 1))
+      #else
+          var ordi_player = Int(arc4random_uniform(all_Trainer.count))
+      #endif
 
       // TODO: faire en sorte que le random fonctionne
-
-      ordi_player = entree_int_user + 1;
+*/
+        ordi_player = entree_int_user + 1;
 
     } while (ordi_player == entree_int_user)
 
-    let joueur_PC = all_Trainer[ordi_player];
+    var joueur_PC = all_Trainer[ordi_player];
 
-    print("L'ordinateur a choisi \(all_Trainer[ordi_player]).\n");
-
-
+    print("L'ordinateur a choisi \(all_Trainer[ordi_player].name).\n");
 
 
+    var pokemon_actuel_joueur : Pokemon?;
+    var pokemon_actuel_PC : Pokemon?;
+
+
+
+    /* #################### Choix du Pokemon ################## */
+
+    /* choix de l'utilisateur */
+    print("\nVeuillez choisir votre Pokemon:\n")
+
+    for i in 1 ... joueur_IRL.pokemons.count {
+      print("\(i). \(joueur_IRL.pokemons[i-1].nickname!)\n")
+    }
+
+    var entree_utilisateur_pokemon: String?
+
+    repeat {
+        entree_utilisateur_pokemon = readLine()
+    } while (entree_juste(entree: entree_utilisateur_pokemon, nb: joueur_IRL.pokemons.count))
+
+
+    var entree_int_user_pokemon = Int(entree_utilisateur_pokemon!)! - 1;
+      pokemon_actuel_joueur = joueur_IRL.pokemons[entree_int_user_pokemon];
+      print("Vous avez choisi: \(joueur_IRL.pokemons[entree_int_user_pokemon].nickname!)\n")
+
+
+    /* Choix du PC */
+
+    // TODO: random
+    var choix_pokemon_PC = entree_int_user_pokemon + 1;
+    pokemon_actuel_PC = joueur_PC.pokemons[choix_pokemon_PC];
+    print("Le PC a choisi: \(joueur_PC.pokemons[choix_pokemon_PC].nickname!)\n")
 
 
     /*##################### COMBAT ###################*/
 
     /* le combat se déroule entre joueur_IRL et joueur_PC */
+
+    var round: Int = 1;
+
+    var jeu_actuel = State(
+                            trainer1 : joueur_IRL,
+                            pokemon1: pokemon_actuel_joueur,
+                            pokemon1_dispo: joueur_IRL.pokemons,
+                            pokemon1_HS: [],
+
+                            trainer2: joueur_PC,
+                            pokemon2: pokemon_actuel_PC,
+                            pokemon2_dispo: joueur_PC.pokemons,
+                            pokemon2_HS: [],
+
+                        //    environment:
+
+
+                            all_attacks: []
+    )
+
+    // Début du jeu, nous enlevons le premier pokemon en cours d'utilisation des pokemons dispo
+
+    jeu_actuel.pokemon1_dispo = remove_pokemon(array: jeu_actuel.pokemon1_dispo, element: jeu_actuel.pokemon1)
+    jeu_actuel.pokemon2_dispo = remove_pokemon(array: jeu_actuel.pokemon2_dispo, element: jeu_actuel.pokemon2)
+
+  var a_qui_le_tour: Int = 1; // vaut 1 s'il s'agit du joueur ou 2 s'il s'agit du PC
+  
+    print("####### DEBUT DU JEU #######\n\t\(joueur_IRL.name!) VS \(joueur_PC.name!)\n")
+    repeat {
+
+      print("###### ROUND \(round) #####\n")
+
+
+
+        round = round + 1;
+    } while ((jeu_actuel.pokemon1_dispo.count > 0) && (jeu_actuel.pokemon1 != nil)) || ((jeu_actuel.pokemon2_dispo.count > 0) && (jeu_actuel.pokemon2 != nil))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
