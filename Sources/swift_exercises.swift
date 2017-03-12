@@ -422,14 +422,14 @@ case .quirky: return Stats(
 
 struct Pokemon {
     let nickname          : String?
-    let damages           : Int // hitpoints loses
+    let life              : Int // vie restante
     let size              : Int
     let weight            : Int
     let experience        : Int
     let level             : Int
     let nature            : Nature
     let species           : Species
-    let moves             : [Move: Int] // Move -> remaining powerpoints
+    let moves             : [(move: Move, pp: Int)] // Move -> remaining powerpoints, j'ai décidé d'en faire un tupple  plutôt qu'un dictionnaire, je trouvais plus pratique
     let individual_values : Stats
     let effort_values     : Stats
     // DONE: implement the effective stats as a computed property:
@@ -449,7 +449,18 @@ struct Pokemon {
 
 
 struct Trainer {
+    let name : String
     let pokemons : [Pokemon]
+}
+
+extension Trainer : Hashable {
+  var hashValue: Int{
+    return name.hashValue
+  }
+
+  static func == (lhs : Trainer, rhs: Trainer) -> Bool{
+    return lhs.name == rhs.name
+  }
 }
 
 struct Environment {
@@ -887,9 +898,59 @@ func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pok
 }
 
 struct State {
-    // TODO: describe a battle state
+    //Les pokemons en jeux, selon le dresseur.
+    var pokemon_du_dresseur: [Trainer : Pokemon]
+
+
+
 }
 
+//La fonction behaviour
+func choose_random_attack(state: State, trainer: Trainer) -> Move{
+  let pokemon : Pokemon = state.pokemon_du_dresseur[trainer]!
+  var numero_attack = random() % pokemon.moves.count
+
+  //Va boucler si aucune attaque n'a de pp restant.
+  //La manière de boucler induit un biais sur l'attaque choise si il y en a avec 0 pp.
+  while (pokemon.moves[numero_attack].pp == 0){
+  numero_attack = (numero_attack + 1) %  pokemon.moves.count
+  }
+
+  return pokemon.moves[numero_attack].move
+}
+
+
+//Nous dit s'il reste des pokemons vivants au dresseur passé en paramètre.
+func pokemon_alive_left(trainer: Trainer) -> Bool{
+  for pokemon in trainer.pokemon {
+      if (pokemon.life != 0){
+        return true
+      }
+  }
+
+  return false
+}
+
+
+//On va envoyer les pokemons dans l'ordre de l'équipe pour chaque dresseur.
+
 func battle(trainers: inout [Trainer], behavior: (State, Trainer) -> Move) -> () {
-    // TODO: simulate battle
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
