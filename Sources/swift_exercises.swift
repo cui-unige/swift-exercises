@@ -941,9 +941,20 @@ func one_turn(_ pokemon1 : Pokemon, _ moves_pokemon1_temp : Move_temp, _ pokemon
 /******************************************************************************/
 
 
+/************************* Chose starting pokemon *****************************/
+func chose_pokemon(_ what_trainer : Trainer) -> Int {
+  print("What pokemon do you wish to use ?")
+  for k in 0...5{
+    print("\(k+1) : \(what_trainer.pokemons[k].species.name)")
+  }
+  let pokemon_to_put = readLine()
+  let pokemon_int : Int = (Int)(pokemon_to_put!)!
+  return pokemon_int
+}
+/******************************************************************************/
+
 
 /************************** Switch pokemon ************************************/
-
 func switch_pokemon (_  what_trainer : Trainer) -> Int{
 
   print("Trainer \(what_trainer.name) wishes to change pokemon ? (y / n)")
@@ -960,25 +971,26 @@ func switch_pokemon (_  what_trainer : Trainer) -> Int{
   }
   return 0
 }
-
 /******************************************************************************/
 
 
 
-/************************** Pokemon Battle ************************************/
-func pokemon_battle(_ pokemon1 : Pokemon, _ pokemon2 : Pokemon, _ environment_battle : Environment, _ trainer1 : Trainer, _ trainer2 : Trainer) -> () {
+/************************** Trainer Battle ************************************/
+func trainer_battle( _ trainer1 : Trainer, _ trainer2 : Trainer, _ environment_battle : Environment) -> () {
 
-  var var_pokemon1 : Pokemon = pokemon1
-  var var_pokemon2 : Pokemon = pokemon2
+  let trainer1_choice : Int = chose_pokemon(trainer1)
+  let trainer2_choice : Int = chose_pokemon(trainer2)
 
+  var var_pokemon1 : Pokemon = trainer1.pokemons[trainer1_choice - 1]
+  var var_pokemon2 : Pokemon = trainer2.pokemons[trainer2_choice - 1]
 
   var end_battle : Bool = false
   var Test_variable_battle : Int = 0
 
   while !(end_battle){
 
+    /* Test if trainer 1 wants to switch pokemons */
     let switch_1 = switch_pokemon(trainer1)
-
     switch (switch_1){
       case 1 : var_pokemon1 = trainer1.pokemons[0]
       case 2 : var_pokemon1 = trainer1.pokemons[1]
@@ -988,7 +1000,7 @@ func pokemon_battle(_ pokemon1 : Pokemon, _ pokemon2 : Pokemon, _ environment_ba
       case 6 : var_pokemon1 = trainer1.pokemons[5]
     default : Test_variable_battle = 1
     }
-
+    /* Test if trainer 2 wants to switch pokemons */
     let switch_2 = switch_pokemon(trainer2)
     switch (switch_2){
       case 1 : var_pokemon2 = trainer2.pokemons[0]
@@ -1020,7 +1032,7 @@ func pokemon_battle(_ pokemon1 : Pokemon, _ pokemon2 : Pokemon, _ environment_ba
       Test_variable_battle = 1
     }
 
-    chose_attack(pokemon1, pokemon2)
+    chose_attack(var_pokemon1, var_pokemon2)
     end_battle = one_turn(var_pokemon1, moves_pokemon1_temp, var_pokemon2, moves_pokemon2_temp, environment_battle)
 
     /* Reset of test variable */
@@ -1030,12 +1042,3 @@ func pokemon_battle(_ pokemon1 : Pokemon, _ pokemon2 : Pokemon, _ environment_ba
 
 }
 /******************************************************************************/
-
-
-
-/*func trainer_battle(_ trainer1 : Trainer, _ trainer2 : Trainer, environment_battle : Environment) {
-
-
-
-
-}*/
