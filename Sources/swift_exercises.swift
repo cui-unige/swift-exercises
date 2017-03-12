@@ -30,6 +30,7 @@ enum Category {
     case status
 }
 
+
 // http://bulbapedia.bulbagarden.net/wiki/Nature
 enum Nature {
     case hardy
@@ -123,6 +124,18 @@ struct Move : Hashable {
       return self.id
     }
 }
+
+struct Move_temp {
+  var move1 : [Move]
+}
+var moves_pokemon1_temp = Move_temp(
+  move1 : []
+)
+var moves_pokemon2_temp = Move_temp(
+  move1 : []
+)
+
+
 func ==(lhs: Move, rhs: Move) -> Bool {
     return lhs.id == rhs.id
 }
@@ -628,7 +641,7 @@ func typeModifier(attacking: Type, defending : Type) -> Double {
 
 
 let move_earthquake = Move(
-  id : 482,
+  id : 89,
   name : "Earthquake",
   description : "An attack that inflicts the damage by shaking the ground. It is useless against Flying type Pokémon.",
   category : .physical,
@@ -640,7 +653,7 @@ let move_earthquake = Move(
 )
 
 let move_stone_edge = Move(
-  id : 168,
+  id : 444,
   name : "Stone Edge",
   description : "The user stabs the foe with a sharpened stone. It has a high critical-hit ratio.",
   category : .physical,
@@ -652,7 +665,7 @@ let move_stone_edge = Move(
 )
 
 let move_bite = Move(
-  id : 510,
+  id : 44,
   name : "Bite",
   description : "A bite made using sharp fangs. This may cause the opponent to flinch, and it might not attack.",
   category  : .physical,
@@ -664,7 +677,7 @@ let move_bite = Move(
 )
 
 let move_fire_fang = Move(
-  id : 742,
+  id : 424,
   name : "Fire Fang",
   description : "The user bites with flame-cloaked fangs. It may also make the foe flinch or sustain a burn.",
   category : .physical,
@@ -811,64 +824,102 @@ let first_random : Int = 1
 func check_order(_ pokemon1 : Pokemon, _ move1 : Move, _ pokemon2 : Pokemon, _ move2 : Move, _ first_random : Int) -> Int{
 
   var first_move : Int = first_random
-
-
-    if (move1.priority > move2.priority) {
+  if (move1.priority > move2.priority) {
+    first_move = 1
+  }
+  else if (move1.priority < move2.priority) {
+    first_move = 2
+  }
+  else if (move1.priority == move2.priority) {
+    if (pokemon1.effective_stats.speed > pokemon2.effective_stats.speed){
       first_move = 1
     }
-    else if (move1.priority < move2.priority) {
+    else if (pokemon1.effective_stats.speed < pokemon2.effective_stats.speed){
       first_move = 2
     }
-    else if (move1.priority == move2.priority) {
-      if (pokemon1.effective_stats.speed > pokemon2.effective_stats.speed){
-        first_move = 1
-      }
-      else if (pokemon1.effective_stats.speed < pokemon2.effective_stats.speed){
+    else {
+      if (first_move == 1) {
         first_move = 2
       }
-      else {
-        if (first_move == 1) {
-          first_move = 2
-        }
-        else if (first_move == 2) {
-          first_move = 1
-        }
+      else if (first_move == 2) {
+        first_move = 1
       }
     }
+  }
   return first_move
 }
 
 
 /* User choses attack of the Pokemons */
 func chose_attack(_ pokemon1 : Pokemon, _ pokemon2 : Pokemon) -> (Int, Int) {
+  /* Chose attack for 1st Pokemon */
   print("Chose attack for \(pokemon1.species.name) between :")
   print("1: \(pokemon1.moves[0])")
   print("2: \(pokemon1.moves[1])")
   print("3: \(pokemon1.moves[2])")
   print("4: \(pokemon1.moves[3])")
-
   print("Please input the Integer of the move :")
   let move_pokemon1 = readLine()
 
 
+  /* Chose attack for 2nd pokemon */
   print("Chose attack for \(pokemon2.species.name) between :")
   print("1: \(pokemon2.moves[0])")
   print("2: \(pokemon2.moves[1])")
   print("3: \(pokemon2.moves[2])")
   print("4: \(pokemon2.moves[3])")
-
   print("Please input the Integer of the move :")
   let move_pokemon2 = readLine()
 
 
+  /* Return values of attacks */
   return (Int(move_pokemon1!)!, Int(move_pokemon2!)!)
 }
 
-var Test_variable_state : Int = 0
 
-func one_turn(_ pokemon1 : Pokemon, _ pokemon2 : Pokemon, _ environment : Environment) -> Bool{
+func one_turn(_ pokemon1 : Pokemon, _ moves_pokemon1_temp : Move_temp, _ pokemon2 : Pokemon , _ moves_pokemon2_temp : Move_temp, _ environment : Environment) -> Bool{
 
-/* a mettre qq part */
+
+  let chosen_attacks : (Int, Int) = chose_attack(pokemon1, pokemon2)
+  let move_used_pokemon1 : Int = chosen_attacks.0 - 1
+  let move_used_pokemon2 : Int = chosen_attacks.1 - 1
+  let pokemon_priority : Int = check_order(pokemon1, moves_pokemon1_temp.move1[move_used_pokemon1], pokemon2, moves_pokemon2_temp.move1[move_used_pokemon2], first_random)
+
+  // Pokemon 1 attacks first
+  if (pokemon_priority == 1) {
+    let dmg : Int = damage(environment, pokemon1, moves_pokemon1_temp.move1[move_used_pokemon1], pokemon2)
+    Battle_State.pokemon2_hp = Battle_State.pokemon2_hp - dmg
+    if check_state(Battle_State){
+      return true
+    } else {
+      let dmg : Int = damage(environment, pokemon2, moves_pokemon2_temp.move1[move_used_pokemon2], pokemon1)
+      Battle_State.pokemon1_hp = Battle_State.pokemon1_hp - dmg
+      if check_state(Battle_State){
+        return true
+      }
+    }
+  } // Pokemon 2 attacks first
+  else {
+    let dmg : Int = damage(environment, pokemon2, moves_pokemon2_temp.move1[move_used_pokemon2], pokemon1)
+    Battle_State.pokemon1_hp = Battle_State.pokemon1_hp - dmg
+    if check_state(Battle_State){
+      return true
+    } else {
+      let dmg : Int = damage(environment, pokemon1, moves_pokemon1_temp.move1[move_used_pokemon1], pokemon2)
+      Battle_State.pokemon2_hp = Battle_State.pokemon2_hp - dmg
+      if check_state(Battle_State){
+        return true
+      }
+    }
+  }
+  return false
+}
+
+func pokemon_battle(_ pokemon1 : Pokemon, _ pokemon2 : Pokemon, _ environment_battle : Environment) -> () {
+
+
+  var end_battle : Bool = false
+  var Test_variable_state : Int = 0
 
   if (Test_variable_state == 0) {
     Battle_State.pokemon1_hp = pokemon1.hitpoints
@@ -876,34 +927,34 @@ func one_turn(_ pokemon1 : Pokemon, _ pokemon2 : Pokemon, _ environment : Enviro
     Test_variable_state = 1
   }
 
-  let chosen_attacks : (Int, Int) = chose_attack(pokemon1, pokemon2)
-  let move_used_pokemon1 : Int = chosen_attacks.0 - 1
-  let move_used_pokemon2 : Int = chosen_attacks.1 - 1
-  let pokemon_priority : Int = check_order(pokemon1, pokemon1.moves[move_used_pokemon1]!, pokemon2, pokemon2.moves[move_used_pokemon2]!, first_random)
+  var Test_variable_move : Int = 0
+  
+  if (Test_variable_move == 0) {
+    moves_pokemon1_temp.move1[0] = pokemon1.moves[0]!
+    moves_pokemon1_temp.move1[1] = pokemon1.moves[1]!
+    moves_pokemon1_temp.move1[2] = pokemon1.moves[2]!
+    moves_pokemon1_temp.move1[3] = pokemon1.moves[3]!
 
-  if (pokemon_priority == 1) {
-    let dmg : Int = damage(environment, pokemon1, pokemon1.moves[move_used_pokemon1]!, pokemon2)
-    Battle_State.pokemon2_hp = Battle_State.pokemon2_hp - dmg
-    if check_state(Battle_State){
-      return true
-    }
-  } else {
-    let dmg : Int = damage(environment, pokemon2, pokemon2.moves[move_used_pokemon2]!, pokemon1)
-    Battle_State.pokemon1_hp = Battle_State.pokemon1_hp - dmg
-    if check_state(Battle_State){
-      return true
-    }
+    moves_pokemon2_temp.move1[0] = pokemon1.moves[0]!
+    moves_pokemon2_temp.move1[1] = pokemon1.moves[1]!
+    moves_pokemon2_temp.move1[2] = pokemon1.moves[2]!
+    moves_pokemon2_temp.move1[3] = pokemon1.moves[3]!
+
+    Test_variable_move = 1
   }
-  return false
-}
 
-func battle(_ pokemon1 : Pokemon, _ pokemon2 : Pokemon, _ environment_battle : Environment) -> () {
 
-  var end_battle : Bool = false
 
   while !(end_battle){
     chose_attack(pokemon1, pokemon2)
-    end_battle = one_turn(pokemon1, pokemon2, environment_battle)
+    end_battle = one_turn(pokemon1, moves_pokemon1_temp, pokemon2, moves_pokemon2_temp, environment_battle)
   }
 
 }
+
+/*func trainer_battle(_ trainer1 : Trainer, _ trainer2 : Trainer, environment_battle : Environment) {
+
+
+
+
+}*/
