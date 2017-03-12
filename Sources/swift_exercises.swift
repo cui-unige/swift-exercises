@@ -87,7 +87,7 @@ struct Move : Hashable {
     let type        : Type
     let power       : Int
     let accuracy    : Int
-    let powerpoints : Int
+    var powerpoints : Int
     let priority    : Int
 
     var hashValue   : Int {
@@ -120,7 +120,7 @@ struct Species : Hashable {
     let id          : Int
     let name        : String
     let evolutions  : Set<Species>
-    let attacks     : Set<Move>
+    let attacks     : [Move]
     let type        : (Type, Type?)
     let base_values : Stats
     var hashValue   : Int {
@@ -174,26 +174,136 @@ let nature_coeff: [Nature: StatsDouble] = [
 // Do you use an enum, a map or constants/variables?
 // http://bulbapedia.bulbagarden.net/wiki/List_of_Pokémon_by_National_Pokédex_number
 
-let curse = Move(id: 1,name: "curse",description: "Curse (Japanese: のろい Curse/Slow) is a non-damaging Ghost-type move introduced in Generation II. Prior to Generation V, it was a ???-type move, and the only move of that type. It was TM03 in Generation II. ",category: Category.status,type: Type.ghost,power: 0,accuracy: 0,powerpoints: 10,priority: 0)
-let aeroblast = Move(id: 2,name: "aeroblast",description: "Aeroblast (Japanese: エアロブラスト Aeroblast) is a damage-dealing Flying-type move introduced in Generation II. It is the signature move of Lugia. ",category: Category.special,type: Type.flying,power: 100,accuracy: 95,powerpoints: 5,priority: 0)
-let earthquake = Move(id: 3,name: "earthquake",description: "Earthquake (Japanese: じしん Earthquake) is a damage-dealing Gfloor-type move introduced in Generation I. It is TM26 in all generations so far. ",category: Category.physical,type: Type.ground,power: 100,accuracy: 100,powerpoints: 10,priority: 0)
-let recover = Move(id: 4,name: "recover",description: "Recover (Japanese: じこさいせい Self-regeneration) is a non-damaging Normal-type move introduced in Generation I. ",category: Category.status,type: Type.normal,power: 0,accuracy: 0,powerpoints: 10,priority: 0)
+let curse = Move(id: 1,name: "curse",description: "Curse is a non-damaging Ghost-type move. ",category: Category.status,type: Type.ghost,power: 0,accuracy: 0,powerpoints: 10,priority: 0)
+let aeroblast = Move(id: 2,name: "aeroblast",description: "Aeroblast is a damage-dealing Flying-type move. ",category: Category.special,type: Type.flying,power: 100,accuracy: 95,powerpoints: 5,priority: 0)
+let earthquake = Move(id: 3,name: "earthquake",description: "Earthquake is a damage-dealing Gfloor-type move. ",category: Category.physical,type: Type.ground,power: 100,accuracy: 100,powerpoints: 10,priority: 0)
+let recover = Move(id: 4,name: "recover",description: "Recover is a non-damaging Normal-type move. ",category: Category.status,type: Type.normal,power: 0,accuracy: 0,powerpoints: 10,priority: 0)
 
 let speciesEmpty : Set<Species> = []
-let Attaque: Set = [curse,aeroblast,earthquake,recover]
-let Values = Stats(hitpoints: 106,attack: 90,defense: 130,special_attack: 90,special_defense: 154,speed: 110)
-let lugia = Species(id: 249,name: "maria",evolutions: speciesEmpty,attacks: Attaque,type: (Type.flying, Type.psychic),base_values: Values)
+let Attaque_lugia = [curse, aeroblast, earthquake, recover]
+let Values_lugia = Stats(hitpoints: 106,attack: 90,defense: 130,special_attack: 90,special_defense: 154,speed: 110)
+let individual_Values_lugia = Stats(hitpoints: 106,attack: 90,defense: 130,special_attack: 90,special_defense: 154,speed: 110)
+let lugia_EffortValues = Stats(
+    hitpoints: 0,
+    attack: 0,
+    defense: 0,
+    special_attack: 0,
+    special_defense: 3,
+    speed: 0
+)
+let lugia_spec = Species(id: 249,name: "lugia",evolutions: speciesEmpty,attacks: Attaque_lugia,type: (Type.flying, Type.psychic),base_values: Values_lugia)
+let lugia = Pokemon(nickname: "Martin", hitpoints: 120, size: 5, weight: 230, experience: 0, level: 1, nature: Nature.naughty, species: lugia_spec, moves: Attaque_lugia, individual_values: individual_Values_lugia, effort_values: lugia_EffortValues)
+
+
+
+//              pokemon autres
+//pokemon 2
+let SolarBeam  = Move(id: 2, name: "Solar Beam",  description: "Absorbs light in one turn, then attacks next turn.",      category: Category.special,  type: Type.grass,  power: 120, accuracy: 100, powerpoints: 10, priority: 0)
+let SunnyDay   = Move(id: 3, name: "Sunny Day",   description: "Boosts the power of FIRE- type moves for 5 turns.",       category: Category.status,   type: Type.fire,   power: 0,   accuracy: 0,   powerpoints: 5,  priority: 0)
+let ReturnRest = Move(id: 4, name: "Return/Rest", description: "Power increases with happiness, up to a maximum of 102.", category: Category.physical, type: Type.normal, power: 0,   accuracy: 100, powerpoints: 20, priority: 0)
+
+let enteiBaseValues = Stats(hitpoints: 115, attack: 115, defense: 85, special_attack: 90, special_defense: 75, speed: 100)
+
+let enteiIndividualValues = Stats(hitpoints: 115, attack: 115, defense: 85, special_attack: 90, special_defense: 75, speed: 100)
+
+let enteiEffortValues = Stats(
+    hitpoints: 1,
+    attack: 2,
+    defense: 0,
+    special_attack: 0,
+    special_defense: 0,
+    speed: 0
+)
+
+let allAttacksEntei = [FireBlast, SolarBeam, SunnyDay, ReturnRest]
+let entei_Specie = Species(id: 244, name: "Entei", evolutions: [], attacks: allAttacksEntei, type: (.fire, nil), base_values: enteiBaseValues)
+let entei = Pokemon(nickname: "Kiki", hitpoints: 120, size: 5, weight: 230, experience: 0, level: 1, nature: Nature.naughty, species: entei_Specie, moves: allAttacksEntei, individual_values: enteiIndividualValues, effort_values: enteiEffortValues)
+
+
+
+
+//pokemon 3
+let FireBlast = Move(id: 1, name: "Fire BLast", description: "30% chance to burn the target.", category: Category.special, type: Type.fire, power: 120, accuracy: 85, powerpoints: 5, priority: 0)
+let BodySlam = Move(id: 2, name: "Roar", description: "30% chance to paralyze the target", category: Category.physical, type: Type.normal, power: 85, accuracy: 100, powerpoints: 15, priority: 0)
+let HyperBeam = Move(id: 3, name: "Hyper Beam", description: "User cannot move next turn, unless opponent or Substitute was KOed.", category: Category.physical, type: Type.normal, power: 150, accuracy: 90, powerpoints: 5, priority: 0)
+let Reflect = Move(id: 4, name: "Reflect", description: "Lowers the physical damage done to user.", category: Category.status, type: Type.psychic, power: 0, accuracy: 0, powerpoints: 20, priority: 0)
+let stats_arca = Stats(hitpoints: 90, attack: 110, defense: 80, special_attack: 80, special_defense: 80, speed: 95)
+let stats_arca_indiv = Stats(hitpoints: 90, attack: 110, defense: 80, special_attack: 80, special_defense: 80, speed: 95)
+
+let arca_EffortValues = Stats(
+    hitpoints: 0,
+    attack: 2,
+    defense: 0,
+    special_attack: 0,
+    special_defense: 0,
+    speed: 0
+)
+
+let attacks_arca = [FireBlast, BodySlam, HyperBeam, Reflect]
+let arcanine_spec = Species(id: 59, name: "arcanine", evolutions: [], attacks: attacks_arca, type: (Type.fire, nil), base_values: stats_arca)
+
+let arcanine = Pokemon(nickname: "pepito", hitpoints: 60, size: 3, weight: 155, experience: 0, level: 1, nature: Nature.rash, species: arcanine_spec, moves: attacks_arca, individual_values: stats_arca_indiv, effort_values: arca_EffortValues)
+
+//pokemon 4
+let bubble = Move(id: 1, name: "Bubble", description: "A spray of countless bubbles is jetted at the opposing Pokémon. This may also lower their Speed stat.", category: Category.special, type: Type.water, power: 40, accuracy: 100, powerpoints: 30, priority: 1)
+
+let water_gun = Move(id: 2, name: "Water Gun",description: "The target is blasted with a forceful shot of water.", category: Category.special, type: Type.water, power: 40, accuracy: 100, powerpoints: 25,priority: 1)
+
+let allAttacksSquirtle = [bubble, water_gun]
+
+/* Squirtle definition */
+let squirtleBaseValues = Stats(
+    hitpoints: 44,
+    attack: 48,
+    defense: 65,
+    special_attack: 50,
+    special_defense: 64,
+    speed: 43
+)
+
+let squirtleIndividualValues = Stats(
+    hitpoints: 47,
+    attack: 42,
+    defense: 69,
+    special_attack: 47,
+    special_defense: 61,
+    speed: 41
+)
+
+let squirtleEffortValues = Stats(
+    hitpoints: 0,
+    attack: 0,
+    defense: 1,
+    special_attack: 0,
+    special_defense: 0,
+    speed: 0
+)
+
+
+
+let squirtleSpecie = Species(
+    id: 007,
+    name: "Squirtle",
+    evolutions: [],
+    attacks: [water_gun, bubble],
+    type: (Type.water, nil),
+    base_values: squirtleBaseValues
+)
+
+
+
+let squirtle = Pokemon(nickname: "Arthur", hitpoints: 47, size: 3, weight: 300, experience: 0, level: 1, nature: Nature.calm, species: squirtleSpecie, moves: allAttacksSquirtle, individual_values: squirtleIndividualValues, effort_values: squirtleEffortValues)
 
 struct Pokemon {
     let nickname          : String?
-    let hitpoints         : Int // remaining hitpoints
+    var hitpoints         : Int // remaining hitpoints
     let size              : Int
     let weight            : Int
     let experience        : Int
     let level             : Int
     let nature            : Nature
     let species           : Species
-    let moves             : [Move: Int] // Move -> remaining powerpoints
+    var moves             : [Move] // Move -> remaining powerpoints
     let individual_values : Stats
     let effort_values     : Stats
 
@@ -216,11 +326,11 @@ struct Pokemon {
 
 
 struct Trainer {
-    let pokemons : [Pokemon]
+    var pokemons : [Pokemon]
 }
 
 struct Environment {
-    let weather : Weather
+    var weather : Weather
     let terrain : Terrain
 }
 
@@ -329,13 +439,207 @@ func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pok
    return Int((damage_part1) * modifier)
 }
 
-/*
-struct State {
-    // TODO: describe a battle state
-    //entraineur, pokemon actif, pokemon en arriere,
+
+struct State
+{
+  let player_1: Trainer
+  let player_2: Trainer
+  var pokemon_attack: Pokemon
+  var pokemon_defense: Pokemon
+  var pokemon_moveAttack: Move
+  var pokemon_moveDefense: Move
+  var pokemon_environment: Environment
 }
 
-func battle(trainers: inout [Trainer], behavior: (State, Trainer) -> Move) -> () {
-    // TODO: simulate battle
+var battle_part2: Int = 1
+func battle(trainers: inout [Trainer]) -> ()
+{
+    print("--------------------------------------------------\n")
+    if currentState.pokemon_attack.effective_stats.speed > currentState.pokemon_defense.effective_stats.speed && battle_part2 == 1
+    {
+      for i in 0...(currentState.pokemon_attack.moves.count - 1)
+      {
+          print("\(i) \(currentState.pokemon_attack.moves[i].name) | Remaining powerpoints for this attack: \(currentState.pokemon_attack.moves[i].powerpoints)")
+      }
+      print("\(currentState.pokemon_attack.moves.count) Run")
+      print("\(currentState.pokemon_attack.moves.count + 1) Menu\n")
 
-    */
+      //on dit que e joueur chosie 1
+      print("on suppose que le joueur chosie 1 car on ne peut le demander sur linux\n")
+      var choice_battle: Int = 1
+
+        if (choice_battle > currentState.pokemon_attack.moves.count + 1)
+        {
+          print("Not possible\n")
+          go()
+        }
+        else
+        {
+          if choice_battle == currentState.pokemon_attack.moves.count
+          {
+            print("You can't lose, if you don't fight ... \n ")
+            abort()
+          }
+          else if choice_battle == currentState.pokemon_attack.moves.count + 1
+          {
+            go()
+          }else
+          {
+            currentState.pokemon_moveAttack = currentState.pokemon_attack.moves[choice_battle] //Selecting appropriate move
+            currentState.pokemon_moveAttack.powerpoints -= 1 //Decreasing PP
+            martin_user.pokemons[currentPokemon].moves[choice_battle].powerpoints -= 1
+            if (currentState.pokemon_moveAttack.powerpoints == 0)
+            {
+              print("\nNo PP for the move")
+              currentState.pokemon_attack.moves.remove(at: choice_battle) //Removing move
+              martin_user.pokemons[currentPokemon].moves.remove(at: choice_battle)//Updating bob's pokemon
+            }
+            else
+            {
+              currentState.pokemon_attack.moves[choice_battle] = currentState.pokemon_moveAttack //Updating global attacks list
+            }
+            if ((currentState.pokemon_attack.nickname == "Kiki") && (currentState.pokemon_moveAttack.id == 3))
+            {
+              currentState.pokemon_environment.weather = Weather.clear_skies //Updating conditions
+            }
+          }
+        }
+        damages = damage(environment: currentState.pokemon_environment, pokemon: currentState.pokemon_attack, move: currentState.pokemon_moveAttack, target: currentState.pokemon_defense)
+        currentState.pokemon_defense.hitpoints = currentState.pokemon_defense.hitpoints - damages; //Remaining hitpoints
+
+        if currentState.pokemon_defense.hitpoints <= 0 {
+            print("Pokemon was killed !\n");
+            abort(); //Exciting game
+        }
+    }
+    else
+    {
+      damages = damage(environment: currentState.pokemon_environment, pokemon: currentState.pokemon_defense, move: currentState.pokemon_moveDefense, target: currentState.pokemon_attack)
+      currentState.pokemon_attack.hitpoints = currentState.pokemon_attack.hitpoints - damages;
+
+      currentState.pokemon_moveDefense.powerpoints -= 1 //Decreasing PP
+
+      if (currentState.pokemon_moveDefense.powerpoints == 0){
+          print("No PP for the move")
+          currentState.pokemon_defense.moves.remove(at:  0) //Removing move
+      }
+
+      if currentState.pokemon_attack.hitpoints <= 0 {
+          print("Pokemon was killed !\n")
+          abort();
+      }
+    }
+
+
+
+    if currentState.pokemon_attack.effective_stats.speed > currentState.pokemon_defense.effective_stats.speed && battle_part2 == 1
+    {
+        print("Pokemon Attack : \(currentState.pokemon_attack.nickname)\t| Specie: \(currentState.pokemon_attack.species.name)");
+        print("Pokemon Defense : \(currentState.pokemon_defense.nickname)\t| Specie: \(currentState.pokemon_defense.species.name)\n");
+        print("Selected move : \(currentState.pokemon_moveAttack.name). Damages done: \(damages) \n");
+        battle_part2 = 0 //Changing player
+    }
+    else
+    {
+        print("Pokemon Attack: \(currentState.pokemon_defense.nickname)\t| Specie: \(currentState.pokemon_defense.species.name)");
+        print("Pokemon Defense: \(currentState.pokemon_attack.nickname)\t| Specie: \(currentState.pokemon_attack.species.name) \n");
+        print("Selected move: \(currentState.pokemon_moveDefense.name). Damages done: \(damages) \n");
+        #if os(Linux)
+           let random_currentstate = Int(random() % 3)
+        #else
+           let random_currentstate = Int(arc4random_uniform(3))
+        #endif
+        currentState.pokemon_moveDefense = currentState.pokemon_defense.moves[random_currentstate];
+        battle_part2 = 1; //Changing player
+    }
+    print("Hitpoints : \(currentState.pokemon_attack.nickname) : \(currentState.pokemon_attack.hitpoints)");
+    print("Hitpoints : \(currentState.pokemon_defense.nickname) : \(currentState.pokemon_defense.hitpoints) \n");
+    battle(trainers: &trainers); //Next round
+}
+
+var martin_user = Trainer(pokemons: [lugia, entei])
+var pepito_user = Trainer(pokemons: [arcanine, squirtle])
+var trainers = [martin_user, pepito_user]
+var currentPokemon = 0
+var damages: Int = 0
+let Game_environnement = Environment(weather: Weather.sandstorm, terrain: Terrain.grassy)
+
+#if os(Linux)
+   var rand_attaque = Int(random() % 3)
+#else
+   var rand_attaque = Int(arc4random_uniform(3))
+#endif
+
+var currentState = State(player_1: martin_user,
+   player_2: pepito_user,
+   pokemon_attack: martin_user.pokemons[0],
+   pokemon_defense: pepito_user.pokemons[0],
+   pokemon_moveAttack: martin_user.pokemons[0].moves[0],
+   pokemon_moveDefense: pepito_user.pokemons[0].moves[rand_attaque],
+ pokemon_environment: Game_environnement)
+
+
+func go() -> ()
+{
+  print("\n=======================================================\n======================POKEMON==========================\n=======================================================\n")
+
+
+  print("\n\nRIVAL would like to battle\n")
+  print("RIVAL  sent out \(currentState.pokemon_defense.species.name)\n")
+
+  print("   0: Fight     1: Pokemon\n   2: Run\n")
+  var move_player: Int!
+
+
+  //normalent on demande se que veut faire le joueur mais sur Linux la command ne marche pas.
+  //move_player = readLine()
+
+  #if os(Linux)
+     move_player = Int(random() % 3)
+  #else
+     move_player = Int(arc4random_uniform(3))
+  #endif
+
+  move_player = 0
+
+  if (move_player == 0)
+  {
+    battle(trainers: &trainers)
+  }
+  if (move_player == 1)
+  {
+
+      for i in 0...(martin_user.pokemons.count - 1){
+          print("\(i+1) name: \(martin_user.pokemons[i].nickname)\t| specie: \(martin_user.pokemons[i].species.name)")
+      }
+
+      print("\nSur linux on ne peut pas utilisé readLine donc on prend toujours l'autre\n")
+
+      #if os(Linux)
+         var move_player_2 = Int(random() % 3)
+      #else
+         var move_player_2 = Int(arc4random_uniform(3))
+      #endif
+
+              if (move_player_2 > martin_user.pokemons.count){
+                  print("Not possible\n")
+                  //go()
+              }else{
+                  currentPokemon = (currentPokemon + 1) % 2
+                  currentState.pokemon_attack = martin_user.pokemons[currentPokemon]
+              }
+
+
+
+      print("New Pokemon selected\n")
+
+      //go()
+  }
+
+  if (move_player == 2)
+  {
+      print("You can't lose, if you don't fight ... \n")
+      abort()
+  }
+
+}
