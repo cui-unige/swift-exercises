@@ -93,7 +93,7 @@ struct Move : Hashable {
     let type        : Type
     let power       : Int
     let accuracy    : Int
-    let powerpoints : Int
+    var powerpoints : Int
     let priority    : Int
 
     var hashValue   : Int {
@@ -118,7 +118,7 @@ struct Species : Hashable {
     let id          : Int
     let name        : String
     let evolutions  : Set<Species>
-    let attacks     : Set<Move>
+    let attacks     : [Move]
     let type        : (Type, Type?)
     let base_values : Stats
     var hashValue   : Int {
@@ -135,8 +135,17 @@ let BodySlam = Move(id: 2, name: "Roar", description: "30% chance to paralyze th
 let HyperBeam = Move(id: 3, name: "Hyper Beam", description: "User cannot move next turn, unless opponent or Substitute was KOed.", category: Category.physical, type: Type.normal, power: 150, accuracy: 90, powerpoints: 5, priority: 0)
 let Reflect = Move(id: 4, name: "Reflect", description: "Lowers the physical damage done to user.", category: Category.status, type: Type.psychic, power: 0, accuracy: 0, powerpoints: 20, priority: 0)
 let stats = Stats(hitpoints: 90, attack: 110, defense: 80, special_attack: 80, special_defense: 80, speed: 95)
+let stats_arca_indiv = Stats(hitpoints: 90, attack: 110, defense: 80, special_attack: 80, special_defense: 80, speed: 95)
 
-let attacks: Set = [FireBlast, BodySlam, HyperBeam, Reflect]
+let arca_EffortValues = Stats(
+    hitpoints: 0,
+    attack: 2,
+    defense: 0,
+    special_attack: 0,
+    special_defense: 0,
+    speed: 0
+)
+let attacks = [FireBlast, BodySlam, HyperBeam, Reflect]
 let arcanine_spec = Species(id: 59, name: "Jack", evolutions: [], attacks: attacks, type: (Type.fire, nil), base_values: stats)
 
 
@@ -146,14 +155,89 @@ let earthquake = Move(id: 3,name: "earthquake",description: "Earthquake is a dam
 let recover = Move(id: 4,name: "recover",description: "Recover is a non-damaging Normal-type move. ",category: Category.status,type: Type.normal,power: 0,accuracy: 0,powerpoints: 10,priority: 0)
 
 let speciesEmpty : Set<Species> = []
-let Attaque: Set = [curse,aeroblast,earthquake,recover]
+let Attaque = [curse,aeroblast,earthquake,recover]
 let Values = Stats(hitpoints: 106,attack: 90,defense: 130,special_attack: 90,special_defense: 154,speed: 110)
 
 let lugia_spec = Species(id: 249,name: "maria",evolutions: speciesEmpty,attacks: Attaque,type: (Type.flying, Type.psychic),base_values: Values)
+
+let SolarBeam  = Move(id: 2, name: "Solar Beam",  description: "Absorbs light in one turn, then attacks next turn.",      category: Category.special,  type: Type.grass,  power: 120, accuracy: 100, powerpoints: 10, priority: 0)
+let SunnyDay   = Move(id: 3, name: "Sunny Day",   description: "Boosts the power of FIRE- type moves for 5 turns.",       category: Category.status,   type: Type.fire,   power: 0,   accuracy: 0,   powerpoints: 5,  priority: 0)
+let ReturnRest = Move(id: 4, name: "Return/Rest", description: "Power increases with happiness, up to a maximum of 102.", category: Category.physical, type: Type.normal, power: 0,   accuracy: 100, powerpoints: 20, priority: 0)
+
+let enteiBaseValues = Stats(hitpoints: 115, attack: 115, defense: 85, special_attack: 90, special_defense: 75, speed: 100)
+
+let enteiIndividualValues = Stats(hitpoints: 115, attack: 115, defense: 85, special_attack: 90, special_defense: 75, speed: 100)
+
+let enteiEffortValues = Stats(
+    hitpoints: 1,
+    attack: 2,
+    defense: 0,
+    special_attack: 0,
+    special_defense: 0,
+    speed: 0
+)
+
+let allAttacksEntei = [FireBlast, SolarBeam, SunnyDay, ReturnRest]
+let entei_Specie = Species(id: 244, name: "Entei", evolutions: [], attacks: allAttacksEntei, type: (.fire, nil), base_values: enteiBaseValues)
+
+
+let bubble = Move(id: 1, name: "Bubble", description: "A spray of countless bubbles is jetted at the opposing Pokémon. This may also lower their Speed stat.", category: Category.special, type: Type.water, power: 40, accuracy: 100, powerpoints: 30, priority: 1)
+
+let water_gun = Move(id: 2, name: "Water Gun",description: "The target is blasted with a forceful shot of water.", category: Category.special, type: Type.water, power: 40, accuracy: 100, powerpoints: 25,priority: 1)
+
+let allAttacksSquirtle = [bubble, water_gun]
+
+/* Squirtle definition */
+let squirtleBaseValues = Stats(
+    hitpoints: 44,
+    attack: 48,
+    defense: 65,
+    special_attack: 50,
+    special_defense: 64,
+    speed: 43
+)
+
+let squirtleIndividualValues = Stats(
+    hitpoints: 47,
+    attack: 42,
+    defense: 69,
+    special_attack: 47,
+    special_defense: 61,
+    speed: 41
+)
+
+let squirtleEffortValues = Stats(
+    hitpoints: 0,
+    attack: 0,
+    defense: 1,
+    special_attack: 0,
+    special_defense: 0,
+    speed: 0
+)
+
+
+
+let squirtleSpecie = Species(
+    id: 007,
+    name: "Squirtle",
+    evolutions: [],
+    attacks: [water_gun, bubble],
+    type: (Type.water, nil),
+    base_values: squirtleBaseValues
+)
+
 // Do you use an enum, a map or constants/variables?
 // http://bulbapedia.bulbagarden.net/wiki/List_of_Pokémon_by_National_Pokédex_number
 
-
+let individual_Values_lugia = Stats(hitpoints: 106,attack: 90,defense: 130,special_attack: 90,special_defense: 154,speed: 110)
+let lugia_EffortValues = Stats(
+    hitpoints: 0,
+    attack: 0,
+    defense: 0,
+    special_attack: 0,
+    special_defense: 3,
+    speed: 0
+)
 
 struct Stats_val {
     let hitpoints       : Double
@@ -206,14 +290,14 @@ func eff_stat_others(base: Int, IV: Int, EV: Int, Level: Int, Nature: Double) ->
 }
 struct Pokemon {
     let nickname          : String?
-    let hitpoints         : Int // remaining hitpoints
+    var hitpoints         : Int // remaining hitpoints
     let size              : Int
     let weight            : Int
     let experience        : Int
     let level             : Int
     let nature            : Nature
     let species           : Species
-    let moves             : [Move: Int] // Move -> remaining powerpoints
+    var moves             : [Move] // Move -> remaining powerpoints
     let individual_values : Stats
     let effort_values     : Stats
     // TODO: implement the effective stats as a computed property:
@@ -233,11 +317,12 @@ struct Pokemon {
 }
 
 struct Trainer {
-    let pokemons : [Pokemon]
+    let name : String
+    var pokemons : [Pokemon]
 }
 
 struct Environment {
-    let weather : Weather
+    var weather : Weather
     let terrain : Terrain
 }
 
@@ -372,7 +457,6 @@ func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pok
 
   let modifier = STAB * type_effectiveness * critical * other * random
   let finalDamage = Int(((Double(2*pokemon.level+10) * attack / defense / 250 * base) + 2) * modifier)
-
 return finalDamage
 }
 
@@ -389,8 +473,19 @@ struct State {
 }
 
 /*  INITIALISATION DES VARIABLES POUR LA SIMULTAION DU COMBAT*/
+//POKEMONS
+let arcanine = Pokemon(nickname: "Ares", hitpoints: 60, size: 3, weight: 155, experience: 0, level: 1, nature: Nature.rash, species: arcanine_spec, moves: attacks, individual_values: stats_arca_indiv, effort_values: arca_EffortValues)
+let lugia = Pokemon(nickname: "Martin", hitpoints: 120, size: 5, weight: 230, experience: 0, level: 1, nature: Nature.naughty, species: lugia_spec, moves: Attaque, individual_values: individual_Values_lugia, effort_values: lugia_EffortValues)
+let entei = Pokemon(nickname: "Kiki", hitpoints: 120, size: 5, weight: 230, experience: 0, level: 1, nature: Nature.naughty, species: entei_Specie, moves: allAttacksEntei, individual_values: enteiIndividualValues, effort_values: enteiEffortValues)
+let squirtle = Pokemon(nickname: "Arthur", hitpoints: 47, size: 3, weight: 300, experience: 0, level: 1, nature: Nature.calm, species: squirtleSpecie, moves: allAttacksSquirtle, individual_values: squirtleIndividualValues, effort_values: squirtleEffortValues)
+//ENVIRONEMMENT
+let todaysEnvironnement = Environment(weather: Weather.sandstorm, terrain: Terrain.grassy)
+//ENTRAINEURS
+var Bob = Trainer(name: "Bob", pokemons:[arcanine, lugia])
+var Alice = Trainer(name: "Alice", pokemons: [entei,squirtle])
 
-
+var trainers=[Bob, Alice];
+//ROUNDS
 func battle(trainers: inout [Trainer], behavior: (State, Trainer) -> Move) -> () {
-    // TODO: simulate battle
+// TODO: simulate battle
 }
