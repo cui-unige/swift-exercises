@@ -124,6 +124,18 @@ func ==(lhs: Species, rhs: Species) -> Bool {
 // TODO: create some species
 // Do you use an enum, a map or constants/variables?
 // http://bulbapedia.bulbagarden.net/wiki/List_of_Pokémon_by_National_Pokédex_number
+let move = set<Move>()
+move = [(1,"pound","touch ",Category.physical,Type.normal,40,100,35,2) ,
+(2,"karate chop","touch ",Category.physical,Type.fighting,50,100,25,2),
+(8,"ice punch"," beautiful",Category.physical,Type.normal,75,100,15,2),
+(19,"fly"," clever",Category.physical,Type.flying,90,95,15,2),
+(14,"Swords dance"," beautiful",Category.status,Type.normal,20,0,0,2)]
+let florizarre_specie = Species(001 , "florizarre", [],[move[1],move[2]],( Type.poison ,nil), (80,82,83,100,100,80),1)
+let herbizarre_specie = Species(002, "herbizzare",[florizarre_specie],[move[3],move[2]],(Type.poison,nil),(60,62,63,80,80,60),2)
+let espece = set<Species>()
+espece = [ florizarre_specie,herbizarre_specie,
+(003, bulbizarre, [florizarre_specie,herbizarre_specie],[move[0],move[3]],(Type.poison,nil),(45,49,49,65,65,45),3 ),
+(119,poissiroy,[],[move[3],move[0]],(Type.water,nil),(140,87,63,63,76,65),4)]
 
 struct Pokemon {
     let nickname          : String?
