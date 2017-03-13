@@ -717,6 +717,8 @@ func typeModifier(att: Type, def: Type) -> Double {
     return 2
   case (.fairy, .fairy):
     return 1
+  default:
+    return 1
   }
 }
 
@@ -754,7 +756,7 @@ struct Species : Hashable {
     let name        : String
     let evolutions  : Set<Species>
     let attacks     : Set<Move>
-    let type        : (Type, Type?)
+    let type        : [Type]
     let base_values : Stats
     var hashValue   : Int {
       return self.id
@@ -808,12 +810,12 @@ struct Pokemon {
 
 struct Trainer {
   let name : String
-  let pokemons : [Pokemon]
+  var pokemons : [Pokemon]
 }
 
 struct Environment {
-  let weather : Weather
-  let terrain : Terrain
+  var weather : Weather
+  var terrain : Terrain
 }
 
 
@@ -834,63 +836,150 @@ func damage(environment: Environment, pokemon: Pokemon, move: Move, target: Poke
     dcA = pokemon.individual_values.special_attack
     dcD = target.individual_values.special_defense
   }
-  if environment.weather == Weather.harsh_sunlight(extremly : true) || environment.weather == Weather.harsh_sunlight(extremly : false) {
-    if move.type == Type.fire {
+  switch (environment.weather, move.type) {
+    case (.harsh_sunlight(extremly : true), .fire):
       dcWeather = 1.5
-    }
-    else if move.type == Type.water {
-      dcWeather = 0.5
-    }
-  }
-  else if environment.weather == Weather.rain(hearvy : true) || environment.weather == Weather.rain(hearvy : false) {
-    if move.type == Type.fire {
-      dcWeather = 0.5
-    }
-    else if move.type == Type.water {
+    case (.harsh_sunlight(extremly : false), .fire):
       dcWeather = 1.5
-    }
+    case (.harsh_sunlight(extremly : true), .water):
+      dcWeather = 0.5
+    case (.harsh_sunlight(extremly : false), .water):
+      dcWeather = 0.5
+    case (.rain(hearvy : true), .fire):
+      dcWeather = 0.5
+    case (.rain(hearvy : false), .fire):
+      dcWeather = 0.5
+    case (.rain(hearvy : true), .water):
+      dcWeather = 1.5
+    case (.rain(hearvy : false), .water):
+      dcWeather = 1.5
+    default:
+      dcWeather = 1.0
   }
   if dcCritRandom < dcCritThreshold {
+    print("\nCoup critique !")
     dcCritMult = (2.0*Double(pokemon.level)+5.0)/(Double(pokemon.level)+5.0)
   }
   else {
     dcCritMult = 1.0
   }
+  if pokemon.species.type.count > 1 {
+      dcModifier = (typeModifier(att : move.type, def : target.species.type[0]) + typeModifier(att : move.type, def : target.species.type[1]))/2.0
+      if dcModifier > 1.0 {
+          print("C'est très efficace !")
+      }
+      else if dcModifier < 1.0 && dcModifier > 0.49 {
+          print("Ce n'est pas très efficace !")
+      }
+      else if dcModifier == 0 {
+          print("C'est inefficace !")
+      }
+  }
+  else {
+    dcModifier = typeModifier(att : move.type, def : target.species.type[0])
+    if dcModifier > 1.0 {
+        print("C'est très efficace !")
+    }
+    else if dcModifier < 1.0 && dcModifier > 0.49 {
+        print("Ce n'est pas très efficace !")
+    }
+    else if dcModifier == 0 {
+        print("C'est inefficace !")
+    }
+  }
   var p1 = (2.0*Double(pokemon.level)/5.0+2.0)*Double(move.power)*Double(dcA)/Double(dcD)/50.0+2.0
-  var p2 = dcWeather*dcCritMult*Double(dcRandom)*typeModifier(pokemon.type, target.type)
+  var p2 = dcWeather*dcCritMult*Double(dcRandom)*dcModifier
   var p3 = Int(p1*p2)
+  print("\n\(p3) points de dégats !")
   return p3
 }
 
 struct State {
   let p1 : Trainer
   let p2 : Trainer
+  var playingPlayer : Trainer
+  var waitingPlayer : Trainer
+  var p1PokemonLeft : [Pokemon]
+  var p2PokemonLeft : [Pokemon]
   var pokemonAtt : Pokemon
   var pokemonDef : Pokemon
   var combatEnvironment : Environment
 }
 
 func behaviour(state : State, trainer : Trainer) -> Move {
-  let weat = combatEnvironment.weather
-  let ter = combatEnvironment.terrain
-  print("Le temps est \(weat) sur le terrain \(ter)")
+  //let weat = combatEnvironment.weather
+  //let ter = combatEnvironment.terrain
+  //print("Le temps est \(weat) sur le terrain \(ter)")
+  // Impossible de print() des enums :(
   var choix : Int = randomInt(min : 0, max : trainer.pokemons[0].moves.count)
   print("\n\nC'est à \(trainer.name) de jouer.\nChoisissez une attack parmi la liste suivante :\n")
   for i in 0...trainer.pokemons[0].moves.count {
     print("\n\(i). \(trainer.pokemons[0].moves[i].name) - type : \(trainer.pokemons[0].moves[i].type)")
   }
-  print("\n\n\(choix). \(trainer.pokemons[0].moves[i].name) a été choisis !");
-  return trainer.pokemons[0].moves[Int(choix)]
+  print("\n\n\(choix). \(trainer.pokemons[0].moves[choix].name) a été choisis !");
+  return trainer.pokemons[0].moves[choix]
 }
 
-func battle(trainers: inout [Trainer]) -> () {
+func battle(trainers: [Trainer]) -> () {
 
+  //Instanciation des éléments de State
+  var p1 : Trainer = trainers[0]
+  var p2 : Trainer = trainers[1]
+  var playingPlayer : Trainer
+  var waitingPlayer : Trainer
+  var pokemonAtt : Pokemon
+  var pokemonDef : Pokemon
+  var combatEnvironment = environmentGenerator()
+  if p1.pokemons[0].individual_values.speed > p2.pokemons[0].individual_values.speed {
+      pokemonAtt = p1.pokemons[0]
+      pokemonDef = p2.pokemons[0]
+      playingPlayer = p1
+      waitingPlayer = p2
+  }
+  else {
+    pokemonAtt = p2.pokemons[0]
+    pokemonDef = p1.pokemons[0]
+    playingPlayer = p2
+    waitingPlayer = p1
+  }
+  var battleState = State(p1 : trainers[0], p2 : trainers[1], playingPlayer : playingPlayer, waitingPlayer : waitingPlayer, p1PokemonLeft : trainers[0].pokemons, p2PokemonLeft : trainers[1].pokemons, pokemonAtt : playingPlayer.pokemons[0], pokemonDef : waitingPlayer.pokemons[0], combatEnvironment : environmentGenerator())
+
+  //Boucle du combat
+  while p1.pokemons.count > 0 || p2.pokemons.count > 0 {
+    var hpTemp = waitingPlayer.pokemons[0].hitpoints - damage(environment: combatEnvironment, pokemon: pokemonAtt, move: behaviour(state : battleState, trainer : playingPlayer), target: pokemonDef)
+    if hpTemp < 1 {
+        print("\(pokemonDef.nickname) est K.O.")
+        if p1.name == waitingPlayer.name {
+            p1.pokemons.remove(at: 0)
+            waitingPlayer = p2
+            playingPlayer = p1
+        }
+        else {
+          p2.pokemons.remove(at: 0)
+          waitingPlayer = p1
+          playingPlayer = p2
+        }
+    }
+    else {
+      if p1.name == waitingPlayer.name {
+          waitingPlayer = p2
+          playingPlayer = p1
+      }
+      else {
+        waitingPlayer = p1
+        playingPlayer = p2
+      }
+    }
+  }
 }
 
 //Fonction provenant de StackOverflow ! http://stackoverflow.com/questions/24256564/generating-random-values-in-swift-between-two-integer-values
 func randomInt(min: Int, max: Int) -> Int {
-    let randomNum = Int(arc4random_uniform(UInt32(max) - UInt32(min)) + UInt32(min))
-    return randomNum
+  #if os(Linux)
+            return Int(random() % (max + 1)) //Problème sous Linux, je ne peux pas borner ma variable aléatoire...
+        #else
+            return Int(arc4random_uniform(UInt32(max) - UInt32(min)) + UInt32(min))
+        #endif
 }
 
 func hpCalculator(pokemon : Pokemon) -> Int {
@@ -937,6 +1026,8 @@ func environmentGenerator() -> Environment {
     tempWeather = Weather.fog
   case 10:
     tempWeather = Weather.mysterious_air_current
+  default:
+    tempWeather = Weather.clear_skies
   }
   var tempTerrain : Terrain
   rand = randomInt(min : 0, max : 4)
@@ -951,6 +1042,8 @@ func environmentGenerator() -> Environment {
     tempTerrain = Terrain.psychic
   case 4:
     tempTerrain = Terrain.misty
+  default:
+    tempTerrain = Terrain.normal
   }
   return Environment(weather : tempWeather, terrain : tempTerrain)
 }
@@ -966,12 +1059,12 @@ let canartichoStats = Stats(hitpoints : 52, attack : 65, defense : 55, special_a
 let moveRapace = Move(id : 1, name : "Rapace", description : "Le lanceur replie ses ailes et charge en rase-mottes. Le lanceur subit aussi de graves dégâts", category : Category.physical, type : Type.flying, power : 120, accuracy : 100, powerpoints : 15, priority : 0)
 let movePicpic = Move(id : 2, name : "Picpic", description : "Frappe l'ennemi d'un bec pointu ou d'une corne pour infliger des dégâts.", category : Category.physical, type : Type.flying, power : 35, accuracy : 100, powerpoints : 35, priority : 0)
 let canartichoMoves : Set<Move> = [moveRapace, movePicpic]
-let canartichoSpecies = Species(id : 083, name : "Canarticho", evolutions : [], attacks : canartichoMoves, type : (Type.normal, Type.flying), base_values : canartichoStats)
+let canartichoSpecies = Species(id : 083, name : "Canarticho", evolutions : [], attacks : canartichoMoves, type : [Type.normal, Type.flying], base_values : canartichoStats)
 let canartichoIndVal = Stats(hitpoints : 0, attack : 0, defense : 0, special_attack : 0, special_defense : 0, speed : 0)
 let canartichoIndVal2 = Stats(hitpoints : 0, attack : 0, defense : 0, special_attack : 0, special_defense : 0, speed : 0)
 let canartichoEffVal = Stats(hitpoints : 0, attack : 0, defense : 0, special_attack : 0, special_defense : 0, speed : 0)
-var canartichoPokemon = Pokemon(nickname : "Sagouin", hitpoints : canartichoStats.hitpoints, size : 80, weight : 15, experience : 0, level : 1, nature : Nature.hasty, species : canartichoSpecies, moves : [moveRapace : 1, movePicpic : 2], individual_values : canartichoIndVal, effort_values : canartichoEffVal)
-var canartichoPokemon2 = Pokemon(nickname : "Saligo", hitpoints : canartichoStats.hitpoints, size : 80, weight : 15, experience : 0, level : 1, nature : Nature.hasty, species : canartichoSpecies, moves : [moveRapace : 1, movePicpic : 2], individual_values : canartichoIndVal2, effort_values : canartichoEffVal)
+var canartichoPokemon = Pokemon(nickname : "Sagouin", hitpoints : canartichoStats.hitpoints, size : 80, weight : 15, experience : 0, level : 1, nature : Nature.hasty, species : canartichoSpecies, moves : [moveRapace, movePicpic], individual_values : canartichoIndVal, effort_values : canartichoEffVal)
+var canartichoPokemon2 = Pokemon(nickname : "Saligo", hitpoints : canartichoStats.hitpoints, size : 80, weight : 15, experience : 0, level : 1, nature : Nature.hasty, species : canartichoSpecies, moves : [moveRapace, movePicpic], individual_values : canartichoIndVal2, effort_values : canartichoEffVal)
 
 // Instanciation de nos trainers !
 
@@ -979,6 +1072,6 @@ var player1 = Trainer(name : "Koj", pokemons : [canartichoPokemon])
 var player2 = Trainer(name : "Yuzu", pokemons : [canartichoPokemon2])
 var players = [player1, player2]
 
-// Instanciation de notre environment !
+// On lance le combat
 
-var combatEnvironment = environmentGenerator()
+battle(trainers: [player1, player2])
