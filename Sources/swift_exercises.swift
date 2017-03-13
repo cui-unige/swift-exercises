@@ -124,18 +124,17 @@ func ==(lhs: Species, rhs: Species) -> Bool {
 // TODO: create some species
 // Do you use an enum, a map or constants/variables?
 // http://bulbapedia.bulbagarden.net/wiki/List_of_Pokémon_by_National_Pokédex_number
-let move = set<Move>()
-move = [(1,"pound","touch ",Category.physical,Type.normal,40,100,35,2) ,
-(2,"karate chop","touch ",Category.physical,Type.fighting,50,100,25,2),
-(8,"ice punch"," beautiful",Category.physical,Type.normal,75,100,15,2),
-(19,"fly"," clever",Category.physical,Type.flying,90,95,15,2),
-(14,"Swords dance"," beautiful",Category.status,Type.normal,20,0,0,2)]
-let florizarre_specie = Species(001 , "florizarre", [],[move[1],move[2]],( Type.poison ,nil), (80,82,83,100,100,80),1)
-let herbizarre_specie = Species(002, "herbizzare",[florizarre_specie],[move[3],move[2]],(Type.poison,nil),(60,62,63,80,80,60),2)
-let espece = set<Species>()
-espece = [ florizarre_specie,herbizarre_specie,
-(003, bulbizarre, [florizarre_specie,herbizarre_specie],[move[0],move[3]],(Type.poison,nil),(45,49,49,65,65,45),3 ),
-(119,poissiroy,[],[move[3],move[0]],(Type.water,nil),(140,87,63,63,76,65),4)]
+let pound_move = Move(id:1,name:"pound",description:"touch ",category:Category.physical,type:Type.normal,power:40,accuracy:100,powerpoints:35,priority:0)
+let karate_move = Move(id:2,name:"karate chop",description:"touch ",category:Category.physical,type:Type.fighting,power:50,accuracy:100,powerpoints:25,prioriy:0)
+let ice_punch_move = Move(id:8,name:"ice punch",description:" beautiful",category:Category.physical,type:Type.normal,power:75,accuracy:100,powerpoints:15,priority:0)
+let fly_move = Move(id:19,name:"fly",description:" clever",category:Category.physical,type:Type.flying,power:90,accuracy:95,powerpoints:15,priority:0)
+let switch_move = Move(id:14,name:"Swords dance",description:" beautiful",category:Category.status,type:Type.normal,power:20,accuracy:0,powerpoints:0,priority:0)
+
+let florizarre_specie = Species(id:001 ,name: "florizarre", evolutions:[],attacks:[pound_move,switch_move],type:( Type.poison ,nil), base_values:Stats(hitpoints:80,attack:82,defense:83,special_attack:100,special_defense:100,speed:80))
+let herbizarre_specie = Species(id:002, name:"herbizzare",evolutions:[florizarre_specie],attacks:[karate_move,fly_move],type:(Type.poison,nil),base_values:Stats(hitpoints:60,attack:62,defense:63,special_attack:80,special_defense:80,speed:60))
+let bulbizarre_specie = Species(id:003, name:"bulbizarre", evolutions:[florizarre_specie,herbizarre_specie],attacks:[pound_move,fly_move],type:(Type.poison,nil),base_values:Stats(hitpoints:45,attack:49,defense:49,special_attack:65,special_defense:65,speed:45) )
+let poissiroy_specie = Species(id:119,name:"poissiroy",evolutions:[],attacks:[switch_move ,pound_move],type:(Type.water,nil),base_values:Stats(hitpoints:140,atack:87,defense:63,special_attack:63,special_defense:76,speed:65))
+
 
 struct Pokemon {
     let nickname          : String?
@@ -153,6 +152,21 @@ struct Pokemon {
     // https://developer.apple.com/library/content/documentation/Swift/Conceptual/Swift_Programming_Language/Properties.html#//apple_ref/doc/uid/TP40014097-CH14-ID259
     // var effective_stats   : Stats {
     // }
+    let base :Stats(Species.base_values.hitpoints,Species.base_values.attack,Species.base_values.defense,
+    Species.base_values.special_attack,Species.base_values.special_defense,Species.base_values.speed)
+    let iv :Stats(individual_values.hitpoints,individual_values.attack,individual_values.defense,
+    individual_values.special_attack,individual_values.special_defense,individual_values.speed)
+    let ev :Stats(effort_values.hitpoints,effort_values.attack,effort_values.defense,effort_values.special_attack,
+    effort_values.special_defense,effort_values.speed)
+
+    func other_stat(base:int , iv:int, ev:int ,levl : int)-> int{
+    let ostat = (((base + iv )*2 + ev/4)*levl/100)+ levl +10
+    return int(ostat)
+    }
+    fun point_vie(base:int , iv:int, ev:int ,levl : int)-> int{
+      let pv = (((base + iv )*2 + ev/4)*levl/100)+5
+      return int(pv)
+    }
 }
 
 struct Trainer {
