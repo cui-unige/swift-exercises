@@ -1,6 +1,7 @@
 /* Import for the floor function. */
 import Foundation
 
+
 /**********************************************/
 /* Types and others informations on pokemons. */
 /**********************************************/
@@ -159,9 +160,11 @@ func ==(lhs: Species, rhs: Species) -> Bool {
     return lhs.id == rhs.id
 }
 
+
 /******************************************************************/
 /* Initialisation of moves, base values and species of a pokemon. */
 /******************************************************************/
+
 let FireBlast = Move(
     id: 1,
     name: "Fire Blast",
@@ -211,7 +214,7 @@ let Rest = Move(
 
 let allMovesEntei = [FireBlast, SolarBeam, SunnyDay, Rest]
 
-let BaseValue = Stats(
+let BaseValue_entei = Stats(
     hitpoints: 115,
     attack: 115,
     defense: 85,
@@ -220,13 +223,13 @@ let BaseValue = Stats(
     speed: 100
 )
 
-let entei_species = Species(
+let Entei_species = Species(
     id: 244,
     name: "Entei",
     evolutions: [],
     attacks: allMovesEntei,
     type: (Type.fire, nil),
-    base_values: BaseValue
+    base_values: BaseValue_entei
 )
 
 /* Fonctions to change values of effective stats. */
@@ -257,7 +260,7 @@ struct Pokemon {
     let level             : Int
     let nature            : Nature
     let species           : Species
-    let moves             : [Move] // Move -> remaining powerpoints
+    var moves             : [Move] // Move -> remaining powerpoints
     let individual_values : Stats
     let effort_values     : Stats
     var effective_stats   : Stats {
@@ -275,10 +278,12 @@ struct Pokemon {
 }
 
 
+
 /********************************/
 /* Initialisation of a pokemon. */
 /********************************/
-let IVs_Entei = Stats(
+
+let IVs_entei = Stats(
     hitpoints: 19,
     attack: 8,
     defense: 13,
@@ -287,7 +292,7 @@ let IVs_Entei = Stats(
     speed: 14
 )
 
-let EVs_Entei = Stats(
+let EVs_entei = Stats(
     hitpoints: 1,
     attack: 2,
     defense: 0,
@@ -304,15 +309,15 @@ let Entei_pokemon = Pokemon (
     experience: 1,
     level: 1,
     nature: .naughty,
-    species: entei_species,
-    moves: [FireBlast, SolarBeam, SunnyDay, Rest],
-    individual_values: IVs_Entei,
-    effort_values: EVs_Entei
+    species: Entei_species,
+    moves: allMovesEntei,
+    individual_values: IVs_entei,
+    effort_values: EVs_entei
 )
 
 struct Trainer {
     let name : String
-    let pokemons : [Pokemon]
+    var pokemons : [Pokemon]
 }
 
 struct Environment {
@@ -339,6 +344,7 @@ let type_modifier: [Type: [Type: Double]] = [
 .dragon:   [.normal: 1  ,.fighting: 1  ,.flying: 1  ,.poison: 1  ,.ground: 1  ,.rock: 1  ,.bug: 1  ,.ghost: 1  ,.steel: 0.5,.fire: 1  ,.water: 1  ,.grass: 1  ,.electric: 1  ,.psychic: 1  ,.ice: 1  ,.dragon: 2  ,.dark: 1  ,.fairy: 0],
 .dark:     [.normal: 1  ,.fighting: 0.5,.flying: 1  ,.poison: 1  ,.ground: 1  ,.rock: 1  ,.bug: 1  ,.ghost: 2  ,.steel: 1  ,.fire: 1  ,.water: 1  ,.grass: 1  ,.electric: 1  ,.psychic: 2  ,.ice: 1  ,.dragon: 1  ,.dark: 0.5,.fairy: 0.5],
 .fairy:    [.normal: 1  ,.fighting: 2  ,.flying: 1  ,.poison: 0.5,.ground: 1  ,.rock: 1  ,.bug: 1  ,.ghost: 1  ,.steel: 0.5,.fire: 0.5,.water: 1  ,.grass: 1  ,.electric: 1  ,.psychic: 1  ,.ice: 1  ,.dragon: 2  ,.dark: 2  ,.fairy: 1]]
+
 
 func typeModifier(attacking: Type, defending: Type) -> Double {
     return (type_modifier[attacking]?[defending])!
@@ -413,15 +419,183 @@ func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pok
 }
 
 struct State {
+    let pokemon_environment: Environment
+
     let trainer1: Trainer
     var pokemon1: Pokemon
     var pokemon1_move: Move
 
-    let trianer_computer: Trainer
+    let trainer_computer: Trainer
     var pokemon_c: Pokemon
     var pokemon_c_move: Move
 }
 
-func battle(trainers: inout [Trainer], behavior: (State, Trainer) -> Move) -> () {
-    // TODO: simulate battle
+
+
+/***************************************************/
+/* Initialisation of some pokemons for the battle. */
+/***************************************************/
+
+/**** Snorlax given by Elif ****/
+// Snorlax moves
+let BodySlam     = Move(id: 01, name: "Body Slam",
+                        description: "The user drops the target with its full body weight. This may also leave the target with paralysis.",
+                      category: Category.physical, type: Type.normal, power: 85,  accuracy: 100, powerpoints: 15, priority: 0)
+
+let HyperBeam    = Move(id: 02, name: "Hyper Beam",
+                        description: "The target is attacked with a powerfulbeam. The user can't move on the next turn.",
+                      category: Category.special,  type: Type.normal, power: 150, accuracy: 90,  powerpoints: 5,  priority: 0)
+
+let Earthquake   = Move(id: 03, name: "Earthquake",
+                        description: "The user sets off an earthquake that strikes every Pokémon around it.",
+                      category: Category.physical, type: Type.ground, power: 100, accuracy: 100, powerpoints: 10, priority: 0)
+
+let SelfDestruct = Move(id: 04, name: "Self-Destruct",
+                        description: "The user attacks everything around it by causing an explosion. The user faints upon this move.",
+                      category: Category.physical, type: Type.normal, power: 200, accuracy: 100, powerpoints: 5,  priority: 0)
+
+let allMovesSnorlax = [BodySlam, HyperBeam, Earthquake, SelfDestruct]
+
+// Snorlax stats
+let BaseValue_snorlax = Stats(hitpoints: 160, attack: 110, defense: 65, special_attack: 65, special_defense: 110, speed: 30)
+
+let IVs_snorlax = Stats(hitpoints:22, attack: 12, defense: 2, special_attack: 31, special_defense: 25, speed: 18)
+
+let EVs_snorlax = Stats(hitpoints: 2, attack: 0, defense: 0, special_attack: 0, special_defense: 0, speed: 0)
+
+// Snorlax species
+let Snorlax_species = Species(id: 143, name: "Snorlax", evolutions: [], attacks: allMovesSnorlax, type: (Type.normal, nil), base_values: BaseValue_snorlax)
+
+
+/**** Squirtle given by Arthur ****/
+// Squirtle moves
+let bubble = Move(id: 1, name: "Bubble",
+                  description: "A spray of countless bubbles is jetted at the opposing Pokémon. This may also lower their Speed stat.",
+                category: Category.special, type: Type.water, power: 40, accuracy: 100, powerpoints: 30, priority: 0)
+
+let water_gun = Move(id: 2, name: "Water Gun",
+                     description: "The target is blasted with a forceful shot of water.",
+                   category: Category.special, type: Type.water, power: 40, accuracy: 100, powerpoints: 25, priority: 0)
+
+let allMovesSquirtle = [bubble, water_gun]
+
+// Squirtle stats
+let BaseValues_squirtle = Stats(hitpoints: 44, attack: 48, defense: 65, special_attack: 50, special_defense: 64, speed: 43)
+
+let IVs_squirtle = Stats(hitpoints: 27, attack: 12, defense: 6, special_attack: 30, special_defense: 18, speed: 10)
+
+let EVs_squirtle = Stats(hitpoints: 0, attack: 0, defense: 1, special_attack: 0, special_defense: 0, speed: 0)
+
+// Squirtle species
+let Squirtle_species = Species(id: 007, name: "Squirtle", evolutions: [], attacks: allMovesSquirtle, type: (Type.water, nil), base_values: BaseValues_squirtle)
+
+
+/**** Pikachu given by Aslam ****/
+// Pikachu moves
+let thunderShockAttack = Move(id: 84, name: "Thunder Shock",
+                              description: "paralyze target",
+                            category: Category.special, type: Type.electric, power:40, accuracy:100, powerpoints:30, priority:0)
+
+// Pikachu stats
+let BaseValues_pikachu = Stats(hitpoints: 35, attack: 55, defense: 30, special_attack: 50,special_defense: 40, speed: 90)
+
+let IVs_pikachu = Stats(hitpoints: 10, attack: 30, defense: 22, special_attack: 5, special_defense: 7, speed: 18)
+
+let EVs_pikachu = Stats(hitpoints: 0, attack: 0, defense: 0, special_attack: 0, special_defense: 0, speed: 2)
+
+let allMovesPikachu = [thunderShockAttack]
+
+// Pikachu Species
+let Pikachu_species = Species(id: 025, name: "Pikachu", evolutions: [], attacks: allMovesPikachu, type: (Type.electric, nil), base_values: BaseValues_pikachu)
+
+
+
+/*****************************************************************************/
+/* Initialisation of values for the battle: pokemons, trainers, environment. */
+/*****************************************************************************/
+
+let Entei_pokemon = Pokemon (nickname: "Moah",
+                             hitpoints: 115, size: 2, weight: 198, experience: 1, level: 1,
+                             nature: .naughty, species: Entei_species, moves: allMovesEntei,
+                             individual_values: IVs_entei, effort_values: EVs_entei)
+
+let Snorlax_pokemon = Pokemon(nickname: "Elif",
+                             hitpoints: 160, size: 5, weight: 750, experience: 0, level: 1,
+                             nature: Nature.calm, species: Snorlax_species, moves: allMovesSnorlax,
+                             individual_values: IVs_snorlax, effort_values: EVs_snorlax)
+
+let Squirtle_pokemon = Pokemon(nickname: "Arthur",
+                               hitpoints: 44, size: 1, weight: 30, experience: 0, level: 1,
+                               nature: Nature.jolly, species: Squirtle_species, moves: allMovesSquirtle,
+                               individual_values: IVs_squirtle, effort_values: EVs_squirtle)
+
+let Pikachu_pokemon = Pokemon(nickname: "Aslam",
+                              hitpoints: 35, size: 1, weight: 50, experience: 0, level: 1,
+                              nature: Nature.docile, species: Pikachu_species, moves: allMovesPikachu,
+                              individual_values: IVs_pikachu, effort_values: EVs_pikachu)
+
+var Sacha = Trainer(name: "Sacha", pokemons:[Entei_pokemon, Pikachu_pokemon])
+var Alban = Trainer(name: "Alban", pokemons:[Snorlax_pokemon, Squirtle_pokemon])
+var trainer = [Sacha, Alban]
+
+let battle_environment =  Environment(weather: Weather.shadowy_aura, terrain: Terrain.misty)
+
+
+// To choose the first pokemon of the opponent.
+let rand_pokemon = Int(random() % Alban.pokemons.count-1)
+let c_Pokemon = Alban.pokemons[rand_pokemon]
+// To choose the first move of the opponent's pokemon.
+let rand_move = Int(random() % c_Pokemon.moves.count-1)
+
+var current_State =  State(trainer1: Sacha, pokemon1: Entei_pokemon, pokemon1_move: FireBlast
+                            trainer_computer: Alban, pokemon_c: rand_pokemon, pokemon_c_move: rand_move,
+                            pokemon_environment: battle_environment)
+
+var turn_number : Int = 1
+
+// To know which one atta first (which one has the highest speed value)
+func first_pokemon(Attack: Pokemon, Defense: Pokemon, current_State: State) {
+    if current_State.pokemon1.effective_stats.speed > current_State.pokemon_c.effective_stats.speed{
+        turn_number = 1 // Pokemon of Sasha
+    } else {
+        turn_number = 0 //Pokemon of Alban
+    }
+}
+
+/********************************************/
+/*********** Main battle function ***********/
+/********************************************/
+
+func battle(trainers: inout [Trainer]) -> () {
+
+  var currentPokemon = 0 // To take the first pokemon in the array of Sacha's pokemons
+
+  if turn_number == 1{
+    print("$$$$$$$$  Select an attack.\n")
+        for i in 0...(current_State.pokemon1.moves.count-1){
+            print("\(i+1) : \(current_State.pokemon1.moves[i].name) - Powerpoints: \(current_State.pokemon1.moves[i].powerpoints)")
+        }
+    print("$$$$$$$$  your choice: ", terminator: "")
+
+    if let entry = readLine() {
+        if let value = Int(entry) {
+
+            current_State.pokemon1_move = current_State.pokemon1.moves[value-1]
+
+            current_State.pokemon1_move.powerpoints -= 1 //Decreasing the powerpoints value because of the use.
+            Sacha.pokemons[currentPokemon].moves[value-1].powerpoints -= 1
+
+            if (current_State.pokemon1_move.powerpoints == 0){
+                print("\n$$$$$$$$ No No more powerpoints. \(current_State.pokemon1_move.name). Move can't be use anymore.")
+                current_State.pokemon1.moves.remove(at: value-1) //Removing move
+                Sacha.pokemons[currentPokemon].moves.remove(at: value-1) // Updating move of Sacha's pokemon
+            }else{
+                current_State.pokemon1.moves[value-1] = current_State.pokemon1_move
+            }
+            if ((current_State.pokemon1.nickname == "Moah") && (current_State.pokemon1_move.id == 3)){
+                current_State.pokemon_environment.weather = Weather.clear_skies //Updating conditions
+            }
+        }
+    }
+  }
 }
