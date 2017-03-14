@@ -21,7 +21,7 @@ enum Type {
     case steel
     case water
 
-    static func values() -> [Type] {
+    static func values() -> [Type] {    //returns an array composed of all cases of this enumeration
         return [.bug, dark, dragon, electric, fairy, fighting, fire, flying, ghost, grass, ground, ice, normal, poison, psychic, rock, steel, water]
     }
 }
@@ -61,7 +61,7 @@ enum Nature {
     case careful
     case quirky
 
-    static func values() -> [Nature] {
+    static func values() -> [Nature] {    //returns an array composed of all cases of this enumeration
         return [.hardy, lonely, brave, adamant, naughty, bold, docile, relaxed, impish, lax, timid, hasty, serious, jolly, naive, modest, mild, quiet, bashful,
                 rash, calm, gentle, sassy, careful, quirky]
     }
@@ -192,19 +192,19 @@ struct Pokemon {
             var new_stats = [Int]()   //ce tableau va contenir les statistiques effectives
             for i in 0 ... 5 {
                 if i == 0 {   //la formule pour le calcul des points de vie est légèrement différente que pour les autres statistiques
-                    let val = (2*base_stats[i] + iv_stats[i] + ev_stats[i]/4) * level/100.0
+                    let val = (2*base_stats[i] + iv_stats[i] + ev_stats[i]/4) * level/100
                     new_stats.append(Int(val) + level + 10)
                 }
                 else {
                     let fact = facts_nature[getIndNature(x: nature)][i-1]
-                    let val = ((2*base_stats[i] + iv_stats[i] + ev_stats[i]/4) * level/100.0 + 5) * fact
+                    let val = ((2*base_stats[i] + iv_stats[i] + ev_stats[i]/4) * level/100 + 5) * fact
                     new_stats.append(Int(val))
                 }
             return Stats(hitpoints: new_stats[0], attack: new_stats[1], defense: new_stats[2], special_attack: new_stats[3], special_defense: new_stats[4], speed: new_stats[5])
           }
         }
         set {
-
+            //not implemented
         }
     }
 }
@@ -219,12 +219,13 @@ struct Environment {
 }
 
 // http://bulbapedia.bulbagarden.net/wiki/Type/Type_chart
-func typeModifier(attacking: Type, defending : Type) -> Double {
+func typeModifier(attacking: Type, defending : Type) -> Double {    //returns a type modifier whose value depends of the types of the attacking and defending species
     return facts_type[getIndType(x: attacking)][getIndType(x: defending)]
 }
 
 // http://bulbapedia.bulbagarden.net/wiki/Damage
-func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pokemon) -> Int {
+func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pokemon) -> Int {    //applies damage to the targeted Pokemon (we always consider that there is only 1 target
+                                                                                                  //and that the badge and burn factors are both equal to 1)
     var w_fact, t_fact, other, stab: Double
     let rand1 = Int(random() % 256)
     let rand2 = Double(rand()) / Double(UINT32_MAX) * 0.15 + 0.85
@@ -273,10 +274,10 @@ func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pok
     }
     else {
         if let secondary = target.species.type.1 {
-            t_fact = facts_type[getIndType(x: move.type)][getIndType(x: target.species.type.0)] * facts_type[getIndType(x: move.type)][getIndType(x: secondary)]
+        t_fact = typeModifier(attacking: move.type, defending: target.species.type.0) * typeModifier(attacking: move.type, defending: secondary)
         }
         else {
-            t_fact = facts_type[getIndType(x: move.type)][getIndType(x: target.species.type.0)]
+            t_fact = typeModifier(attacking: move.type, defending: target.species.type.0)
         }
         if move.type == pokemon.species.type.0 || move.type == pokemon.species.type.1 {
             stab = 1.5
@@ -287,7 +288,7 @@ func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pok
     return Int(((2*pokemon.level + 10) * move.power * att/def / 250 + 2) * modifier)
 }
 
-func getIndType(x: Type) -> Int {
+func getIndType(x: Type) -> Int {   //returns the index of the enumeration instance 'x' of type 'Type' in this same enumeration
     var inc = 0
     for y in Type.values() {
         if y == x {
@@ -298,7 +299,7 @@ func getIndType(x: Type) -> Int {
     return inc
 }
 
-func getIndNature(x: Nature) -> Int {
+func getIndNature(x: Nature) -> Int {    //returns the index of the enumeration instance 'x' of type 'Nature' in this same enumeration
     var inc = 0
     for y in Nature.values() {
         if y == x {
@@ -336,20 +337,20 @@ struct State {
     var escape_attempts: (Int, Int)
 }
 
-func changePokemon(state: inout State, trainers: [Trainer], trainer_num: Int) { // This function makes a random choice for the next Pokemon to use in the battle
-    let rand = Int(random() % state.remaining_pokemons[trainer_num].count)
-    let pokemon_num = state.remaining_pokemons[trainer_num][rand]
+func changePokemon(state: inout State, trainers: [Trainer], trainer_num: Int) {   //makes a random choice for the next Pokemon to use in the battle
+    let n = Int(random() % state.remaining_pokemons[trainer_num].count)
+    let pokemon_num = state.remaining_pokemons[trainer_num][n]
     state.active_pokemons[trainer_num] = ActivePokemon(pokemon: trainers[trainer_num].pokemons[pokemon_num], id: pokemon_num)
 }
 
-func tryEscape(pokemon: Pokemon, target: Pokemon, nbTries: Int) -> Bool {
-    let rand = Int(random() % 256)
+func tryEscape(pokemon: Pokemon, target: Pokemon, nbTries: Int) -> Bool {   //determines if the targeted Pokemon can escape the battle
+    let n = Int(random() % 256)
     let x = Double(pokemon.effective_stats.speed) * 128 / Double(target.effective_stats.speed)
     let tot = (Int(x) + 30*nbTries) % 256
-    return rand < tot
+    return n < tot
 }
 
-func performAttack(move: Move, trainers: inout [Trainer], trainer_num: Int, state: State) {
+func performAttack(move: Move, trainers: inout [Trainer], trainer_num: Int, state: State) {   //performs an attack for a given trainer
     switch move.category {
     case .physical:
       let nb_damage = damage(environment: state.environment, pokemon: state.active_pokemons[trainer_num].pokemon, move: move, target: state.active_pokemons[1-trainer_num].pokemon)
@@ -358,17 +359,111 @@ func performAttack(move: Move, trainers: inout [Trainer], trainer_num: Int, stat
          trainers[trainer_num].pokemons[state.active_pokemons[trainer_num].id].hitpoints = trainers[trainer_num].pokemons[state.active_pokemons[trainer_num].id].hitpoints > nb_damage/4 ? trainers[trainer_num].pokemons[trainer_num].hitpoints - nb_damage/4 : 0
       }
     case .special:
+        //not implemented
         break
     case .status:
+        //not implemented
         break
     default:
         break
     }
+}
 
-func battle(trainers: inout [Trainer], behavior: (State, Trainer) -> Move) -> () {
+func checkDeath(state: inout State, next_move: inout [Move?], trainers: [Trainer], trainer_num: Int) -> Bool {    //verifies if a Pokemon was dead and if so, removes it from 'state.remaining_pokemons'
+   let pokemon_num = state.active_pokemons[trainer_num].id
+   if trainers[trainer_num].pokemons[pokemon_num].hitpoints == 0 {    //is dead ?
+      state.remaining_pokemons[trainer_num] = state.remaining_pokemons[trainer_num].filter{$0 != pokemon_num}
+      next_move[trainer_num] = nil
+      if state.remaining_pokemons[trainer_num].isEmpty {
+         return true
+      }
+      changePokemon(state: &state, trainers: trainers, trainer_num: trainer_num)
+   }
+   return false
+}
+
+func chooseAct(trainer: Trainer) -> String {    //choose an action for the trainer randomly
+
+    //random choice of the trainer action (normally, the player should be able to choose the action but it would be too difficult to implement an input stream in order to
+    //read values from the keyboard)
+    let n = Int(Double(rand())/Double(UINT32_MAX) * 3)
+    if n == 0 {
+        return "Attack"
+    }
+    else {
+        if n == 1 {
+            return "Change pokemon"
+        }
+        else {
+            return "Run"
+        }
+    }
+}
+
+func battle(trainers: inout [Trainer], behavior: (State, Trainer) -> Move) -> () {    //simulate a Pokemon battle between 2 trainers
     let pokemons_nums = [[Int](0 ..< trainers[0].pokemons.count).filter{trainers[0].pokemons[$0].hitpoints != 0},
                           [Int](0 ..< trainers[1].pokemons.count).filter{trainers[1].pokemons[$0].hitpoints != 0}]
 
     var battle_state = State(environment: Environment(weather: .clear_skies, terrain: .normal), active_pokemons: [ActivePokemon(pokemon: Array(trainers)[0].pokemons[pokemons_nums[0][0]], id: pokemons_nums[0][0]),
                        ActivePokemon(pokemon: Array(trainers)[1].pokemons[pokemons_nums[1][0]], id: pokemons_nums[1][0])], remaining_pokemons: pokemons_nums, escape_attempts: (0, 0))
+
+    FIGHT: while true {
+       //choose an action for each trainer
+       let act1 = chooseAct(trainer: trainers[0])
+       let act2 = chooseAct(trainer: trainers[1])
+       var att_move: [Move?] = [nil, nil]
+
+       //analyse first trainer's action
+       switch act1 {
+       case "Change pokemon":
+          changePokemon(state: &battle_state, trainers: trainers, trainer_num: 0)
+          att_move[0] = nil
+       case "Run":
+          battle_state.escape_attempts.0 += 1
+          if tryEscape(pokemon: battle_state.active_pokemons[0].pokemon, target: battle_state.active_pokemons[1].pokemon, nbTries: battle_state.escape_attempts.0) {
+             break FIGHT
+          }
+       case "Attack":
+          att_move[0] = behavior(battle_state, trainers[0])
+       default:
+          //unknown action
+          att_move[0] = nil
+      }
+
+      //analyse second trainer's action
+      switch act2 {
+      case "Change pokemon":
+         changePokemon(state: &battle_state, trainers: trainers, trainer_num: 1)
+         att_move[1] = nil
+      case "Run":
+         battle_state.escape_attempts.1 += 1
+         if tryEscape(pokemon: battle_state.active_pokemons[1].pokemon, target: battle_state.active_pokemons[0].pokemon, nbTries: battle_state.escape_attempts.0) {
+            break FIGHT
+         }
+      case "Attack":
+         att_move[1] = behavior(battle_state, trainers[1])
+      default:
+         //unknown action
+         att_move[1] = nil
+      }
+
+      //determine the order in which the trainers move to action
+      let order = battle_state.active_pokemons[0].pokemon.effective_stats.speed >= battle_state.active_pokemons[1].pokemon.effective_stats.speed ? (first: 0, last: 1) : (first: 1, last: 0)
+
+      //first attack
+      if let attack = att_move[order.first] {
+         performAttack(move: attack, trainers: &trainers, trainer_num: order.first, state: battle_state)
+         if checkDeath(state: &battle_state, next_move: &att_move, trainers: trainers, trainer_num: order.last) || checkDeath(state: &battle_state, next_move: &att_move, trainers: trainers, trainer_num: order.first) {
+            break FIGHT
+         }
+      }
+
+      //second attack
+      if let attack = att_move[order.last] {
+         performAttack(move: attack, trainers: &trainers, trainer_num: order.last, state: battle_state)
+         if checkDeath(state: &battle_state, next_move: &att_move, trainers: trainers, trainer_num: order.first) || checkDeath(state: &battle_state, next_move: &att_move, trainers: trainers, trainer_num: order.last) {
+            break FIGHT
+         }
+      }
+    }
 }
