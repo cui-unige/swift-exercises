@@ -342,9 +342,17 @@ struct Pokemon {
          temp_modifiers.speed = temp_modifiers.speed + new_effective_stats.speed - effective_stats.speed
       }
     }
+    func getName() -> String {
+      if let name = self.nickname {
+         return name
+      } else {
+         return self.species.name
+      }
+   }
 }
 
 struct Trainer {
+   let name: String
     var pokemons : [Pokemon]
     var backpack: [Item]
 }
@@ -507,6 +515,14 @@ func rmv_all_effects(trainer: inout Trainer, pokeIndex: Int) {
 /******************************************************************************/
 /***************** Functions and structs for battle handling ******************/
 /******************************************************************************/
+func display_status(state: State, trainers: [Trainer]) {
+   let pokemon1 = trainers[0].pokemons[state.activePokemons[0].index]
+   let pokemon2 = trainers[1].pokemons[state.activePokemons[1].index]
+   print("\(pokemon1.getName()) : \(pokemon1.hitpoints)/\(pokemon1.effective_stats.hitpoints) hp")
+   print("\(pokemon2.getName()) : \(pokemon2.hitpoints)/\(pokemon2.effective_stats.hitpoints) hp")
+   print()
+}
+
 func use_item(trainer: inout Trainer) {
    // Choose item (random here)
    #if os(Linux)
@@ -550,6 +566,12 @@ func damage(environment : Environment, pokemon: Pokemon, move: Move, target: Pok
       } else {
          type_effectiveness = typeModifier(attacking: move.type, defending: target.species.type.0)
       }
+   }
+   if type_effectiveness > 1 {
+      print(" It's very effective !", terminator: "")
+   }
+   if type_effectiveness < 1 {
+      print(" It's not very effective.", terminator: "")
    }
    let crit_threshold = pokemon.species.base_values.speed / 2
    #if os(Linux)
@@ -609,6 +631,7 @@ struct PokemonInFight {
 }
 
 struct State {
+   var round: Int
    var environment: Environment
    var activePokemons: [PokemonInFight]
    var order: (first: Int, last: Int) { // Indicates which of the 2 active pokemons acts first
@@ -640,6 +663,7 @@ func dumbOffense(_ state: State, _ trainerNum: Int) -> Move {
 
 func select_action(trainer: Trainer) -> String {
    // Here defaults to attack, but could be 'Use item', 'Change pokemon' or 'Run'
+   print("\(trainer.name) chose to attack\n")
    return "Attack"
 }
 
@@ -650,6 +674,7 @@ func change_pokemon(state: inout State, trainers: [Trainer],trainerNum: Int) { /
       let diceRoll = Int(arc4random_uniform(state.remaining_pokemons[trainerNum].count))
    #endif
    let pick = state.remaining_pokemons[trainerNum][diceRoll]
+   print("\(trainers[trainerNum].pokemons[pick].getName()) go !\n")
    state.activePokemons[trainerNum] = PokemonInFight(pokemon: trainers[trainerNum].pokemons[pick], index: pick)
 }
 
@@ -665,12 +690,13 @@ func try_escape(who: Pokemon, against: Pokemon, totalTries: Int) -> Bool {
 }
 
 func make_attack(move: Move, trainers: inout [Trainer], trainerNum: Int, state: State) {
+   print("\(state.activePokemons[trainerNum].pokemon.getName()) uses \(move.name).", terminator: "")
    switch move.category {
    case .physical:
       let damageDealt = damage(environment: state.environment, pokemon: state.activePokemons[trainerNum].pokemon, move: move, target: state.activePokemons[1-trainerNum].pokemon)
-      trainers[1-trainerNum].pokemons[state.activePokemons[1-trainerNum].index].hitpoints = trainers[1-trainerNum].pokemons[state.activePokemons[1-trainerNum].index].hitpoints > damageDealt ? trainers[1-trainerNum].pokemons[1-trainerNum].hitpoints - damageDealt : 0
+      trainers[1-trainerNum].pokemons[state.activePokemons[1-trainerNum].index].hitpoints = trainers[1-trainerNum].pokemons[state.activePokemons[1-trainerNum].index].hitpoints > damageDealt ? trainers[1-trainerNum].pokemons[state.activePokemons[1-trainerNum].index].hitpoints - damageDealt : 0
       if move.name == "Struggle" {
-         trainers[trainerNum].pokemons[state.activePokemons[trainerNum].index].hitpoints = trainers[trainerNum].pokemons[state.activePokemons[trainerNum].index].hitpoints > damageDealt/4 ? trainers[trainerNum].pokemons[trainerNum].hitpoints - damageDealt/4 : 0
+         trainers[trainerNum].pokemons[state.activePokemons[trainerNum].index].hitpoints = trainers[trainerNum].pokemons[state.activePokemons[trainerNum].index].hitpoints > damageDealt/4 ? trainers[trainerNum].pokemons[state.activePokemons[trainerNum].index].hitpoints - damageDealt/4 : 0
       }
    case .special:
       /* Not implemented yet */
@@ -679,12 +705,15 @@ func make_attack(move: Move, trainers: inout [Trainer], trainerNum: Int, state: 
       /* Not implemented yet */
       break
    }
+   trainers[trainerNum].pokemons[state.activePokemons[trainerNum].index].moves[move]! -= 1
+   print("\n")
 }
 
 // Verifies if pokemon has fainted (if so removes it from 'availables')
 func has_fainted(state: inout State, trainers: [Trainer], trainerNum: Int) -> Bool {
    let pokeIndex = state.activePokemons[trainerNum].index
    if trainers[trainerNum].pokemons[pokeIndex].hitpoints == 0 { // if dead
+      print("\(trainers[trainerNum].pokemons[pokeIndex].getName()) has fainted\n")
       state.remaining_pokemons[trainerNum] = state.remaining_pokemons[trainerNum].filter{$0 != pokeIndex} // not available anymore
       return true
    } else {
@@ -697,6 +726,7 @@ func check_death(state: inout State, nextMove: inout [Move?], trainers: [Trainer
    if has_fainted(state: &state, trainers: trainers, trainerNum: trainerNum) {
       nextMove[trainerNum] = nil
       if state.remaining_pokemons[trainerNum].isEmpty {
+         print("\(trainers[1-trainerNum].name) wins !!!\n\n")
          return true
       } else {
          change_pokemon(state: &state, trainers: trainers, trainerNum: trainerNum)
@@ -742,12 +772,18 @@ func status_dmg(trainers: inout [Trainer], state: inout State, trainerNum: Int) 
 /**************************** Main Battle Function ****************************/
 /******************************************************************************/
 func battle(trainers: inout [Trainer], behavior: (State, Int) -> Move) -> () {
+
+   // Seed for rand()
+   let time = UInt32(NSDate().timeIntervalSinceReferenceDate)
+   srand(time)
+
    // Initial check for available pokemons
    let whosUp = [[Int](0 ..< trainers[0].pokemons.count).filter{trainers[0].pokemons[$0].hitpoints != 0},
                  [Int](0 ..< trainers[1].pokemons.count).filter{trainers[1].pokemons[$0].hitpoints != 0}]
 
    // Initial state
    var battle_state = State(
+      round: 1,
       environment: Environment(
          weather: .clear_skies,
          terrain: .normal
@@ -760,10 +796,19 @@ func battle(trainers: inout [Trainer], behavior: (State, Int) -> Move) -> () {
       escape_attempts: (0, 0)
    )
 
+   // Anouncer
+   print("\n\n\(trainers[0].name) and \(trainers[1].name) want to fight...\n")
+
    // Loop until fight ends
    FIGHT: while true {
+
+      // Round anouncer
+      print("\n=============== [Round \(battle_state.round)] ===============\n")
+
       // Choose action
+      print("\(trainers[0].name) chooses an action :")
       let action1 = select_action(trainer: trainers[0])
+      print("\(trainers[1].name) chooses an action :")
       let action2 = select_action(trainer: trainers[1])
 
       var attMove: [Move?] = [nil, nil]
@@ -778,6 +823,7 @@ func battle(trainers: inout [Trainer], behavior: (State, Int) -> Move) -> () {
       case "Run":
          battle_state.escape_attempts.0 += 1
          if try_escape(who: battle_state.activePokemons[0].pokemon, against: battle_state.activePokemons[1].pokemon, totalTries: battle_state.escape_attempts.0) {
+            print("\(trainers[0].name) escaped...\n")
             break FIGHT
          }
       case "Attack":
@@ -797,12 +843,13 @@ func battle(trainers: inout [Trainer], behavior: (State, Int) -> Move) -> () {
       case "Run":
          battle_state.escape_attempts.1 += 1
          if try_escape(who: battle_state.activePokemons[1].pokemon, against: battle_state.activePokemons[0].pokemon, totalTries: battle_state.escape_attempts.1) {
+            print("\(trainers[1].name) escaped...\n")
             break FIGHT
          }
       case "Attack":
          attMove[1] = behavior(battle_state, 1)
       default:
-         // Error message "Unknown action"
+         print("Unknown action (canceled)\n")
          attMove[1] = nil
       }
 
@@ -845,6 +892,7 @@ func battle(trainers: inout [Trainer], behavior: (State, Int) -> Move) -> () {
       // First attack
       if let attack = attMove[order.first] {
          make_attack(move: attack, trainers: &trainers, trainerNum: order.first, state: battle_state)
+         display_status(state: battle_state, trainers: Array(trainers))
          if check_death(state: &battle_state, nextMove: &attMove, trainers: trainers, trainerNum: order.last) {
             break FIGHT
          }
@@ -861,6 +909,7 @@ func battle(trainers: inout [Trainer], behavior: (State, Int) -> Move) -> () {
       // Second attack
       if let attack = attMove[order.last] {
          make_attack(move: attack, trainers: &trainers, trainerNum: order.last, state: battle_state)
+         display_status(state: battle_state, trainers: Array(trainers))
          if check_death(state: &battle_state, nextMove: &attMove, trainers: trainers, trainerNum: order.first) {
             break FIGHT
          }
@@ -868,6 +917,9 @@ func battle(trainers: inout [Trainer], behavior: (State, Int) -> Move) -> () {
             break FIGHT
          }
       }
+
+      // Next round
+      battle_state.round += 1
 
    } // FIGHT loop
 }
