@@ -430,7 +430,7 @@ let type_mode: [Type: [Type: Double]] = [
 
 func randomNumber(min: Int, max: Int) -> Int {
     #if os(Linux)
-        let randomNum = Int(random() % (UInt32(max) - UInt32(min)) + UInt32(min))
+        let randomNum = Int(random() % (UInt32(max) - UInt32(min) + UInt32(min)))
     #else
         let randomNum = Int(arc4random_uniform(UInt32(max) - UInt32(min)) + UInt32(min))
     #endif
