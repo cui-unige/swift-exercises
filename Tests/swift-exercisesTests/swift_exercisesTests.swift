@@ -4,7 +4,7 @@ import XCTest
 class swift_exercisesTests: XCTestCase {
   
     func test_typeModifier() {
-        XCTAssertEqual(typeModifier(attacking: Type.normal, defending: Type.normal), 1, "normal/normal should be 1")
+        
         print("\n ######################## \n")
         print("\nPokemon v1. Giovanna Théo.")
         print("You play the role of Bob. You can select your Pokemon and your moves")
