@@ -429,7 +429,11 @@ let type_mode: [Type: [Type: Double]] = [
 //Function used to generate random numbers. Credits to http://stackoverflow.com/questions/24256564/generating-random-values-in-swift-between-two-integer-values
 
 func randomNumber(min: Int, max: Int) -> Int {
-    let randomNum = Int(arc4random_uniform(UInt32(max) - UInt32(min)) + UInt32(min))
+    #if os(Linux)
+        let randomNum = Int(random() % (UInt32(max) - UInt32(min)) + UInt32(min))
+    #else
+        let randomNum = Int(arc4random_uniform(UInt32(max) - UInt32(min)) + UInt32(min))
+    #endif
     return randomNum
 }
 
