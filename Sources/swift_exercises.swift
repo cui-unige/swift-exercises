@@ -1062,7 +1062,15 @@ func fin_du_match() {
       battle()
     }
 }
-
+/* fonction qui calcule aléatoirement un nombre */
+func random_number(nb: int)->int{
+	// https://bugs.swift.org/browse/SR-685
+ #if os(Linux)
+            return Int(random() % (nb + 1))
+        #else
+            return Int(arc4random_uniform(UInt32(nb)))
+        #endif
+}
 func battle() {
     // TODO: simulate battle
 
@@ -1083,13 +1091,13 @@ func battle() {
 
     /* ******* Ordinateur choisi ******** */
 
-    var ordi_player: Int = Int(arc4random_uniform(UInt32(all_Trainer.count))); // var qui contiendra le numéro du joueur PC
-    
+   // var ordi_player: Int = Int(arc4random_uniform(UInt32(all_Trainer.count))); // var qui contiendra le numéro du joueur PC
+    var ordi_player: Int = random_number(all_Trainer.count)
     repeat {
       /* utilisation de arc4random a des pb sur linux
          voir lien: https://bugs.swift.org/browse/SR-685 */
-
-          ordi_player = Int(arc4random_uniform(UInt32(all_Trainer.count)))
+	  ordi_player = random_number(all_Trainer.count)
+         // ordi_player = Int(arc4random_uniform(UInt32(all_Trainer.count)))
 
 
       } while (ordi_player == entree_int_user)
@@ -1128,7 +1136,8 @@ func battle() {
     /* Choix du PC */
 
     // TODO: random
-    let choix_pokemon_PC = Int(arc4random_uniform(UInt32(joueur_PC.pokemons.count)));
+   // let choix_pokemon_PC = Int(arc4random_uniform(UInt32(joueur_PC.pokemons.count)));
+    let choix_pokemon_PC =  random_number(joueur_PC.pokemons.count);
     pokemon_actuel_PC = joueur_PC.pokemons[choix_pokemon_PC];
     print("Le PC a choisi: \(joueur_PC.pokemons[choix_pokemon_PC].nickname!)\n")
 
@@ -1222,8 +1231,9 @@ func battle() {
                                     if jeu_actuel.pokemon2_dispo.count > 0 {
 
                                         // nombre aléatoire pour choisir un nv pokemon
-                                        let random = Int(arc4random_uniform(UInt32(jeu_actuel.pokemon2_dispo.count))) // entre 0 et pokemon2_dispo.count
-                                        jeu_actuel.pokemon2 = jeu_actuel.pokemon2_dispo[random]
+                                       // let random = Int(arc4random_uniform(UInt32(jeu_actuel.pokemon2_dispo.count))) // entre 0 et pokemon2_dispo.count
+                                        let random = random_number(jeu_actuel.pokemon2_dispo.count)
+					jeu_actuel.pokemon2 = jeu_actuel.pokemon2_dispo[random]
                                         jeu_actuel.pokemon2_dispo.remove(at: random)
                                         print("Votre adversaire ne se laisse pas faire, il choisit d'appeler \(jeu_actuel.pokemon2!.nickname)\n")
                                         a_qui_le_tour = 2 // on passe la main a l'adversaire
@@ -1303,8 +1313,9 @@ func battle() {
                     if jeu_actuel.pokemon2!.moves.count > 0  {
 
                         //random number -> numero de lattaque
-                        let random_attack = Int(arc4random_uniform(UInt32(jeu_actuel.pokemon2!.moves.count)))
-                        // Consommation de powerpoints
+                     //   let random_attack = Int(arc4random_uniform(UInt32(jeu_actuel.pokemon2!.moves.count)))
+                        let random_attack = random_number(jeu_actuel.pokemon2!.moves.count)
+			// Consommation de powerpoints
                         jeu_actuel.pokemon2!.powerpoints -= jeu_actuel.pokemon2!.moves[random_attack].powerpoints
                         // calcule la valeur des dommages: 0000
                         let damage_on_adv = damage(pokemon: jeu_actuel.pokemon2!, move: jeu_actuel.pokemon2!.moves[random_attack], target: jeu_actuel.pokemon1!)
@@ -1355,8 +1366,9 @@ func battle() {
                         print("\(jeu_actuel.trainer2.name!) vous a sous-estimé. Son Pokemon ne peut plus attaqué.\nIl choisit un nouveau Pokemon.\n")
                         // Il choisit un nouveau pokemon s'il peut
                         if jeu_actuel.pokemon2_dispo.count > 0 {
-                            let random = Int(arc4random_uniform(UInt32(jeu_actuel.pokemon2_dispo.count))) // entre 0 et pokemon2_dispo.count
-                            jeu_actuel.pokemon2 = jeu_actuel.pokemon2_dispo[random]
+                            //let random = Int(arc4random_uniform(UInt32(jeu_actuel.pokemon2_dispo.count))) // entre 0 et pokemon2_dispo.count
+                            let random = random_number(jeu_actuel.pokemon2_dispo.count)
+			    jeu_actuel.pokemon2 = jeu_actuel.pokemon2_dispo[random]
                             jeu_actuel.pokemon2_dispo.remove(at: random)
                             print("Votre redoutable adversaire ne se laisse pas faire, il choisit d'appeler \(jeu_actuel.pokemon2!.nickname!)\n")
                             a_qui_le_tour = 1
