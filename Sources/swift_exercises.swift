@@ -1,4 +1,23 @@
-import Darwin // Mathematical functions
+// Defines arc4random_uniform
+#if os(Linux)
+func arc4random_uniform (_ max: UInt32) -> UInt32 {
+    return UInt32(random() % (max + 1))
+}
+    
+    // Defines exit
+    func exit (_ error_code: Int) -> () {
+        if error_code == 0 {
+            abort()
+        } else {
+            fatalError()
+        }
+    }
+#else
+    import Darwin // arc4random_uniform and exit
+#endif
+
+
+
 
 // http://bulbapedia.bulbagarden.net/wiki/Type
 enum Type {
@@ -919,7 +938,7 @@ func battle(state: inout State) -> () {
      */
     var round: Int = 1
 
-    while(true) {
+    while true {
         print("### Round "+String(round)+" ###\n")
         // Player gets to choose an action
         playerTurn(state: &state)
