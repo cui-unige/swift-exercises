@@ -17,10 +17,6 @@ class swift_exercisesTests: XCTestCase {
         
     }
 
-    static var allTests : [(String, (swift_exercisesTests) -> () throws -> Void)] {
-        return [
-            ("Type/Type modifiers", test_typeModifier),
-        ]
     }
     
-}
+
