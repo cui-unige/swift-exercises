@@ -152,21 +152,27 @@ struct Pokemon {
     // https://developer.apple.com/library/content/documentation/Swift/Conceptual/Swift_Programming_Language/Properties.html#//apple_ref/doc/uid/TP40014097-CH14-ID259
     // var effective_stats   : Stats {
     // }
+
     let base :Stats(Species.base_values.hitpoints,Species.base_values.attack,Species.base_values.defense,
     Species.base_values.special_attack,Species.base_values.special_defense,Species.base_values.speed)
+
     let iv :Stats(individual_values.hitpoints,individual_values.attack,individual_values.defense,
     individual_values.special_attack,individual_values.special_defense,individual_values.speed)
+
     let ev :Stats(effort_values.hitpoints,effort_values.attack,effort_values.defense,effort_values.special_attack,
     effort_values.special_defense,effort_values.speed)
 
-    func other_stat(base:int , iv:int, ev:int ,levl : int)-> int{
-    let ostat = (((base + iv )*2 + ev/4)*levl/100)+ levl +10
-    return int(ostat)
+    let effective_stats : Stats
+    func effective_values(b:int , i:int,  e:int , levl : int)-> int{
+
+      return int((((b + i)*2 + e/4)*levl/100)+5)
     }
-    fun point_vie(base:int , iv:int, ev:int ,levl : int)-> int{
-      let pv = (((base + iv )*2 + ev/4)*levl/100)+5
-      return int(pv)
-    }
+    let effective_stat.hitpoint = int((((base[0] + iv[0] )*2 + ev[0]/4)*level/100)+ level +10)
+    let effective_stat.attact = effective_values( base[1], iv[1], ev[1] , level)
+    let effective_stat.defense= effective_values(base[2],  iv[2], ev[2] ,level)
+    let effective_stat.special_attack = effective_values( base[3],  iv[3],  ev[3] , level)
+    let effective_stat.special_defense= effective_values( base[4],  iv[4],  ev[4] , level)
+    let effective_stat.speed = effective_values( base[5],  iv[5],  ev[5] , level)
 }
 
 struct Trainer {
